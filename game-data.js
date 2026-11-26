@@ -282,3 +282,20 @@ SK.closed=function(){return new Date().getHours()>=SK.DEADLINE_HOUR};
 
 window.SK=SK;
 })();
+
+/* ---------- 반 협동 주간 레이드 ----------
+ * 매주 월요일 새 보스. 반 친구들 데미지를 모두 더해 일요일까지 쓰러뜨려요.
+ * 체력 = 캐릭터 있는 학생 수(최소 minKids) × perKid. 처치하면 그 주에 참여한 친구 알 부화 가속 +egg점.
+ * 상: 최다 딜러(그 주 데미지 1등), 매일 출석상(그 주 지난 날 매일 체크), 결정적 막타(처치한 날 가장 많이 때린 친구) */
+SK.COOP={start:'2026-12-01',perKid:800,minKids:3,egg:10,
+  bosses:[{n:'숙제 먹는 구름 거인',spr:'sleepy'},{n:'딴짓 유령 군단',spr:'autumn'},{n:'게으름 눈보라 골렘',spr:'winter'},{n:'핑계 대장 꽃마녀',spr:'spring'},{n:'스마트폰 블랙홀 드래곤',spr:'icedragon'},{n:'졸음 아이스크림 왕',spr:'summer'}]};
+/* students: [{id, name, daily:{'YYYY-MM-DD':{dm,r}}}] */
+SK.coop=function(students,today){const C=SK.COOP;if(!C||today<C.start)return null;const ws=SK.weekKey(today),from=ws<C.start?C.start:ws,to=SK.addDays(ws,6);
+  const wi=Math.round((SK.parseDay(ws)-SK.parseDay(SK.weekKey(C.start)))/864e5/7),boss=C.bosses[((wi%C.bosses.length)+C.bosses.length)%C.bosses.length];
+  const kids=students.filter(s=>s.daily);const hp=Math.max(C.minKids,kids.length)*C.perKid;
+  const days=[];for(let k=from;k<=to&&k<=today;k=SK.addDays(k,1))days.push(k);
+  const dmOf=(s,k)=>Math.max(0,(s.daily[k]&&s.daily[k].dm)||0);
+  let cum=0,killDay=null;days.forEach(k=>{const t=kids.reduce((a,s)=>a+dmOf(s,k),0);if(!killDay&&cum+t>=hp)killDay=k;cum+=t});
+  const per=kids.map(s=>({id:s.id,name:s.name,dm:days.reduce((a,k)=>a+dmOf(s,k),0),all:days.length>0&&days.filter(k=>k<today||dmOf(s,k)>0).every(k=>dmOf(s,k)>0)})).sort((a,b)=>b.dm-a.dm);
+  const top=per[0]&&per[0].dm>0?per[0]:null;const lastHit=killDay?kids.map(s=>({id:s.id,name:s.name,dm:dmOf(s,killDay)})).sort((a,b)=>b.dm-a.dm)[0]:null;
+  return {ws,from,to,boss,hp,dmg:cum,left:Math.max(0,hp-cum),dead:cum>=hp,killDay,per,top,lastHit,daily:per.filter(p=>p.all&&p.dm>0),kids:kids.length}};
