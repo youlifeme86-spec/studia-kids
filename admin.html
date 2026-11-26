@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>스터디아 선생님</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<script src="config.js"></script>
+<script src="game-data.js"></script>
+<style>
+:root{--bg:#FBF4E6;--paper:#FFFDF8;--ink:#3A2C22;--muted:#8A7766;--line:#EADFCB;--accent:#F08A4B;--soft:#FDE6D3;--good:#3E9B6B;--bad:#D2504A;--purple:#7A4FD0;
+  --f-display:'Jua',system-ui,sans-serif;--f-body:'Noto Sans KR',system-ui,-apple-system,sans-serif;--shadow:0 2px 0 rgba(90,60,30,.06),0 8px 24px rgba(90,60,30,.05)}
+*{box-sizing:border-box}
+html{color-scheme:light}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-body)}
+h1,h2,h3{font-family:var(--f-display);font-weight:400;margin:0;letter-spacing:.2px}
+h1{font-size:26px}h2{font-size:20px}h3{font-size:17px}
+p{margin:0}
+button{font:inherit;cursor:pointer;color:inherit}
+a{color:var(--accent)}
+.wrap{max-width:1080px;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:14px}
+.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.top .sp{flex:1}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px;min-width:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.stat{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
+.stat b{display:block;font-family:var(--f-display);font-size:28px;font-weight:400;font-variant-numeric:tabular-nums}
+.stat span{font-size:13px;color:var(--muted)}
+.stat.alert b{color:var(--bad)}
+.btn{border:0;border-radius:12px;padding:10px 14px;background:var(--accent);color:#fff;font-weight:700}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line);font-weight:500}
+.btn.sm{padding:5px 10px;font-size:13px;border-radius:10px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+input,textarea,select{font:inherit;color:inherit;border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:10px;width:100%}
+textarea{min-height:90px;resize:vertical}
+label{font-size:13px;color:var(--muted)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;align-items:end}
+.muted{color:var(--muted)}.small{font-size:13px}.tiny{font-size:12px}
+.pill{display:inline-block;border-radius:999px;padding:1px 9px;font-size:12px;background:var(--soft);white-space:nowrap}
+.pill.off{background:#eee;color:#888}.pill.bad{background:#F8D9D6;color:#9B2C25}.pill.p{background:#E9DDFB;color:#4B2E8F}
+.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:8px 6px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top;white-space:nowrap}
+th{font-size:12px;color:var(--muted);font-weight:500}
+td.r,th.r{text-align:right;font-variant-numeric:tabular-nums}
+td.wrapcell{white-space:normal;min-width:220px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle;margin-right:4px}
+.tabs{display:flex;gap:4px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:4px;overflow-x:auto}
+.tabs button{border:0;background:transparent;border-radius:10px;padding:8px 12px;color:var(--muted);white-space:nowrap}
+.tabs button[aria-pressed="true"]{background:var(--soft);color:var(--ink);font-weight:700}
+.note{background:var(--soft);border-radius:12px;padding:10px 12px;font-size:14px;white-space:pre-wrap}
+.err{border-left:4px solid var(--bad);padding:6px 10px;background:#fff;border-radius:8px}
+.err.rep{border-left-color:var(--purple)}
+.err pre{white-space:pre-wrap;word-break:break-all;font-size:11px;color:var(--muted);margin:4px 0 0;max-height:120px;overflow:auto}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:999px;font-size:14px;z-index:9;max-width:90%}
+.login{max-width:380px;margin:12vh auto 0}
+[hidden]{display:none!important}
+@media (max-width:600px){.wrap{padding:12px}th,td{padding:7px 4px}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+(function(){
+const API=String((window.RR_CONFIG||{}).API_URL||'').trim();
+const BASE=location.origin+location.pathname.replace(/admin\.html$/,'');
+const KEY='sk-admin-v1';
+const KINGDOM={};Object.keys(SK.KINGDOMS).forEach(k=>KINGDOM[k]=[SK.KINGDOMS[k].n,SK.KINGDOMS[k].c]);
+let ADJ={id:'',date:'',t:'check',a:'math',pts:'',s:'',why:''};
+let AUTH=null;try{AUTH=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}
+let D=null,TAB='home',LAST_ERR_SEEN=+(localStorage.getItem(KEY+':errseen')||0),timer=null,busy=false;
+const app=document.getElementById('app');
+const esc=t=>String(t??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $=s=>app.querySelector(s);
+function toast(t){const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2600)}
+async function api(action,data){
+  if(!API)throw new Error('config.js 에 서버 주소가 없어요');
+  let r;try{r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({action,token:AUTH&&AUTH.token||''},data||{}))})}catch(e){throw new Error('인터넷 연결을 확인해 주세요')}
+  const j=await r.json().catch(()=>({ok:false,error:'서버 응답을 읽지 못했어요'}));
+  if(!j.ok){if(j.code==='auth'||j.code==='forbidden'){logout(j.error)}const e=new Error(j.error);e.code=j.code;throw e}return j}
+function logout(msg){AUTH=null;localStorage.removeItem(KEY);clearInterval(timer);D=null;render();if(msg)toast(msg)}
+function copy(t){navigator.clipboard.writeText(t).then(()=>toast('복사했어요')).catch(()=>{prompt('아래 내용을 복사하세요',t)})}
+
+/* 날짜 (앱과 같은 규칙: 그날 0시~24시, 체크 마감 밤 10시) */
+function parse(k){const [y,m,d]=k.split('-').map(Number);return new Date(y,m-1,d)}
+function key(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function add(k,n){const d=parse(k);d.setDate(d.getDate()+n);return key(d)}
+function weekStart(k){const d=parse(k);return add(k,-((d.getDay()+6)%7))}
+function fmt(k){const d=parse(k);return (d.getMonth()+1)+'/'+d.getDate()+'('+'일월화수목금토'[d.getDay()]+')'}
+function ago(iso){if(!iso)return '-';const t=new Date(iso);if(isNaN(t))return '-';const m=Math.round((Date.now()-t)/60000);if(m<1)return '방금';if(m<60)return m+'분 전';if(m<1440)return Math.round(m/60)+'시간 전';return Math.round(m/1440)+'일 전'}
+function sumRange(daily,from,to,f){let s=0;Object.keys(daily||{}).forEach(k=>{if(k>=from&&k<=to)s+=(daily[k][f||'r']||0)});return s}
+
+function studentLinkText(s,pw){return `[스터디아 왕국] 입장 안내\n\n접속 주소: ${BASE}\n아이디: ${s.id}\n비밀번호: ${pw||'(선생님께 받은 비밀번호)'}\n\n처음 들어가면 성향 테스트로 왕국을 정하고 동물 캐릭터를 만들어요. 홈 화면에 추가해 두면 앱처럼 쓸 수 있어요.\n공부 체크는 매일 밤 10시까지예요.`}
+function parentLink(s){return BASE+'#parent-'+s.parentCode}
+
+function render(){
+  if(!AUTH){app.innerHTML=`<div class="card login"><h1>스터디아 선생님</h1><p class="small muted">구글 시트에서 [처음 설정] 때 만든 관리자 아이디로 로그인해요.</p>
+    ${API?'':'<p class="note">config.js 에 앱스크립트 웹 앱 주소가 아직 없어요. 설치 안내서 3단계를 봐 주세요.</p>'}
+    <form id="lf" style="display:flex;flex-direction:column;gap:8px"><label>아이디<input id="id" autocomplete="username" autocapitalize="none"></label><label>비밀번호<input id="pw" type="password" autocomplete="current-password"></label>
+    <p class="small" id="le" style="color:var(--bad)" hidden></p><button class="btn" id="go">로그인</button></form></div>`;
+    $('#lf').onsubmit=async e=>{e.preventDefault();const b=$('#go');b.disabled=true;b.textContent='확인 중...';
+      try{const j=await api('login',{id:$('#id').value.trim().toLowerCase(),pw:$('#pw').value});
+        if(j.role!=='admin')throw new Error('관리자 계정이 아니에요. 학생은 '+BASE+' 에서 들어가요');
+        AUTH={token:j.token,id:j.id};localStorage.setItem(KEY,JSON.stringify(AUTH));refresh(true)}
+      catch(x){const le=$('#le');le.hidden=false;le.textContent=x.message;b.disabled=false;b.textContent='로그인'}};return}
+  if(!D){app.innerHTML='<div class="card"><h2>불러오는 중...</h2><p class="small muted">구글 시트에서 학생 기록을 읽고 있어요. 1~3초 걸려요.</p></div>';return}
+  const stu=D.students.filter(s=>s.role==='student');const today=D.today,ws=weekStart(today),ms=today.slice(0,8)+'01';
+  const doneToday=stu.filter(s=>s.daily[today]&&s.daily[today].raw>0).length;
+  const newErr=D.errors.filter(e=>new Date(e.time).getTime()>LAST_ERR_SEEN).length;
+  let h=`<div class="top"><h1>스터디아 선생님</h1><span class="pill">${fmt(today)}</span><span class="sp"></span>
+    <span class="tiny muted" id="upd">방금 새로 고침</span><a class="btn ghost sm" href="support/" target="_blank" rel="noopener" style="text-decoration:none">지원센터</a><a class="btn ghost sm" href="rank.html" target="_blank" rel="noopener" style="text-decoration:none">랭킹 사이트</a><button class="btn ghost sm" id="rf">새로 고침</button><button class="btn ghost sm" id="lo">로그아웃</button></div>
+  <div class="tabs">${[['home','오늘'],['adjust','점수 조정'],['students','학생 계정'],['new','계정 만들기'],['errors','오류 기록'+(newErr?' ('+newErr+')':'')]].map(([k,l])=>`<button data-t="${k}" aria-pressed="${TAB===k}">${l}</button>`).join('')}</div>`;
+  if(TAB==='home'){
+    const cells={};stu.forEach(s=>{const e=s.daily[today];if(e&&e.cell)cells[e.cell]=(cells[e.cell]||0)+1});
+    h+=`<div class="grid"><div class="stat"><b>${stu.filter(s=>s.active).length}</b><span>사용 중인 학생</span></div><div class="stat"><b>${doneToday}</b><span>오늘 공부 체크한 학생</span></div>
+      <div class="stat ${D.pending.length?'alert':''}"><b>${D.pending.length}</b><span>숙제검사 확인 대기</span></div><div class="stat ${newErr?'alert':''}"><b>${newErr}</b><span>새 오류 기록</span></div></div>
+    ${stu.some(s=>s.alerts&&s.alerts.length)?`<div class="card" style="border-color:var(--bad)"><h2>마음 신호</h2><p class="small muted">보호자께 연락해 주세요. 한마디 내용은 아이가 공개한 경우에만 학생 기록에서 볼 수 있어요. 상담 안내: 청소년상담 1388.</p>${stu.filter(s=>s.alerts&&s.alerts.length).map(s=>`<p class="small"><b>${esc(s.name)}</b> ${s.char?esc(s.char.name):''} · ${s.alerts.map(a=>`<span class="pill bad">${esc(a)}</span>`).join(' ')}</p>`).join('')}</div>`:''}
+    <div class="card"><h2>미션1 숙제검사 확인</h2><p class="small muted">학생이 '숙제검사 받았어요'를 누르면 여기에 떠요. 확인하면 그날 미션1 5점과 7일 동안 마스터의 가호(데미지 +10%)가 켜져요. 10점인 학생은 [점수 조정]에서 늦은 체크로 넣어 주세요.</p>${D.pending.length?`<div class="tscroll"><table><thead><tr><th>학생</th><th>캐릭터</th><th>날짜</th><th></th></tr></thead><tbody>${D.pending.sort((a,b)=>a.date<b.date?1:-1).map((p,i)=>`<tr><td>${esc(p.name)} <span class="tiny muted">${esc(p.id)}</span></td><td>${esc(p.char)}</td><td>${fmt(p.date)}</td><td><button class="btn sm" data-ap="${i}">확인 (미션1 5점)</button></td></tr>`).join('')}</tbody></table></div>`:'<p class="small muted">기다리는 요청이 없어요.</p>'}</div>
+    <div class="card"><h2>학생 현황</h2><div class="tscroll"><table><thead><tr><th>학생</th><th>캐릭터 · 왕국</th><th class="r">오늘</th><th class="r">이번 주</th><th class="r">이번 달</th><th>오늘의 칸</th><th>가호</th><th>동의</th><th>마지막 저장</th></tr></thead><tbody>
+      ${stu.filter(s=>s.active).sort((a,b)=>sumRange(b.daily,ws,today)-sumRange(a.daily,ws,today)).map(s=>{const e=s.daily[today]||{};const K=s.char&&KINGDOM[s.char.kingdom];
+        return `<tr><td>${esc(s.name)} <span class="tiny muted">${esc(s.id)}</span></td><td>${s.char?`<span class="dot" style="background:${esc(s.char.color)}"></span>${esc(s.char.name)} <span class="tiny muted">${K?K[0]:''}</span>`:'<span class="pill off">캐릭터 전</span>'}</td>
+        <td class="r">${e.r||0}</td><td class="r">${sumRange(s.daily,ws,today)}</td><td class="r">${s.monthPts||sumRange(s.daily,ms,today,'raw')} <span class="tiny muted">/300</span></td><td>${e.cell?`<span class="pill ${['불안','무관심','걱정'].includes(e.cell)?'bad':''}">${e.cell}</span>`:'-'}</td>
+        <td>${s.bless&&today<=s.bless.until?'<span class="pill p">~'+fmt(s.bless.until)+'</span>':'-'}</td><td>${s.consent?'<span class="tiny">'+esc(String(s.consent).slice(0,10))+'</span>':'<span class="pill bad">없음</span>'}</td><td class="tiny">${ago(s.savedAt)}</td></tr>`}).join('')||'<tr><td colspan="9" class="muted">아직 학생 계정이 없어요. [계정 만들기]에서 만들어 주세요.</td></tr>'}
+    </tbody></table></div><p class="tiny muted">점수는 랭킹 점수(하루 30점 상한, 연속 보너스·추가 포인트는 따로). 이번 달은 기준치 300점 대비 원점수. 30초마다 자동으로 새로 고침돼요.</p></div>
+    <div class="card"><h2>오늘 몰입 분포</h2><div class="row">${['몰입','각성','통제','이완','지루함','무관심','걱정','불안'].map(c=>`<span class="pill ${['불안','무관심','걱정'].includes(c)&&cells[c]?'bad':''}">${c} ${cells[c]||0}명</span>`).join('')}</div></div>`;
+  }
+  if(TAB==='adjust'){
+    const act=SK.ORDER.map(a=>[a,SK.ACT[a].n+' '+SK.ACT[a].pt+'점']);
+    h+=`<div class="card"><h2>점수 조정</h2><p class="small muted">늦게 알린 공부는 다음 날까지 넣을 수 있어요. 추가 포인트는 과목을 고르면 그 과목 보스에도 들어가요. 거짓 체크 감점은 1~5점이고, 아이 화면에 최근 감점이 보여요. 학생이 앱을 다시 열면 랭킹에 반영돼요.</p>
+      <form class="form" id="af"><label>학생<select id="aid"><option value="">고르기</option>${stu.map(s=>`<option value="${esc(s.id)}" ${ADJ.id===s.id?'selected':''}>${esc(s.name)} (${esc(s.char?s.char.name:s.id)})</option>`).join('')}</select></label>
+      <label>날짜<select id="adate">${[0,1].map(i=>{const d=add(today,-i);return `<option value="${d}" ${ADJ.date===d?'selected':''}>${fmt(d)}${i?' 어제':' 오늘'}</option>`}).join('')}${[2,3,4,5,6].map(i=>{const d=add(today,-i);return `<option value="${d}" ${ADJ.date===d?'selected':''}>${fmt(d)} (포인트·감점만)</option>`}).join('')}</select></label>
+      <label>종류<select id="at"><option value="check" ${ADJ.t==='check'?'selected':''}>늦게 알린 체크</option><option value="bonus" ${ADJ.t==='bonus'?'selected':''}>선생님 추가 포인트</option><option value="penalty" ${ADJ.t==='penalty'?'selected':''}>거짓 체크 감점</option></select></label>
+      ${ADJ.t==='check'?`<label>체크<select id="aa">${act.map(([a,l])=>`<option value="${a}" ${ADJ.a===a?'selected':''}>${esc(l)}</option>`).join('')}<option value="m1x10" ${ADJ.a==='m1x10'?'selected':''}>미션1 숙제검사 10점</option></select></label>`:
+        `<label>점수 (${ADJ.t==='bonus'?'1~30':'1~5'})<input id="apts" type="number" min="1" max="${ADJ.t==='bonus'?30:5}" value="${esc(ADJ.pts)}"></label>${ADJ.t==='bonus'?`<label>과목 (선택)<select id="as"><option value="">과목 없음 (레이드·히든보스)</option>${SK.SUBJ_KEYS.map(x=>`<option value="${x}" ${ADJ.s===x?'selected':''}>${SK.SUBJ[x].n}</option>`).join('')}</select></label>`:''}`}
+      <label>사유<input id="awhy" maxlength="60" placeholder="${ADJ.t==='bonus'?'예: 어려운 숙제 끝까지 함':ADJ.t==='penalty'?'예: 하지 않은 수학 체크':'예: 전화로 알려 줌'}" value="${esc(ADJ.why)}"></label>
+      <button class="btn" id="ago">넣기</button></form></div>
+    <div class="card"><h2>최근 2주 조정 내역</h2>${(D.adj||[]).length?`<div class="tscroll"><table><thead><tr><th>학생</th><th>날짜</th><th>종류</th><th class="r">점수</th><th>사유</th><th></th></tr></thead><tbody>${D.adj.map(a=>{const s=D.students.find(x=>x.id===a.id);return `<tr><td>${esc(s?s.name:a.id)}</td><td>${fmt(a.date)}</td><td>${a.t==='check'?'늦은 체크 · '+esc(SK.ACT[a.a]?SK.ACT[a.a].n:a.a):a.t==='bonus'?'추가 포인트'+(a.s?' · '+esc(SK.SUBJ[a.s].n):''):'<span class="pill bad">감점</span>'}</td><td class="r">${a.t==='penalty'?'-':'+'}${a.pts}</td><td class="tiny">${esc(a.why)}</td><td><button class="btn ghost sm" data-adel="${esc(a.uid)}">지우기</button></td></tr>`}).join('')}</tbody></table></div>`:'<p class="small muted">아직 없어요.</p>'}</div>`;
+  }
+  if(TAB==='students'){
+    h+=`<div class="card"><h2>학생 계정</h2><p class="small muted">비밀번호는 시트에 암호화돼 저장되어 선생님도 원래 비밀번호를 볼 수 없어요. 잊었다면 [새 비밀번호]로 다시 발급하세요.</p>
+    <div class="tscroll"><table><thead><tr><th>이름</th><th>아이디</th><th>상태</th><th>캐릭터</th><th>보호자 동의</th><th>마지막 접속</th><th>메모</th><th></th></tr></thead><tbody>
+    ${D.students.map(s=>`<tr><td>${esc(s.name)}</td><td>${esc(s.id)}</td><td>${s.role==='admin'?'<span class="pill p">관리자</span>':s.active?'<span class="pill">사용</span>':'<span class="pill off">멈춤</span>'}</td>
+      <td>${s.char?esc(s.char.name):'-'}</td><td class="tiny">${s.role==='student'?(s.consent?esc(String(s.consent).slice(0,10)):'<span class="pill bad">없음</span>')+` <button class="btn ghost sm" data-cs="${esc(s.id)}">고치기</button>`:''}</td><td class="tiny">${ago(s.lastLogin)}</td><td class="tiny">${esc(s.memo)}</td>
+      <td>${s.role==='student'?`<div class="row"><button class="btn ghost sm" data-rs="${esc(s.id)}">새 비밀번호</button><button class="btn ghost sm" data-pl="${esc(s.id)}">보호자 링크</button><button class="btn ghost sm" data-in="${esc(s.id)}">입장 안내</button><button class="btn ghost sm" data-ac="${esc(s.id)}">${s.active?'멈추기':'다시 사용'}</button></div>`:''}</td></tr>`).join('')}
+    </tbody></table></div></div><div id="out"></div>`;
+  }
+  if(TAB==='new'){
+    h+=`<div class="card" style="border-color:var(--accent)"><h3>먼저 보호자 동의를 받아 주세요</h3><p class="small">초등생은 모두 만 14세 미만이라, 계정을 만들기 전에 보호자(법정대리인) 동의가 필요해요. 동의서를 받은 날짜를 넣어야 계정이 만들어져요. 동의서 양식은 지원센터 [보호자 안내]에 있어요.</p></div>
+    <div class="card"><h2>학생 계정 한 명 만들기</h2>
+      <form class="form" id="nf"><label>보호자 동의일<input id="ncs" type="date" value="${today}"></label><label>아이디 (영문·숫자 3~20자)<input id="nid" autocapitalize="none" placeholder="예: kim01"></label><label>이름 (관리용, 학생에게 안 보임)<input id="nnm" placeholder="예: 김가나"></label>
+      <label>비밀번호 (비우면 자동)<input id="npw" placeholder="자동 8자리"></label><label>메모<input id="nmemo" placeholder="예: 4학년"></label><button class="btn" id="ngo">만들기</button></form></div>
+    <div class="card"><h2>여러 명 한 번에</h2><p class="small muted">한 줄에 한 명씩 <b>아이디, 이름</b> (메모는 세 번째 칸). 비밀번호는 자동으로 만들어져요.</p>
+      <label style="max-width:220px">보호자 동의일 (모두 같은 날)<input id="bcs" type="date" value="${today}"></label><textarea id="bulk" placeholder="kim01, 김가나, 4학년&#10;lee02, 이다라"></textarea><button class="btn" id="bgo" style="align-self:flex-start">모두 만들기</button></div>
+    <div id="out"></div>`;
+  }
+  if(TAB==='errors'){
+    h+=`<div class="card"><div class="row"><h2 style="flex:1">오류 기록</h2><span class="tiny muted">전체 ${D.errorCount}건 · 최근 100건</span><button class="btn ghost sm" id="ce">모두 지우기</button></div>
+      <p class="small muted">학생 폰에서 오류가 나면 자동으로 여기와 구글 시트 [오류] 탭에 쌓여요. 보라색은 학생이 직접 보낸 신고예요. 고칠 때 이 내용을 Claude에게 그대로 붙여 주면 돼요.</p>
+      ${D.errors.length?D.errors.map(e=>`<div class="err ${String(e.msg).startsWith('[학생 신고]')?'rep':''}"><div class="row small"><b>${esc(e.id)}</b><span class="muted">${new Date(e.time).toLocaleString('ko-KR')}</span><span class="pill">${esc(e.ver)}</span><span class="tiny muted">${esc(e.tab)}</span></div>
+        <div>${esc(e.msg)}</div>${e.stack?`<pre>${esc(e.stack)}</pre>`:''}<div class="tiny muted">${esc(e.ua)}</div></div>`).join(''):'<p class="small muted">오류가 없어요.</p>'}</div>`;
+    LAST_ERR_SEEN=Date.now();localStorage.setItem(KEY+':errseen',LAST_ERR_SEEN);
+  }
+  app.innerHTML=h;bind();
+}
+function showOut(html){const o=$('#out');if(o){o.innerHTML=html;o.scrollIntoView({behavior:'smooth',block:'nearest'});o.querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>copy(decodeURIComponent(b.dataset.copy)))}}
+function bind(){
+  app.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{TAB=b.dataset.t;render()});
+  $('#rf').onclick=()=>refresh(true);$('#lo').onclick=()=>logout('로그아웃했어요');
+  app.querySelectorAll('[data-ap]').forEach(b=>b.onclick=async()=>{const p=D.pending[+b.dataset.ap];b.disabled=true;b.textContent='승인 중...';
+    try{await api('adminApprove',{id:p.id,date:p.date});toast(p.name+' 승인 완료');refresh()}catch(e){toast(e.message);b.disabled=false;b.textContent='확인 (미션1 5점)'}});
+  const syncAdj=()=>{const g=id=>{const el=$(id);return el?el.value:''};ADJ={id:g('#aid'),date:g('#adate'),t:g('#at')||'check',a:g('#aa')||ADJ.a,pts:g('#apts'),s:g('#as'),why:g('#awhy')}};
+  if($('#at'))$('#at').onchange=()=>{syncAdj();render()};
+  if($('#af'))$('#af').onsubmit=async e=>{e.preventDefault();syncAdj();if(!ADJ.id){toast('학생을 골라 주세요');return}const b=$('#ago');b.disabled=true;
+    const body={id:ADJ.id,date:ADJ.date,t:ADJ.t,why:ADJ.why};if(ADJ.t==='check'){body.a=ADJ.a==='m1x10'?'m1':ADJ.a;if(ADJ.a==='m1x10')body.pts=10}else{body.pts=+ADJ.pts;body.s=ADJ.s}
+    try{await api('adminAdjust',body);toast('넣었어요');ADJ.pts='';ADJ.why='';refresh(true)}catch(x){toast(x.message);b.disabled=false}};
+  app.querySelectorAll('[data-adel]').forEach(b=>b.onclick=async()=>{if(!b.dataset.c){b.dataset.c=1;b.textContent='한 번 더';return}b.disabled=true;try{await api('adminAdjustDelete',{uid:b.dataset.adel});toast('지웠어요');refresh(true)}catch(x){toast(x.message);b.disabled=false}});
+  app.querySelectorAll('[data-cs]').forEach(b=>b.onclick=async()=>{const s=D.students.find(x=>x.id===b.dataset.cs);const v=prompt(s.name+' 보호자 동의일 (예: 2026-11-26, 비우면 지움)',s.consent?String(s.consent).slice(0,10):today);if(v==null)return;
+    try{await api('adminConsent',{id:s.id,consent:v.trim()});toast('바꿨어요');refresh(true)}catch(x){toast(x.message)}});
+  const find=id=>D.students.find(s=>s.id===id);
+  app.querySelectorAll('[data-rs]').forEach(b=>b.onclick=async()=>{const s=find(b.dataset.rs);if(!b.dataset.c){b.dataset.c=1;b.textContent='한 번 더 누르면 발급';return}b.disabled=true;
+    try{const j=await api('adminReset',{id:s.id});const t=studentLinkText(s,j.pw);showOut(`<div class="card"><h3>${esc(s.name)} 새 비밀번호: <b>${esc(j.pw)}</b></h3><p class="small muted">이 창을 닫으면 다시 볼 수 없어요. 예전 기기의 로그인은 풀려요.</p><div class="note">${esc(t)}</div><button class="btn sm" data-copy="${encodeURIComponent(t)}">안내문 복사</button></div>`);b.textContent='발급 완료'}catch(e){toast(e.message);b.disabled=false}});
+  app.querySelectorAll('[data-pl]').forEach(b=>b.onclick=()=>{const s=find(b.dataset.pl);const t=`[스터디아 왕국] ${s.name} 보호자 리포트\n${parentLink(s)}\n\n로그인 없이 열리는 읽기 전용 화면이에요. 다른 아이와의 순위는 보이지 않아요.`;showOut(`<div class="card"><h3>${esc(s.name)} 보호자 링크</h3><div class="note">${esc(t)}</div><div class="row"><button class="btn sm" data-copy="${encodeURIComponent(t)}">복사</button><a class="btn ghost sm" href="${esc(parentLink(s))}" target="_blank" rel="noopener">열어 보기</a></div><p class="tiny muted">링크가 새어 나갔다면 시트 [계정] 탭의 학부모코드를 지우고 새로 넣으면 예전 링크는 막혀요.</p></div>`)});
+  app.querySelectorAll('[data-in]').forEach(b=>b.onclick=()=>{const s=find(b.dataset.in);const t=studentLinkText(s,'');showOut(`<div class="card"><h3>${esc(s.name)} 입장 안내</h3><div class="note">${esc(t)}</div><button class="btn sm" data-copy="${encodeURIComponent(t)}">복사</button></div>`)});
+  app.querySelectorAll('[data-ac]').forEach(b=>b.onclick=async()=>{const s=find(b.dataset.ac);b.disabled=true;try{await api('adminSetActive',{id:s.id,active:!s.active});toast(s.active?'멈췄어요. 그 학생은 로그인이 풀려요':'다시 쓸 수 있어요');refresh()}catch(e){toast(e.message);b.disabled=false}});
+  if($('#nf'))$('#nf').onsubmit=async e=>{e.preventDefault();const b=$('#ngo');b.disabled=true;
+    try{const j=await api('adminCreate',{id:$('#nid').value,name:$('#nnm').value,pw:$('#npw').value,memo:$('#nmemo').value,consent:$('#ncs').value});const t=studentLinkText(j,j.pw);
+      showOut(`<div class="card"><h3>${esc(j.name)} 계정을 만들었어요</h3><p class="small">아이디 <b>${esc(j.id)}</b> · 비밀번호 <b>${esc(j.pw)}</b></p><p class="small muted">비밀번호는 지금만 보여요. 아래 안내문을 학생에게 보내 주세요.</p><div class="note">${esc(t)}</div><button class="btn sm" data-copy="${encodeURIComponent(t)}">안내문 복사</button></div>`);
+      $('#nf').reset();refresh()}catch(x){toast(x.message)}b.disabled=false};
+  if($('#bgo'))$('#bgo').onclick=async e=>{const lines=$('#bulk').value.split('\n').map(x=>x.split(/[,\t]/).map(y=>y.trim())).filter(x=>x[0]);if(!lines.length)return;const b=e.target;b.disabled=true;const res=[];
+    for(const [id,name,memo] of lines){b.textContent=`만드는 중 ${res.length+1}/${lines.length}`;try{const j=await api('adminCreate',{id,name:name||id,memo:memo||'',consent:$('#bcs').value});res.push({ok:1,...j})}catch(x){res.push({ok:0,id,name,err:x.message})}}
+    const txt=res.filter(r=>r.ok).map(r=>`${r.name}\t${r.id}\t${r.pw}`).join('\n');
+    showOut(`<div class="card"><h3>${res.filter(r=>r.ok).length}명 만들었어요</h3><p class="small muted">비밀번호는 지금만 보여요. 복사해서 따로 보관하거나 학생마다 보내 주세요.</p><div class="tscroll"><table><thead><tr><th>이름</th><th>아이디</th><th>비밀번호</th><th></th></tr></thead><tbody>${res.map(r=>`<tr><td>${esc(r.name)}</td><td>${esc(r.id)}</td><td>${r.ok?'<b>'+esc(r.pw)+'</b>':'<span style="color:var(--bad)">'+esc(r.err)+'</span>'}</td><td>${r.ok?`<button class="btn ghost sm" data-copy="${encodeURIComponent(studentLinkText(r,r.pw))}">안내문 복사</button>`:''}</td></tr>`).join('')}</tbody></table></div><button class="btn sm" data-copy="${encodeURIComponent(txt)}" style="align-self:flex-start">표 전체 복사 (엑셀에 붙여넣기)</button></div>`);
+    b.disabled=false;b.textContent='모두 만들기';$('#bulk').value='';refresh()};
+  if($('#ce'))$('#ce').onclick=async e=>{const b=e.target;if(!b.dataset.c){b.dataset.c=1;b.textContent='한 번 더 누르면 모두 지워요';return}try{await api('adminClearErrors');toast('지웠어요');refresh()}catch(x){toast(x.message)}};
+}
+let lastAt=0;
+async function refresh(show){if(busy)return;busy=true;if(show&&!D)render();
+  try{D=await api('adminOverview');lastAt=Date.now();const keep=document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName);const out=$('#out');const outHtml=out?out.innerHTML:'';
+    if(!keep){render();if(outHtml&&$('#out')){showOut(outHtml)}}}
+  catch(e){if(AUTH)toast(e.message)}busy=false;
+  clearInterval(timer);timer=setInterval(()=>{if(!document.hidden)refresh()},30000)}
+setInterval(()=>{const u=document.getElementById('upd');if(u&&lastAt)u.textContent=ago(new Date(lastAt).toISOString())+' 새로 고침'},15000);
+render();if(AUTH)refresh(true);
+})();
+</script>
+</body>
+</html>

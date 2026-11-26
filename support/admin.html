@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>선생님 안내 · 스터디아 왕국 지원센터</title>
+<meta name="description" content="스터디아 왕국 초등 선생님 화면 사용법: 계정, 숙제검사 확인, 점수 조정, 마음 신호.">
+<meta name="theme-color" content="#1E3A6E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="admin">
+
+<div class="page-hero"><div class="wrap">
+  <div class="crumb"><a href="index.html">지원센터</a> › 선생님</div>
+  <h1>선생님 안내</h1>
+  <p>관리자 화면(admin.html)에서 하는 일을 정리했어요. 처음 설치는 저장소의 README를 봐 주세요.</p>
+</div></div>
+
+<div class="wrap guide">
+  <nav class="toc" aria-label="이 페이지 목차">
+    <b>목차</b>
+    <a href="#daily">매일 하는 일</a>
+    <a href="#accounts">계정 만들기</a>
+    <a href="#adjust">점수 조정</a>
+    <a href="#signals">마음 신호</a>
+    <a href="#update">고치거나 바꿀 때</a>
+  </nav>
+  <div class="doc">
+
+    <section id="daily"><h2>매일 하는 일</h2>
+      <ol class="steps"><li><b>미션1 숙제검사 확인</b>[오늘] 탭에 아이가 '알리기'를 누른 날짜가 떠요. <span class="kbd">확인</span>을 누르면 5점과 7일 동안 마스터의 가호(+10%)가 켜져요.</li>
+        <li><b>학생 현황 보기</b>오늘·이번 주·이번 달 점수, 오늘의 마음 칸, 보호자 동의일.</li>
+        <li><b>오류 기록</b>아이 폰에서 난 오류와 아이가 보낸 신고가 쌓여요.</li></ol></section>
+    <section id="accounts"><h2>계정 만들기</h2>
+      <p><b>보호자 동의를 받은 뒤에만</b> 만들 수 있어요. [계정 만들기]에서 동의일을 넣고 아이디·이름(관리용)을 넣으면 비밀번호가 자동으로 만들어져요. 여러 명은 한 줄에 "아이디, 이름, 메모"로 붙여 넣어요.</p>
+      <p>만든 뒤 <span class="kbd">안내문 복사</span>로 아이·보호자에게 보내고, [학생 계정]에서 <span class="kbd">보호자 링크</span>를 복사해 보호자께 보내요.</p></section>
+    <section id="adjust"><h2>점수 조정</h2>
+      <div class="tbl"><table><thead><tr><th>종류</th><th>언제</th></tr></thead><tbody>
+        <tr><td>늦게 알린 체크</td><td>밤 10시 뒤에 알린 공부. 그날이나 다음 날까지 넣을 수 있어요. 미션1을 10점으로 넣는 것도 여기서.</td></tr>
+        <tr><td>선생님 추가 포인트</td><td>1~30점. 과목을 고르면 그 과목 보스에도 들어가요 (씩씩 연방은 치명타 ×2). 하루 상한 30점 밖이에요.</td></tr>
+        <tr><td>거짓 체크 감점</td><td>1~5점. 아이 화면 [오늘]에 감점과 사유가 보여요. 데미지에서도 빠져요.</td></tr>
+      </tbody></table></div>
+      <p class="small muted">조정은 시트 [조정] 탭에 쌓이고, 아이가 앱을 다시 열면 랭킹에도 반영돼요. 잘못 넣었으면 [점수 조정] 아래 목록에서 지워요.</p></section>
+    <section id="signals"><h2>마음 신호</h2>
+      <p>컨디션 '너무 힘들어'가 3일 이어지거나, 아이의 한마디에 위험한 말이 있으면 [오늘] 탭 맨 위에 <b>마음 신호</b>가 떠요. 한마디 내용 자체는 보내지 않고 알림만 떠요. 보호자께 연락해 주시고, 필요하면 청소년상담 1388을 안내해 주세요.</p></section>
+    <section id="update"><h2>고치거나 바꿀 때</h2>
+      <p>점수·보스·왕국 이름은 <b>game-data.js</b> 한 파일에 모여 있어요. 서버(Code.gs)의 점수표(ACT)도 같이 바꿔 주세요. 화면을 바꾸면 version.json 의 version 값도 바꿔야 열려 있는 앱에 '새 버전' 버튼이 떠요.</p></section>
+  </div>
+</div>
+
+<script src="site.js"></script>
+
+</body>
+</html>

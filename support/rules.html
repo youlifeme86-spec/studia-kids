@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>규칙 도감 · 스터디아 왕국 지원센터</title>
+<meta name="description" content="스터디아 왕국 초등 9대 왕국, 과목 보스, 레이드, 점수표.">
+<meta name="theme-color" content="#1E3A6E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="../game-data.js"></script>
+</head>
+<body data-page="rules">
+
+<div class="page-hero"><div class="wrap">
+  <div class="crumb"><a href="index.html">지원센터</a> › 규칙 도감</div>
+  <h1>규칙 도감</h1>
+  <p>왕국, 보스, 레이드, 점수표를 한곳에. 숫자는 앱과 같은 파일에서 바로 읽어 와요.</p>
+</div></div>
+
+<div class="wrap guide">
+  <nav class="toc" aria-label="이 페이지 목차">
+    <b>목차</b>
+    <a href="#kingdoms">9대 왕국</a>
+    <a href="#bosses">과목 보스</a>
+    <a href="#raids">레이드와 히든보스</a>
+    <a href="#checks">점수표</a>
+    <a href="#grow">성장과 보상</a>
+  </nav>
+  <div class="doc">
+
+    <section id="kingdoms"><h2>9대 왕국</h2><p class="small muted">왕국마다 특별한 힘(패시브)이 있어요. 왕국 이사는 한 달이 끝날 때 할 수 있어요.</p><div id="kd"></div></section>
+    <section id="bosses"><h2>과목 보스</h2><p class="small muted">매달 1일 새로 나타나요. 한 달 300점을 하면 모두 쓰러뜨릴 수 있게 맞췄어요.</p><div id="bs"></div></section>
+    <section id="raids"><h2>레이드와 히든보스</h2><p class="small muted">충전하는 달에 쌓인 데미지가 문이 열리는 달 1일에 한 번에 들어가요. HP = 충전 달 수 × 3,000 + 1,500.</p><div id="rd"></div></section>
+    <section id="checks"><h2>점수표</h2><div id="ck"></div><p class="small">하루 랭킹 상한 30점 · 체크 마감 밤 10시 · 1점 = 10 데미지 · 버프 합은 최대 +100%, 한 번에 최대 4배.</p></section>
+    <section id="grow"><h2>성장과 보상</h2>
+      <div class="tbl"><table><thead><tr><th>무엇</th><th>어떻게</th></tr></thead><tbody>
+      <tr><td>월간 성장 단계</td><td>아기(0) → 꼬마(80, 리본) → 씩씩이(180, 망토) → 챔피언(300, 왕관) → 전설(420). 매달 1일 다시 시작</td></tr>
+      <tr><td>누적 레벨</td><td>누적 300점마다 1레벨, 사라지지 않아요</td></tr>
+      <tr><td>장비 카드</td><td>그달 처치한 과목 보스마다 1장 · 레이드 100 데미지</td></tr>
+      <tr><td>시즌 보물상자</td><td>한 달 300점 달성 · 레이드 300 데미지</td></tr>
+      <tr><td>출석 펫</td><td>7일 연속 알람 부엉이, 30일 연속 황금 붕어빵 펫</td></tr>
+      </tbody></table></div></section>
+  </div>
+</div>
+
+<script src="site.js"></script>
+<script>
+(function(){const e=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+document.getElementById('kd').innerHTML='<div class="tbl"><table><thead><tr><th>권역</th><th>왕국</th><th>힘</th></tr></thead><tbody>'+Object.keys(SK.KINGDOMS).map(k=>{const K=SK.KINGDOMS[k];return '<tr><td>'+e(K.zn)+'</td><td><b style="color:'+K.c+'">'+e(K.n)+'</b></td><td>['+e(K.p)+'] '+e(K.d)+'</td></tr>'}).join('')+'</tbody></table></div>';
+document.getElementById('bs').innerHTML='<div class="tbl"><table><thead><tr><th></th><th>보스</th><th>HP</th><th>방해 스킬</th><th>처치 보상</th></tr></thead><tbody>'+SK.SUBJ_KEYS.map(s=>{const B=SK.SUBJ[s];return '<tr><td><span data-spr="'+s+'" data-sc="2"></span></td><td><b>'+e(B.boss)+'</b><br><span class="tiny muted">'+e(B.n)+'</span></td><td style="white-space:nowrap">'+B.hp+'</td><td class="small">'+B.sk.map(e).join(', ')+'</td><td class="small">'+e(B.gear)+' · 칭호 ['+e(B.title)+']</td></tr>'}).join('')+'</tbody></table></div>';
+document.getElementById('rd').innerHTML='<div class="tbl"><table><thead><tr><th></th><th>레이드</th><th>때</th><th>충전 → 열림</th><th>HP</th><th>칭호</th></tr></thead><tbody>'+SK.RAIDS.map(r=>{const sp=r.specs[0];const months=[];for(let i=sp.n;i>=1;i--)months.push(((sp.m-i-1+12)%12)+1);return '<tr><td><span data-spr="'+r.id+'" data-sc="2"></span></td><td><b>'+e(r.n)+'</b></td><td class="small">'+e(r.when)+'</td><td>'+months.join('~')+'월 → '+sp.m+'월</td><td style="white-space:nowrap">'+(sp.n*SK.BASE*10+1500).toLocaleString()+'</td><td class="small">'+e(r.title)+'</td></tr>'}).join('')+'<tr><td><span data-spr="hidden" data-sc="2"></span></td><td><b>'+e(SK.HIDDEN.n)+'</b> (히든보스)</td><td class="small">3월 1일부터 1년</td><td>모든 데미지</td><td>'+SK.HIDDEN.hp.toLocaleString()+'</td><td class="small">꿈의 문 엔딩 카드</td></tr></tbody></table></div>';
+document.getElementById('ck').innerHTML='<div class="tbl"><table><thead><tr><th>체크</th><th>점수</th><th>횟수</th><th>공격하는 보스</th></tr></thead><tbody>'+SK.ORDER.map(a=>{const A=SK.ACT[a];return '<tr><td>'+e(A.n)+'</td><td>'+A.pt+'점</td><td>하루 1번'+(A.wk?', 주 '+A.wk+'번':'')+'</td><td class="small">'+(A.s?e(SK.SUBJ[A.s].boss):'궁극기 게이지 +20%')+'</td></tr>'}).join('')+'</tbody></table></div>';
+SK.hydrate(document)})();
+</script>
+</body>
+</html>
