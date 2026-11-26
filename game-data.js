@@ -151,6 +151,10 @@ SK.EARLY={hour:22,pct:0};   /* 골든타임으로 바뀌어서 꺼 둠 */
  * 크리티컬: pct% 확률로 ×mult, 슈퍼 크리(MEGA HIT): megaPct% 확률로 ×megaMult. 궁극기가 찬 공격은 무조건 MEGA ×3 (주사위 안 굴림)
  * 데일리 콤보: 오늘 몇 번째 체크인지에 따라 +% (2번째 +10, 3번째 +20, 4번째부터 +30)
  * 골든타임: 서울 시각 from시~to시 전 체크 +pct% */
+/* 스트릭 방패: every일 연속 출석마다 1개 (최대 max개). 체크 없는 날 자동으로 1개 써서 연속 기록을 지키고 보스 반격도 막아요 */
+SK.SHIELD={every:5,max:2};
+/* 최소 시동 퀘스트: 오늘 체크가 하나도 없을 때 '문제 1개만' → dmg 데미지 + 출석 인정 (랭킹 점수 0) */
+SK.MINI={dmg:5};
 SK.CRIT={pct:15,mult:1.5,megaPct:3,megaMult:2};
 SK.COMBO=[0,0,10,20,30];
 SK.GOLDEN={from:19,to:21,pct:20};

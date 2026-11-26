@@ -15,11 +15,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="스터디아 키즈">
-<script src="config.js?v=2026.11.26-1627"></script>
-<script src="game-data.js?v=2026.11.26-1627"></script>
-<script src="sound.js?v=2026.11.26-1627"></script>
+<script src="config.js?v=2026.11.26-1629"></script>
+<script src="game-data.js?v=2026.11.26-1629"></script>
+<script src="sound.js?v=2026.11.26-1629"></script>
 <script>
-window.RR_VERSION='2026.11.26-1627';
+window.RR_VERSION='2026.11.26-1629';
 /* 실시간 오류 기록: 학생 폰에서 난 오류를 구글 시트 [오류] 탭으로 보냄 */
 (function(){var n=0;window.RR_REPORT=function(msg,stack,extra){try{var C=window.RR_CONFIG||{};if(!C.API_URL||n>=8)return;n++;var a=null;try{a=JSON.parse(localStorage.getItem('sk-auth-v1')||'null')}catch(e){}
 fetch(C.API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},keepalive:true,body:JSON.stringify({action:'logError',token:a&&a.token||'',msg:String(msg||'').slice(0,1000),stack:String(stack||'').slice(0,3000),page:location.pathname+(location.hash.indexOf('#parent')===0?' (학부모)':''),tab:(window.RR_TAB||'')+(extra?' '+extra:''),ver:window.RR_VERSION||'',ua:navigator.userAgent.slice(0,300)})}).catch(function(){})}catch(e){}};
@@ -452,17 +452,22 @@ function dayScoreOf(st,k){const L=(st.logs||{})[k];if(!L)return {raw:0,rank:0,mi
   const capped=Math.min(chk+ac,DAILY_CAP);
   return {raw:Math.max(0,chk+ac+sb+bonus-pen),rank:Math.max(0,capped+sb+bonus-pen),min,subjects:subs.size,chk,ac,sb,bonus,pen}}
 function dayScore(k){return dayScoreOf(S,k)}
-function hasDone(L){return L&&(L.q.some(q=>q.done)||(L.life&&L.life.clean)||adjOf(L,'check').length>0)}
+function hasDone(L){return !!L&&(L.q.some(q=>q.done)||(L.life&&(L.life.clean||L.life.mini))||adjOf(L,'check').length>0)}
+function hasStudy(L){return !!L&&(L.q.some(q=>q.done)||(L.life&&L.life.clean)||adjOf(L,'check').length>0)}
 /* 연속 출석: 오뚝이 공화국은 끊긴 날 1번을 막아 줌 */
-function streak(st){st=st||S;let n=0,k=TODAY(),shield=st.char&&st.char.kingdom==='ukk'?1:0;if(!hasDone(st.logs[k]))k=addDays(k,-1);
-  for(let i=0;i<400;i++){if(hasDone(st.logs[k])){n++}else if(shield&&hasDone(st.logs[addDays(k,-1)])){shield=0}else break;k=addDays(k,-1)}return n}
+/* 스트릭 방패: 가입일부터 하루씩 따라가며 계산 (오뚝이 공화국은 방패 1개 들고 시작) */
+function shieldState(st){st=st||S;const t=TODAY(),SH=SK.SHIELD||{every:0,max:0};const days=Object.keys(st.logs||{}).sort();let J=joinDay(st)||days[0];if(days[0]&&days[0]<J)J=days[0];
+  let n=0,sh=st.char&&st.char.kingdom==='ukk'?1:0,used=[],got=[];if(!J)return {n:0,shields:sh,used,got};
+  for(let k=J;k<=t;k=addDays(k,1)){if(hasDone(st.logs[k])){n++;if(SH.every&&n%SH.every===0&&sh<SH.max){sh++;got.push(k)}}else if(k<t){if(sh>0){sh--;used.push(k)}else n=0}}
+  return {n,shields:sh,used,got}}
+function streak(st){return shieldState(st).n}
 function weekScore(k){const w=weekKey(k||TODAY());let t=0;for(let i=0;i<7;i++)t+=dayScore(addDays(w,i)).rank;return t}
 function monthScoreRaw(mk,st){st=st||S;mk=mk||monthKeyOf(TODAY());return Object.keys(st.logs||{}).filter(x=>x.startsWith(mk)).reduce((a,x)=>a+dayScoreOf(st,x).raw,0)}
 
 /* ---------- 데미지 ---------- */
 function qDmg(q){return q.dmg!=null?q.dmg:qPts(q)*10}
 /* 과목 보스 밖에서 레이드·히든보스에만 들어가는 몫: 올클리어·연속 보너스·과목 없는 선생님 포인트 - 감점 */
-function dayExtraDmg(st,k){const L=st.logs[k];if(!L)return 0;const d=dayScoreOf(st,k);let x=(d.ac+d.sb)*10;
+function dayExtraDmg(st,k){const L=st.logs[k];if(!L)return 0;const d=dayScoreOf(st,k);let x=(d.ac+d.sb)*10;if(L.life&&L.life.mini)x+=(SK.MINI&&SK.MINI.dmg)||0;
   adjOf(L,'bonus').forEach(a=>{x+=(+a.pts||0)*10*(a.crit||1)});x-=d.pen*10;
   adjOf(L,'check').forEach(a=>{x+=(+a.pts||0)*10});
   if(L.life&&L.life.clean)x+=ACT.clean.pt*10;return x}
@@ -508,10 +513,10 @@ function giftBossFrac(mk,st,preview){st=st||S;const J=joinDay(st);if(!J||novPrac
   if(mk===jm)return jf;const cm=preview?monthKeyOf(TODAY()):(st.gift&&st.gift.at?monthKeyOf(st.gift.at):'');return mk===cm&&mk>jm?jf:0}
 function bossState(s,mk,st){st=st||S;const P=novPrac(mk);const hp=bossHp(s,mk),start=mk+'-01',end=P?WIN.novEnd:monthEnd(mk),today=TODAY();
   const late=Math.round(hp*giftBossFrac(mk,st)*(SK.LATE.boss||0)/100);let left=Math.max(0,hp-late),heal=0,healDays=[];const J=joinDay(st);
-  const maxHeal=Math.round(hp*(SK.REGEN.maxPct||0)/100);
+  const maxHeal=Math.round(hp*(SK.REGEN.maxPct||0)/100);const shU=P?[]:shieldState(st).used;
   for(let k=start;k<=end&&k<=today;k=addDays(k,1)){
     if(left<=0)break;left=Math.max(0,left-dayBossDmg(st,k,s));
-    if(!P&&left>0&&k<today&&J&&k>=J&&SK.REGEN.pct&&!hasDone(st.logs[k])&&heal<maxHeal){const h=Math.min(Math.round(hp*SK.REGEN.pct/100),maxHeal-heal,hp-left);if(h>0){left+=h;heal+=h;healDays.push([k,h])}}}
+    if(!P&&left>0&&k<today&&J&&k>=J&&SK.REGEN.pct&&!shU.includes(k)&&!hasDone(st.logs[k])&&heal<maxHeal){const h=Math.min(Math.round(hp*SK.REGEN.pct/100),maxHeal-heal,hp-left);if(h>0){left+=h;heal+=h;healDays.push([k,h])}}}
   return {left,late,heal,healDays}}
 /* 다른 화면이 쓰던 '이달 데미지'는 이제 체력에서 남은 체력을 뺀 값 (축복·반격 포함) */
 function monthBossDmg(s,mk,st){return bossHp(s,mk)-bossState(s,mk,st).left}
@@ -575,7 +580,7 @@ let S=freshState();
 let writeTimer=null,retryTimer=null,flushing=false,flushAgain=false,SYNC='idle',failCount=0;
 /* 서버 요약에 쓰는 하루 기록: 랭킹 점수, 데미지, 마음 칸, 알림 */
 function computeDaily(st){const out={};Object.keys(st.logs||{}).forEach(k=>{const d=dayScoreOf(st,k);const e=st.emo&&st.emo[k];const L=st.logs[k];
-  if(d.raw||e||L.hiddenReq){const bd={};SUBJ_KEYS.forEach(s=>{const v=dayBossDmg(st,k,s);if(v)bd[s]=v});
+  if(d.raw||e||L.hiddenReq||(L.life&&L.life.mini)){const bd={};SUBJ_KEYS.forEach(s=>{const v=dayBossDmg(st,k,s);if(v)bd[s]=v});
     let dm=dayExtraDmg(st,k);L.q.forEach(q=>{if(q.done)dm+=qDmg(q)});
     out[k]={r:d.rank,raw:d.raw,min:d.min,n:d.subjects,cell:e?e.cell:null,cond:e?e.cond:null,al:e&&e.alert?1:0,hr:L.hiddenReq&&!L.hidden?1:0,dm:Math.max(0,dm),bd}}});
   if(st.char){const mk=monthKeyOf(TODAY()),f=mk+'-01';const off={};SUBJ_KEYS.forEach(s=>{const v=rankBossDmg(s,mk,st)-rawBossDmg(s,mk,st);if(v)off[s]=v});
@@ -714,7 +719,7 @@ function render(){setTimeout(syncBgm,0);setTimeout(enhanceScroll,30);
   if(UI.tab==='emo'){nav.hidden=true;return renderEmotion()}
   renderNav([['today','오늘'],['boss','보스전'],['raid','레이드'],['rank','랭킹'],['me','나']],UI.tab,id=>{UI.tab=id;render();scr.scrollTop=0});
   ({today:renderToday,boss:renderBoss,raid:renderRaid,rank:renderRank,me:renderMe})[UI.tab]();
-  hydrate(scr);checkSeason();
+  hydrate(scr);checkSeason();checkWelcome();
 }
 
 /* ---------- 스크롤 표시: 아래에 더 있으면 알려 주고, 옆으로 밀 수 있는 곳에는 화살표 ---------- */
@@ -878,6 +883,10 @@ function renderToday(){
   h+=`<div class="card" style="gap:8px"><div class="row between"><h3>공부 체크</h3><span class="num small"><b style="font-size:20px">${sc.rank}</b> / ${DAILY_CAP}점</span></div>`;
   L.q.forEach((q,i)=>{h+=questRow(q,i,L,k)});
   h+=`<div class="quest ${L.life.clean?'done':''}"><span class="dot" style="background:var(--gold)"></span><div class="body"><div class="t">${ACT.clean.n}</div><div class="tiny muted">+1점 · 궁극기 게이지 +20%</div></div><button class="check" data-life="clean" ${closed?'disabled':''}>${L.life.clean?'✓':'완료'}</button></div></div>`;
+  {const SS=shieldState();const showMini=SK.MINI&&(!hasStudy(L)||L.life.mini);
+   h+=`<div class="card shcard"><div class="row between"><b>🛡 스트릭 방패 ${'🛡'.repeat(SS.shields)}${'<span style="opacity:.25">🛡</span>'.repeat(Math.max(0,SK.SHIELD.max-SS.shields))}</b><span class="small">연속 <b>${SS.n}</b>일</span></div>
+     <p class="tiny muted">${SK.SHIELD.every}일 연속 출석마다 방패 1개 (최대 ${SK.SHIELD.max}개). 못 한 날엔 방패가 자동으로 연속 기록을 지키고 보스 반격도 막아 줘요. 다음 방패까지 ${SS.shields>=SK.SHIELD.max?'가득 찼어요!':(SK.SHIELD.every-SS.n%SK.SHIELD.every)+'일'}</p>
+     ${showMini?`<div class="quest ${L.life.mini?'done':''}" style="margin-top:6px"><span class="dot" style="background:#7FC8A9"></span><div class="body"><div class="t">오늘 너무 힘들어? 문제 1개만!</div><div class="tiny muted">최소 시동 퀘스트 · 책상에 앉아 딱 1문제 · ${SK.MINI.dmg} 데미지 + 출석 인정</div></div><button class="check" data-life="mini" ${closed||L.life.mini?'disabled':''}>${L.life.mini?'✓':'했어'}</button></div>`:''}</div>`}
   h+=`<div class="card" style="gap:4px"><div class="row between"><b>보너스</b><span class="small">${sc.ac?'<span class="pill">올클리어 +2</span>':''} ${sc.sb?'<span class="pill">연속 +'+sc.sb+'</span>':''} ${sc.bonus?'<span class="pill purple">선생님 +'+sc.bonus+'</span>':''} ${sc.pen?'<span class="pill red">감점 -'+sc.pen+'</span>':''}</span></div>
     <p class="tiny muted">오늘 할 수 있는 체크를 다 하면 올클리어 +2점, 3일 연속 +2점, 7일 연속 +5점. 보너스는 레이드와 히든보스에 들어가요.</p>
     ${adjOf(L,'penalty').concat(adjOf(L,'bonus'),adjOf(L,'check')).map(a=>`<p class="tiny">${a.t==='penalty'?'감점':a.t==='bonus'?'선생님 포인트':'선생님이 넣은 체크'} ${a.pts}점${a.why?' · '+esc(a.why):''}</p>`).join('')}</div>`;
@@ -888,7 +897,9 @@ function renderToday(){
   if($('#evc'))$('#evc').onclick=()=>{UI.tab=k<=WIN.novEnd?'boss':'raid';if(UI.tab==='boss')UI.bm=WIN.nov;render()};
   if($('#gift'))$('#gift').onclick=giftModal;
   scr.querySelectorAll('.check[data-i]').forEach(b=>b.onclick=()=>askQuest(+b.dataset.i));
-  scr.querySelectorAll('.check[data-life]').forEach(b=>b.onclick=()=>{if(SK.closed()){toast('밤 12시가 지나서 마감됐어');return}L.life.clean=!L.life.clean;if(L.life.clean){S.gauge=Math.min(100,S.gauge+20);toast(`방이 반짝반짝! +1점 · 궁극기 게이지 ${S.gauge}%`)}else S.gauge=Math.max(0,S.gauge-20);afterCheck(k);save();render()});
+  scr.querySelectorAll('.check[data-life="mini"]').forEach(b=>b.onclick=()=>{if(SK.closed()){toast('밤 12시가 지나서 마감됐어');return}
+    confirmSheet('문제 1개 풀었니?','책상에 앉아서 딱 1문제! 그것만 해도 오늘 출석이야.',()=>{L.life.mini=true;afterCheck(k);save();if(window.SKSound){SKSound.play('attack');SKSound.buzz(30)}toast(`시동 걸렸다! ${SK.MINI.dmg} 데미지 · 출석 인정. 내일도 같이 하자!`);render()})});
+  scr.querySelectorAll('.check[data-life="clean"]').forEach(b=>b.onclick=()=>{if(SK.closed()){toast('밤 12시가 지나서 마감됐어');return}L.life.clean=!L.life.clean;if(L.life.clean){S.gauge=Math.min(100,S.gauge+20);toast(`방이 반짝반짝! +1점 · 궁극기 게이지 ${S.gauge}%`)}else S.gauge=Math.max(0,S.gauge-20);afterCheck(k);save();render()});
   const m1=scr.querySelector('[data-m1]');if(m1)m1.onclick=()=>confirmSheet('숙제검사 받았니?','선생님께 확인 요청을 보내요. 선생님이 누르면 5점과 마스터의 가호가 켜져요.',()=>{L.hiddenReq=true;save();toast('선생님께 알렸어요');render()});
   $('#finish').onclick=()=>{UI.tab='emo';UI.emo={i:0,a:{}};render();scr.scrollTop=0};
 }
@@ -1032,6 +1043,18 @@ function settleMonth(mk){S.seasons=S.seasons||{};if(S.seasons[mk])return S.seaso
   killed.forEach(x=>S.items.push({kind:'gear',s:x,name:SUBJ[x].gear,dmg:ITEM_GEAR,from:label}));
   if(pts>=BASE)S.items.push({kind:'chest',name:'시즌 보물상자',dmg:ITEM_CHEST,from:label});
   S.seasons[mk]={name:S.char?S.char.name:'',kingdom:S.char?S.char.kingdom:'',pts,killed,stage:SK.stage(pts)[1],items:killed.length+(pts>=BASE?1:0)};return S.seasons[mk]}
+/* 복귀 환영: 하루 이상 쉬었다 돌아오면 혼내지 않고 반겨 줘요 (하루 한 번) */
+function checkWelcome(){if(READONLY||!S.char||UI.mode!=='student'||document.querySelector('.modal,.sheet'))return;const t=TODAY();if(hasDone(S.logs[t]))return;
+  const days=Object.keys(S.logs||{}).filter(k=>k<t&&hasDone(S.logs[k])).sort();const last=days[days.length-1];if(!last||last>=addDays(t,-1))return;
+  const key='sk-welcome-'+t;try{if(localStorage.getItem(key))return;localStorage.setItem(key,'1')}catch(e){return}
+  const SS=shieldState();const saved=SS.used.filter(k=>k>last).length;const gap=Math.round((parseDay(t)-parseDay(last))/864e5)-1;
+  const m=document.createElement('div');m.className='modal';
+  m.innerHTML=`<div class="card" role="dialog" aria-label="다시 왔구나"><h2 style="text-align:center">기다리고 있었어!</h2>
+   <div class="row" style="justify-content:center;gap:16px">${SK.heroTag(S.char,5)}</div>
+   <p style="text-align:center">${esc(S.char.name)}, ${gap}일 만이야! 오늘 다시 같이 가볼까?</p>
+   ${saved?`<p class="small" style="text-align:center">🛡 방패 ${saved}개가 연속 기록 <b>${SS.n}일</b>을 지켜 줬어!</p>`:`<p class="small muted" style="text-align:center">쉬어도 괜찮아. 오늘 1개만 해도 다시 시작이야.</p>`}
+   <button class="btn" id="wgo">가자!</button></div>`;
+  phone.appendChild(m);hydrate(m);if(window.SKSound)SKSound.play('item');m.querySelector('#wgo').onclick=()=>{m.remove();UI.tab='today';render()}}
 function checkSeason(){if(READONLY||!S.char||UI.mode!=='student'||document.querySelector('.modal'))return;const cur=monthKeyOf(TODAY());
   if(!S.season){S.season=cur;save();return}if(S.season===cur)return;
   const prev=S.season;const r=settleMonth(prev);S.season=cur;save();
