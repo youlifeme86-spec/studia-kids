@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Press+Start+2P&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=2026.11.26-0959">
-<script src="../game-data.js?v=2026.11.26-0959"></script>
+<link rel="stylesheet" href="style.css?v=2026.11.26-1058">
+<script src="../game-data.js?v=2026.11.26-1058"></script>
 </head>
 <body data-page="rules">
 
@@ -24,6 +24,7 @@
   <nav class="toc" aria-label="이 페이지 목차">
     <b>목차</b>
     <a href="#kingdoms">9대 왕국</a>
+    <a href="#flow">점수가 보스에게 가는 길</a>
     <a href="#bosses">과목 보스</a>
     <a href="#raids">레이드와 히든보스</a>
     <a href="#checks">점수표</a>
@@ -32,6 +33,33 @@
   <div class="doc">
 
     <section id="kingdoms"><h2>9대 왕국</h2><p class="small muted">왕국마다 특별한 힘(패시브)이 있어요. 왕국 이사는 한 달이 끝날 때 할 수 있어요.</p><div id="kd"></div></section>
+    <section id="flow"><h2>점수는 어떻게 보스에게 들어가나요</h2>
+      <p>체크 한 번은 <b>세 보스에게 동시에</b> 들어가요. 기본은 <b>1점 = 데미지 10</b>이고, 힘내기 물약·마스터의 가호 같은 버프가 있으면 더 세져요.</p>
+      <div class="grid g3" style="margin:4px 0 18px">
+        <div class="card"><div style="display:flex;justify-content:center;margin-bottom:8px"><span data-spr="m" data-sc="4"></span></div><h3>① 과목 보스</h3><p class="small">그 과목 체크로만 그 과목 보스를 때려요. 매달 1일에 새 보스 6마리가 나와요.</p></div>
+        <div class="card"><div style="display:flex;justify-content:center;margin-bottom:8px"><span data-spr="winter" data-sc="4"></span></div><h3>② 계절 레이드</h3><p class="small">레이드 달 전 1~2달 동안 점수가 쌓여 충전되고, 레이드 달에는 직접 공격해요.</p></div>
+        <div class="card"><div style="display:flex;justify-content:center;margin-bottom:8px"><span data-spr="hidden" data-sc="4"></span></div><h3>③ 히든보스</h3><p class="small">꿈의 문 수문장. 3월 1일부터 1년 동안 모든 데미지가 쌓여요.</p></div>
+      </div>
+      <h3>① 과목 보스: 한 달 300점이면 모두 처치</h3>
+      <p>6마리 체력을 더하면 2,730이에요. 한 달에 과목을 고르게 300점 하면 모두 쓰러뜨릴 수 있게 맞췄어요.</p>
+      <div class="tbl"><table><thead><tr><th>보스</th><th>때리는 체크</th><th>HP</th><th>처치에 필요한 점수</th></tr></thead><tbody>
+        <tr><td>분수 골렘 (수학)</td><td>수학</td><td>750</td><td>75점</td></tr>
+        <tr><td>단어 먹보 몬스터 (영어)</td><td>영어</td><td>750</td><td>75점</td></tr>
+        <tr><td>미루기 대마왕 (숙제)</td><td>미션1 숙제검사, 미션2, 학교숙제</td><td>450</td><td>45점</td></tr>
+        <tr><td>맞춤법 안개요정 (국어)</td><td>국어</td><td>300</td><td>30점</td></tr>
+        <tr><td>궁금증 슬라임 (EBS)</td><td>EBS</td><td>300</td><td>30점</td></tr>
+        <tr><td>책장 잠금 드래곤 (독서)</td><td>책읽기</td><td>180</td><td>18점</td></tr>
+      </tbody></table></div>
+      <p class="small muted">청소는 과목 보스 대신 궁극기 게이지를 채워요. 선생님 추가 포인트에 과목을 고르면 그 과목 보스에게도 들어가요.</p>
+      <h3>② 계절 레이드: 충전하고, 열리면 공격</h3>
+      <p>레이드는 4·7·8·10·12·2월에 열려요. 그 전 1~2달 동안 내가 준 데미지가 <b>충전</b>되고(최대 충전 달 수 × 3,000), 레이드 달 1일에 한꺼번에 들어가요. 레이드 달에는 체크할 때마다 직접 공격해요. 레이드 HP는 충전 최대치 + 1,500이에요.</p>
+      <div class="note"><b>예시</b> 12월 눈사람 왕 프로스트는 10~11월에 충전(최대 6,000)하고, 12월에 HP 7,500과 싸워요. 충전을 꽉 채우면 12월에 1,500만 더 때리면 돼요.</div>
+      <h3>③ 히든보스: 1년짜리 대장정</h3>
+      <p>꿈의 문 수문장은 3월 1일부터 다음 해 2월 말까지 모든 데미지가 쌓여요. HP는 36,000. 한 달 300점을 1년 동안 이어 가면 쓰러뜨릴 수 있어요.</p>
+      <h3>보너스와 감점은?</h3>
+      <p>올클리어·연속 보너스와 과목을 고르지 않은 선생님 추가 포인트는 레이드와 히든보스에만 들어가요. 거짓 체크 감점은 레이드와 히든보스 데미지에서 빠져요.</p>
+      <div class="tip"><b>랭킹 점수와는 따로예요</b> 랭킹의 월간 점수는 매달 1일 0점부터 다시 시작하지만, 누적 레벨·도감·칭호 같은 기록은 그대로 남아요.</div>
+    </section>
     <section id="bosses"><h2>과목 보스</h2><p class="small muted">매달 1일 새로 나타나요. 한 달 300점을 하면 모두 쓰러뜨릴 수 있게 맞췄어요.</p><div id="bs"></div></section>
     <section id="raids"><h2>레이드와 히든보스</h2><p class="small muted">충전하는 달에 쌓인 데미지가 문이 열리는 달 1일에 한 번에 들어가요. HP = 충전 달 수 × 3,000 + 1,500.</p><div id="rd"></div></section>
     <section id="checks"><h2>점수표</h2><div id="ck"></div><p class="small">하루 랭킹 상한 30점 · 체크 마감 밤 10시 · 1점 = 10 데미지 · 버프 합은 최대 +100%, 한 번에 최대 4배.</p></section>
@@ -46,7 +74,7 @@
   </div>
 </div>
 
-<script src="site.js?v=2026.11.26-0959"></script>
+<script src="site.js?v=2026.11.26-1058"></script>
 <script>
 (function(){const e=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 document.getElementById('kd').innerHTML='<div class="tbl"><table><thead><tr><th>권역</th><th>왕국</th><th>힘</th></tr></thead><tbody>'+Object.keys(SK.KINGDOMS).map(k=>{const K=SK.KINGDOMS[k];return '<tr><td>'+e(K.zn)+'</td><td><b style="color:'+K.c+'">'+e(K.n)+'</b></td><td>['+e(K.p)+'] '+e(K.d)+'</td></tr>'}).join('')+'</tbody></table></div>';

@@ -161,3 +161,4 @@ footer a{color:#F3E3CC}
 footer nav{display:flex;flex-wrap:wrap;gap:6px 16px}
 .logo .mk canvas{height:40px;width:auto}
 .logo .mark{width:30px;height:30px;flex:none}
+.doc section>h3{margin-top:22px}
