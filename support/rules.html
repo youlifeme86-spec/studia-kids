@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Press+Start+2P&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=2026.11.26-1632">
-<script src="../game-data.js?v=2026.11.26-1632"></script>
+<link rel="stylesheet" href="style.css?v=2026.11.26-1635">
+<script src="../game-data.js?v=2026.11.26-1635"></script>
 </head>
 <body data-page="rules">
 
@@ -25,6 +25,7 @@
     <b>목차</b>
     <a href="#kingdoms">9대 왕국</a>
     <a href="#flow">점수가 보스에게 가는 길</a>
+    <a href="#partner">알·방패</a>
     <a href="#winter">겨울 이벤트</a>
     <a href="#bosses">과목 보스</a>
     <a href="#raids">레이드와 히든보스</a>
@@ -79,6 +80,9 @@
       <p>올클리어·연속 보너스와 과목을 고르지 않은 선생님 추가 포인트는 레이드와 히든보스에만 들어가요. 거짓 체크 감점은 레이드와 히든보스 데미지에서 빠져요.</p>
       <div class="tip"><b>랭킹 점수와는 따로예요</b> 랭킹의 월간 점수는 매달 1일 0점부터 다시 시작하지만, 누적 레벨·도감·칭호 같은 기록은 그대로 남아요.</div>
     </section>
+    <section id="partner"><h2>알 부화 · 파트너 · 방패</h2>
+      <p>알은 고른 날부터 랭킹 원점수로 자라요: 30점 1차 부화 → 150점 2차 성장 → 300점 최종 각성. 파트너는 1마리만 장착하고, 장착한 파트너의 능력만 켜져요(왕국 능력과 같이 적용). 불꽃 크리 +5/8/10%, 비취 방패 4일마다(2차부터 콤보 +5%), 심해 약점 과목 +20/30/40%, 성운 골든타임 +15/25/30%.</p>
+      <p>스트릭 방패: 5일 연속 출석마다 1개(최대 2개). 체크 없는 날 자동으로 1개 써서 연속 기록을 지키고 그날 보스 반격(3%)도 막아요. 최소 시동 퀘스트("문제 1개만")는 5 데미지 + 출석 인정, 랭킹 점수는 0점이에요.</p></section>
     <section id="winter"><h2>❄ 겨울 이벤트 (2026년 첫 겨울)</h2>
       <p class="small muted">왕국이 처음 열린 기념으로, 크리스마스 전에 보스를 쓰러뜨리는 경험을 해 보자! 1월부터는 원래 규칙으로 새로 시작해요.</p>
       <div class="tbl"><table><thead><tr><th>보스</th><th>이벤트 규칙</th><th>보통 속도(하루 15~20점)면</th></tr></thead><tbody>
@@ -103,7 +107,7 @@
   </div>
 </div>
 
-<script src="site.js?v=2026.11.26-1632"></script>
+<script src="site.js?v=2026.11.26-1635"></script>
 <script>
 (function(){const e=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 document.getElementById('kd').innerHTML='<div class="tbl"><table><thead><tr><th>권역</th><th>왕국</th><th>힘</th></tr></thead><tbody>'+Object.keys(SK.KINGDOMS).map(k=>{const K=SK.KINGDOMS[k];return '<tr><td>'+e(K.zn)+'</td><td><b style="color:'+K.c+'">'+e(K.n)+'</b></td><td>['+e(K.p)+'] '+e(K.d)+'</td></tr>'}).join('')+'</tbody></table></div>';
