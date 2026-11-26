@@ -7,10 +7,10 @@
 <title>스터디아 키즈 선생님</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap">
-<script>window.PAGE_VERSION='2026.11.26-1255';/* 옛 화면이 캐시에 남아 있으면 새 버전으로 한 번 다시 불러와요 */
+<script>window.PAGE_VERSION='2026.11.26-1256';/* 옛 화면이 캐시에 남아 있으면 새 버전으로 한 번 다시 불러와요 */
 (function(){fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(v){if(!v||!v.version||v.version===window.PAGE_VERSION)return;var k='sk-reload-'+v.version;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1')}catch(e){return}var u=new URL(location.href);u.searchParams.set('v',v.version);location.replace(u.toString())}).catch(function(){})})();</script>
-<script src="config.js?v=2026.11.26-1255"></script>
-<script src="game-data.js?v=2026.11.26-1255"></script>
+<script src="config.js?v=2026.11.26-1256"></script>
+<script src="game-data.js?v=2026.11.26-1256"></script>
 <style>
 :root{--bg:#FBF4E6;--paper:#FFFDF8;--ink:#3A2C22;--muted:#8A7766;--line:#EADFCB;--accent:#F08A4B;--soft:#FDE6D3;--good:#3E9B6B;--bad:#D2504A;--purple:#7A4FD0;
   --f-display:'Jua',system-ui,sans-serif;--f-body:'Noto Sans KR',system-ui,-apple-system,sans-serif;--shadow:0 2px 0 rgba(90,60,30,.06),0 8px 24px rgba(90,60,30,.05)}
@@ -95,7 +95,7 @@ function fmt(k){const d=parse(k);return (d.getMonth()+1)+'/'+d.getDate()+'('+'�
 function ago(iso){if(!iso)return '-';const t=new Date(iso);if(isNaN(t))return '-';const m=Math.round((Date.now()-t)/60000);if(m<1)return '방금';if(m<60)return m+'분 전';if(m<1440)return Math.round(m/60)+'시간 전';return Math.round(m/1440)+'일 전'}
 function sumRange(daily,from,to,f){let s=0;Object.keys(daily||{}).forEach(k=>{if(k>=from&&k<=to)s+=(daily[k][f||'r']||0)});return s}
 
-function studentLinkText(s,pw){return `[스터디아 왕국] 입장 안내\n\n접속 주소: ${BASE}\n아이디: ${s.id}\n비밀번호: ${pw||'(선생님께 받은 비밀번호)'}\n\n처음 들어가면 성향 테스트로 왕국을 정하고 동물 캐릭터를 만들어요. 홈 화면에 추가해 두면 앱처럼 쓸 수 있어요.\n공부 체크는 매일 밤 12시까지예요.`}
+function studentLinkText(s,pw){return `[스터디아 왕국] 입장 안내\n\n접속 주소: ${BASE}\n이름: ${s.name||''}\n아이디: ${s.id}\n비밀번호: ${pw||'(선생님께 받은 비밀번호)'}\n\n처음 들어가면 성향 테스트로 왕국을 정하고 동물 캐릭터를 만들어요. 홈 화면에 추가해 두면 앱처럼 쓸 수 있어요.\n공부 체크는 매일 밤 12시까지예요.`}
 function parentLink(s){return BASE+'#parent-'+s.parentCode}
 
 function render(){
