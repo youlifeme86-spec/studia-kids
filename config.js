@@ -4,5 +4,5 @@
  * 비워 두면 학생 화면이 이 기기에만 저장되는 체험 모드로 열려요.
  */
 window.RR_CONFIG = {
-  API_URL: ''
+  API_URL: 'https://script.google.com/macros/s/AKfycbzsF5_824bB06YlA-jiiytvE3VbYUXGLizUvGIv1j5qzvG0CcjZzHWny1GB5CFbZ2MWLQ/exec'
 };
