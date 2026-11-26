@@ -15,11 +15,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="스터디아 키즈">
-<script src="config.js?v=2026.11.26-1641"></script>
-<script src="game-data.js?v=2026.11.26-1641"></script>
-<script src="sound.js?v=2026.11.26-1641"></script>
+<script src="config.js?v=2026.11.26-1644"></script>
+<script src="game-data.js?v=2026.11.26-1644"></script>
+<script src="sound.js?v=2026.11.26-1644"></script>
 <script>
-window.RR_VERSION='2026.11.26-1641';
+window.RR_VERSION='2026.11.26-1644';
 /* 실시간 오류 기록: 학생 폰에서 난 오류를 구글 시트 [오류] 탭으로 보냄 */
 (function(){var n=0;window.RR_REPORT=function(msg,stack,extra){try{var C=window.RR_CONFIG||{};if(!C.API_URL||n>=8)return;n++;var a=null;try{a=JSON.parse(localStorage.getItem('sk-auth-v1')||'null')}catch(e){}
 fetch(C.API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},keepalive:true,body:JSON.stringify({action:'logError',token:a&&a.token||'',msg:String(msg||'').slice(0,1000),stack:String(stack||'').slice(0,3000),page:location.pathname+(location.hash.indexOf('#parent')===0?' (학부모)':''),tab:(window.RR_TAB||'')+(extra?' '+extra:''),ver:window.RR_VERSION||'',ua:navigator.userAgent.slice(0,300)})}).catch(function(){})}catch(e){}};
@@ -285,6 +285,7 @@ img.px,canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 @keyframes drift{from{transform:translateX(-140px)}to{transform:translateX(480px)}}
 .tw{position:absolute;animation:twinkle 1.6s steps(2) infinite}
 @keyframes twinkle{50%{transform:translateY(-4px)}}
+.lvrow{display:flex;gap:6px;margin:2px 0 8px}.lvp{flex:1;text-align:center;padding:3px 0;border:2px solid #F6E3B4;font-family:var(--f-display);font-size:13px;opacity:.5}.lvp.now{opacity:1;background:#F6E3B4;color:#22183A}.lvp.done{opacity:1;background:#7A4FD0;border-color:#7A4FD0}
 .dex{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.dexc{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 6px;border:3px solid #2B1D16;background:#FFF6DC;font:inherit;color:#2B1D16;text-align:center;cursor:pointer}
 .dexc.on{background:#FFE9A8;box-shadow:inset 0 0 0 3px #F7C531}.dexc.off{background:#EFE7D6;cursor:default}
 .eggpick{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.egp{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 6px;border:3px solid #2B1D16;background:#FFF6DC;font:inherit;color:#2B1D16;text-align:center;cursor:pointer}.egp.on{background:#FFE9A8;box-shadow:inset 0 0 0 3px #F26B1D}
@@ -469,7 +470,7 @@ function shieldState(st){st=st||S;const t=TODAY(),SH=SK.SHIELD||{every:0,max:0};
   return {n,shields:sh,used,got}}
 function streak(st){return shieldState(st).n}
 /* ---------- 알 부화 ---------- */
-function eggXp(e,st){st=st||S;const cw=Object.keys(st.coopWins||{}).filter(w=>SK.addDays(w,6)>=e.start).length*((SK.COOP&&SK.COOP.egg)||0);return cw+Object.keys(st.logs||{}).filter(k=>k>=e.start).reduce((a,k)=>a+dayScoreOf(st,k).raw,0)}
+function eggXp(e,st){st=st||S;const cw=Object.entries(st.coopWins||{}).filter(([w])=>SK.addDays(w.slice(0,10),6)>=e.start).reduce((a,[w,v])=>a+(v===1?((SK.COOP&&SK.COOP.egg)||0):(+v||0)),0);return cw+Object.keys(st.logs||{}).filter(k=>k>=e.start).reduce((a,k)=>a+dayScoreOf(st,k).raw,0)}
 function eggStage(xp){let n=0;SK.EGG_STAGES.forEach(t=>{if(xp>=t)n++});return n}
 function eggList(st){st=st||S;return (st.eggs||[]).map(e=>{const xp=eggXp(e,st);return {...e,xp,stage:eggStage(xp)}})}
 function incubating(st){return eggList(st).find(e=>e.stage<SK.EGG_STAGES.length)||null}
@@ -904,7 +905,7 @@ function renderToday(){
   L.q.forEach((q,i)=>{h+=questRow(q,i,L,k)});
   h+=`<div class="quest ${L.life.clean?'done':''}"><span class="dot" style="background:var(--gold)"></span><div class="body"><div class="t">${ACT.clean.n}</div><div class="tiny muted">+1점 · 궁극기 게이지 +20%</div></div><button class="check" data-life="clean" ${closed?'disabled':''}>${L.life.clean?'✓':'완료'}</button></div></div>`;
   {const SS=shieldState();const showMini=SK.MINI&&(!hasStudy(L)||L.life.mini);
-   {const ce=SK.coopEvent&&SK.coopEvent([],k,SK.seoulHour());if(ce&&!ce.over)h+=`<button class="card evcard" id="coopc" type="button" style="background:#22183A;color:#F6E3B4;border-color:#22183A"><b>${ce.soon?'🌙 깜짝 협동 이벤트 예고':'🌙 지금 반 협동 이벤트 진행 중!'}</b><div class="tiny">${fmt(ce.ev.day)} 밤 ${ce.ev.from-12}시~12시 · ${esc(ce.ev.n)} · 눌러서 보기</div></button>`}
+   {const ce=SK.coopEvent&&SK.coopEvent([],k,SK.seoulHour());if(ce&&!ce.over)h+=`<button class="card evcard" id="coopc" type="button" style="background:#22183A;color:#F6E3B4;border-color:#22183A"><b>${ce.soon?'🌙 깜짝 협동 이벤트 예고':'🌙 지금 반 협동 이벤트 진행 중!'}</b><div class="tiny">${fmt(ce.ev.day)} 밤 ${ce.ev.from-12}시~12시 · 그림자 군단 Lv.1~${ce.ev.levels.length} · 눌러서 보기</div></button>`}
    {const E=incubating(),P=partner();h+=`<button class="card evcard" id="eggc" type="button" style="background:linear-gradient(180deg,#FFF3D6,#fff)"><div class="row" style="gap:10px">${E?`<span class="${E.stage?'':'eggwob'}" data-spr="${E.stage?'pet_'+E.id:'egg_'+E.id}" data-sc="3"></span><div style="flex:1"><b>${E.stage?esc(petName(E))+' 키우는 중':esc(SK.EGGS[E.id].egg)+' 품는 중'}</b><div class="tiny">${E.xp}점 · ${SK.EGG_STAGES.find(t=>E.xp<t)-E.xp}점 더 하면 ${['부화','2차 성장','최종 각성'][E.stage]}!</div></div>`:`<span data-spr="egg_fire" data-sc="3"></span><div style="flex:1"><b>${P?'새 알을 품어 볼까?':'알을 골라 품어 봐!'}</b><div class="tiny">공부 점수 30점이면 부화해서 내 옆에 따라다녀요</div></div>`}</div></button>`}
    h+=`<div class="card shcard"><div class="row between"><b>🛡 스트릭 방패 ${'🛡'.repeat(SS.shields)}${'<span style="opacity:.25">🛡</span>'.repeat(Math.max(0,SK.SHIELD.max-SS.shields))}</b><span class="small">연속 <b>${SS.n}</b>일</span></div>
      ${(()=>{const ev=petBuf('leaf')||SK.SHIELD.every;return `<p class="tiny muted">${ev}일 연속 출석마다 방패 1개 (최대 ${SK.SHIELD.max}개)${petBuf('leaf')?' · 비취알 파트너 효과':''}. 못 한 날엔 방패가 자동으로 연속 기록을 지키고 보스 반격도 막아 줘요. 다음 방패까지 ${SS.shields>=SK.SHIELD.max?'가득 찼어요!':(ev-SS.n%ev)+'일'}</p>`})()}
@@ -1192,16 +1193,18 @@ function renderRank(){
 /* ---------- 반 협동 주간 레이드 ---------- */
 function coopNow(){if(!SK.coop||!S.char)return null;const me=MODE_DB?UID:'me';return {R:SK.coop(roster().map(x=>({id:x.id,name:x.d.char?x.d.char.name:x.id,daily:x.d.daily||{}})),TODAY()),me}}
 function coopEventHTML(){if(!SK.coopEvent||!S.char)return '';const me=MODE_DB?UID:'me';const R=SK.coopEvent(roster().map(x=>({id:x.id,name:x.d.char?x.d.char.name:x.id,daily:x.d.daily||{}})),TODAY(),SK.seoulHour());if(!R)return '';const E=R.ev;
-  if(R.soon)return `<div class="card coop" style="background:#22183A;color:#F6E3B4"><div class="row" style="gap:12px"><span data-spr="${E.spr}" data-sc="3" style="filter:brightness(.3)"></span><div><b>깜짝 협동 이벤트 예고!</b><p class="small">${fmt(E.day)} 밤 ${E.from-12}시, 반 친구 모두 함께 [${esc(E.n)}]와 싸워요. 그날 한 체크 데미지가 문이 열리는 순간 한꺼번에 들어가고, 밤 12시까지 더 체크하면 더 들어가요!</p></div></div></div>`;
+  const LV=E.levels,last=LV[LV.length-1];
+  if(R.soon)return `<div class="card coop" style="background:#22183A;color:#F6E3B4"><div class="row" style="gap:12px"><span data-spr="${last.spr}" data-sc="3" style="filter:brightness(.3)"></span><div><b>깜짝 협동 이벤트 예고!</b><p class="small">${fmt(E.day)} 밤 ${E.from-12}시, 반 친구 모두 함께 그림자 군단 ${LV.length}단계와 싸워요. ${fmt(E.since||E.day)}부터 그날 밤 10시까지 한 체크 데미지가 문이 열리는 순간 한꺼번에 들어가고, 밤 12시까지 더 체크하면 더 들어가요! 지금부터 열심히 모아 두자!</p></div></div></div>`;
   const mine=R.per.find(p=>p.id===me)||{dm:0};
-  if(R.dead&&mine.dm>0&&!(S.coopWins||{})[E.day]){(S.coopWins=S.coopWins||{})[E.day]=1;save();setTimeout(()=>toast(`${E.n} 처치! 알 부화 가속 +${SK.COOP.egg}점`),600)}
+  if(mine.dm>0){let got=0;R.levels.slice(0,R.cleared).forEach(l=>{const key=E.day+'#'+l.lv;if(!(S.coopWins||{})[key]){(S.coopWins=S.coopWins||{})[key]=l.egg;got+=l.egg}});if(got){save();setTimeout(()=>toast(`${R.cleared}단계 처치! 알 부화 가속 +${got}점`),600)}}
   return `<div class="card coop" style="background:#22183A;color:#F6E3B4"><div class="row between"><h3>깜짝 협동 이벤트</h3><span class="pill">${fmt(E.day)} 밤 ${E.from-12}~12시</span></div>
-   <div class="row" style="gap:12px"><span data-spr="${E.spr}" data-sc="3" style="${R.dead?'opacity:.3;filter:grayscale(1)':''}"></span><div style="flex:1;min-width:0"><b>${esc(E.n)}</b>
-   <div class="bar hid"><i style="width:${pctOf(R.left,R.hp)}%"></i></div><p class="tiny">${R.dead?'<b>처치 완료! 우리 반 승리!</b>':R.over?'아쉽게 놓쳤어요. 12월 협동 레이드에서 다시!':`HP ${fmtN(R.left)} / ${fmtN(R.hp)} · 밤 12시까지!`} · 친구 ${R.per.filter(p=>p.dm>0).length}/${R.kids}명 참여</p></div></div>
+   <div class="lvrow">${R.levels.map(l=>`<span class="lvp ${R.cleared>=l.lv?'done':R.cur.lv===l.lv?'now':''}">Lv.${l.lv}${R.cleared>=l.lv?' ✓':''}</span>`).join('')}</div>
+   <div class="row" style="gap:12px"><span data-spr="${R.cur.spr}" data-sc="3" style="${R.all?'opacity:.3;filter:grayscale(1)':''}"></span><div style="flex:1;min-width:0"><b>Lv.${R.cur.lv} ${esc(R.cur.n)}</b>
+   <div class="bar hid"><i style="width:${pctOf(R.left,R.cur.hp)}%"></i></div><p class="tiny">${R.all?'<b>3단계 모두 처치! 우리 반 대승리!</b>':R.over?`${R.cleared}단계까지 처치했어요. 12월 협동 레이드에서 다시!`:`HP ${fmtN(R.left)} / ${fmtN(R.cur.hp)} · 밤 12시까지!`} · 친구 ${R.per.filter(p=>p.dm>0).length}/${R.kids}명 참여</p></div></div>
    <p class="small">내 데미지 <b>${fmtN(mine.dm)}</b>${R.top?` · 🏆 최다 딜러 ${esc(R.top.name)}`:''}</p>
-   <p class="tiny" style="opacity:.8">그날 체크한 데미지가 모두 들어가요. 과목 보스·레이드·히든보스에서 빠지지 않고 똑같이 같이 들어가요. 처치하면 참여한 친구 모두 알 부화 가속 +${SK.COOP.egg}점!</p></div>`}
+   <p class="tiny" style="opacity:.8">${fmt(E.since||E.day)}부터 한 체크 데미지가 모두 들어가요. 단계를 쓰러뜨리면 바로 다음 단계가 나오고, 넘친 데미지는 다음 단계로 이어져요. 처치 보상(참여한 친구 모두 알 부화 가속): ${R.levels.map(l=>`Lv.${l.lv} +${l.egg}`).join(' · ')}점. 과목 보스·레이드·히든보스에서 빠지지 않고 똑같이 같이 들어가요.</p></div>`}
 function coopHTML(){const c=coopNow();if(!c||!c.R)return '';const R=c.R,mine=R.per.find(p=>p.id===c.me)||{dm:0};
-  if(R.dead&&mine.dm>0&&!(S.coopWins||{})[R.ws]){(S.coopWins=S.coopWins||{})[R.ws]=1;save();setTimeout(()=>toast(`반 협동 레이드 처치! 알 부화 가속 +${SK.COOP.egg}점`),600)}
+  if(R.dead&&mine.dm>0&&!(S.coopWins||{})[R.ws]){(S.coopWins=S.coopWins||{})[R.ws]=SK.COOP.egg;save();setTimeout(()=>toast(`반 협동 레이드 처치! 알 부화 가속 +${SK.COOP.egg}점`),600)}
   return `<div class="card coop"><div class="row between"><h3>우리 반 협동 레이드</h3><span class="pill">${fmt(R.from)}~${fmt(R.to)}</span></div>
    <div class="row" style="gap:12px"><span data-spr="${R.boss.spr}" data-sc="3" style="${R.dead?'opacity:.3;filter:grayscale(1)':''}"></span><div style="flex:1;min-width:0"><b>${esc(R.boss.n)}</b>
    <div class="bar"><i style="width:${pctOf(R.left,R.hp)}%"></i></div><p class="tiny">${R.dead?`<b>처치 완료!</b> (${fmt(R.killDay)})`:`HP ${fmtN(R.left)} / ${fmtN(R.hp)}`} · 친구 ${R.kids}명이 함께 때리는 중</p></div></div>

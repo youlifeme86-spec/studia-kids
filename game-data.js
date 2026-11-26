@@ -288,8 +288,12 @@ window.SK=SK;
  * 체력 = 캐릭터 있는 학생 수(최소 minKids) × perKid. 처치하면 그 주에 참여한 친구 알 부화 가속 +egg점.
  * 상: 최다 딜러(그 주 데미지 1등), 매일 출석상(그 주 지난 날 매일 체크), 결정적 막타(처치한 날 가장 많이 때린 친구) */
 SK.COOP={start:'2026-12-01',perKid:800,minKids:3,egg:10,
-  /* 깜짝 협동 이벤트: day 날 from시에 문이 열리고, 그날 반 전체 데미지(열리기 전에 한 체크 포함)로 to시(=마감)까지 처치 */
-  events:[{day:'2026-11-28',from:22,to:24,n:'개국 전야 그림자 대왕',spr:'hidden',perKid:200,showUntil:'2026-11-30'}],
+  /* 깜짝 협동 이벤트: day 날 from시에 문이 열리고, since~day 반 전체 데미지(열리기 전에 한 체크 포함)로 to시(=마감)까지 처치 */
+  /* levels: 앞 단계를 쓰러뜨리면 다음 단계가 나와요. 넘친 데미지는 다음 단계로 이어져요. perKid = 학생 1명당 체력, egg = 그 단계 처치 보상(알 가속 점수) */
+  events:[{day:'2026-11-28',since:'2026-11-26',from:22,to:24,showUntil:'2026-11-30',levels:[
+    {n:'그림자 졸개 대장',spr:'autumn',perKid:40,egg:10},
+    {n:'그림자 얼음 기사',spr:'icedragon',perKid:60,egg:15},
+    {n:'개국 전야 그림자 대왕',spr:'hidden',perKid:80,egg:25}]}],
   bosses:[{n:'숙제 먹는 구름 거인',spr:'sleepy'},{n:'딴짓 유령 군단',spr:'autumn'},{n:'게으름 눈보라 골렘',spr:'winter'},{n:'핑계 대장 꽃마녀',spr:'spring'},{n:'스마트폰 블랙홀 드래곤',spr:'icedragon'},{n:'졸음 아이스크림 왕',spr:'summer'}]};
 /* students: [{id, name, daily:{'YYYY-MM-DD':{dm,r}}}] */
 SK.coop=function(students,today){const C=SK.COOP;if(!C||today<C.start)return null;const ws=SK.weekKey(today),from=ws<C.start?C.start:ws,to=SK.addDays(ws,6);
@@ -304,6 +308,9 @@ SK.coop=function(students,today){const C=SK.COOP;if(!C||today<C.start)return nul
 /* 깜짝 협동 이벤트 상태. 열리기 전이면 {soon:true} */
 SK.coopEvent=function(students,today,hour){const C=SK.COOP;if(!C||!C.events)return null;const E=C.events.find(e=>today>=SK.addDays(e.day,-1)&&today<=(e.showUntil||e.day));if(!E)return null;
   if(today<E.day||(today===E.day&&hour<E.from))return {ev:E,soon:true};
-  const kids=students.filter(s=>s.daily);const hp=Math.max(C.minKids,kids.length)*E.perKid;const dmOf=s=>Math.max(0,(s.daily[E.day]&&s.daily[E.day].dm)||0);
+  const kids=students.filter(s=>s.daily);const n=Math.max(C.minKids,kids.length);const dmOf=s=>Object.keys(s.daily).reduce((a,k)=>a+(k>=(E.since||E.day)&&k<=E.day?Math.max(0,s.daily[k].dm||0):0),0);
   const per=kids.map(s=>({id:s.id,name:s.name,dm:dmOf(s)})).sort((a,b)=>b.dm-a.dm);const dmg=per.reduce((a,p)=>a+p.dm,0);
-  return {ev:E,boss:{n:E.n,spr:E.spr},ws:E.day,from:E.day,to:E.day,hp,dmg,left:Math.max(0,hp-dmg),dead:dmg>=hp,killDay:dmg>=hp?E.day:null,per,top:per[0]&&per[0].dm>0?per[0]:null,lastHit:null,daily:[],kids:kids.length,over:today>E.day,live:today===E.day}};
+  let cum=0,lv=0,base=0;const L=E.levels.map((l,i)=>{const hp=n*l.perKid;const r={...l,lv:i+1,hp,start:cum};cum+=hp;return r});
+  const cleared=L.filter(l=>dmg>=l.start+l.hp).length;const cur=L[Math.min(cleared,L.length-1)];const all=cleared>=L.length;
+  const left=all?0:Math.max(0,cur.start+cur.hp-dmg);
+  return {ev:E,levels:L,cleared,cur,all,boss:{n:cur.n,spr:cur.spr},ws:E.day,from:E.day,to:E.day,hp:cur.hp,dmg,left,dead:all,per,top:per[0]&&per[0].dm>0?per[0]:null,lastHit:null,daily:[],kids:kids.length,over:today>E.day,live:today===E.day}};
