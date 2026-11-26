@@ -12,11 +12,11 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="스터디아 키즈">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%2346B1D8'/%3E%3Crect x='3' y='9' width='10' height='4' fill='%237CC242'/%3E%3Crect x='6' y='3' width='4' height='6' fill='%23E2453C'/%3E%3C/svg%3E">
-<script src="config.js?v=2026.11.26-1205"></script>
-<script src="game-data.js?v=2026.11.26-1205"></script>
-<script src="sound.js?v=2026.11.26-1205"></script>
+<script src="config.js?v=2026.11.26-1209"></script>
+<script src="game-data.js?v=2026.11.26-1209"></script>
+<script src="sound.js?v=2026.11.26-1209"></script>
 <script>
-window.RR_VERSION='2026.11.26-1205';
+window.RR_VERSION='2026.11.26-1209';
 /* 실시간 오류 기록: 학생 폰에서 난 오류를 구글 시트 [오류] 탭으로 보냄 */
 (function(){var n=0;window.RR_REPORT=function(msg,stack,extra){try{var C=window.RR_CONFIG||{};if(!C.API_URL||n>=8)return;n++;var a=null;try{a=JSON.parse(localStorage.getItem('sk-auth-v1')||'null')}catch(e){}
 fetch(C.API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},keepalive:true,body:JSON.stringify({action:'logError',token:a&&a.token||'',msg:String(msg||'').slice(0,1000),stack:String(stack||'').slice(0,3000),page:location.pathname+(location.hash.indexOf('#parent')===0?' (학부모)':''),tab:(window.RR_TAB||'')+(extra?' '+extra:''),ver:window.RR_VERSION||'',ua:navigator.userAgent.slice(0,300)})}).catch(function(){})}catch(e){}};
@@ -448,7 +448,7 @@ function lateFrac(from,to,st,preview){if(!preview&&!giftOn(st||S))return 0;const
 function monthEnd(mk){return ymd(+mk.slice(0,4),+mk.slice(5,7)+1,0)}
 /* 선물상자 안에 든 축복 미리 보기 (아직 안 받았어도 계산) */
 function giftPreview(){const mk=monthKeyOf(TODAY()),start=mk+'-01',end=monthEnd(mk);const out={boss:[],raid:null,hidden:0};
-  const bf=lateFrac(start,end,S,true)*(SK.LATE.boss||0)/100;if(bf>0)SUBJ_KEYS.forEach(x=>out.boss.push([x,Math.round(SUBJ[x].hp*bf)]));
+  const bf=giftBossFrac(mk,S,true)*(SK.LATE.boss||0)/100;if(bf>0)SUBJ_KEYS.forEach(x=>out.boss.push([x,Math.round(SUBJ[x].hp*bf)]));
   const all=RAIDS.map(r=>raidInst(r));const I=all.find(x=>x.open)||all.sort((a,b)=>a.openStart<b.openStart?-1:1)[0];
   const rc=Math.round(I.cap*lateFrac(I.accStart,addDays(I.openStart,-1),S,true)*(SK.LATE.raid||0)/100);if(rc>0)out.raid={n:I.r.n,id:I.r.id,v:rc,open:I.openStart};
   const t=TODAY(),y=+t.slice(0,4),m=+t.slice(5,7);const hs=ymd(m>=3?y:y-1,3,1);out.hidden=Math.round(HIDDEN.hp*lateFrac(hs,addDays(ymd(m>=3?y+1:y,3,1),-1),S,true)*(SK.LATE.hidden||0)/100);
@@ -470,8 +470,10 @@ function giftModal(){const G=giftPreview();const m=document.createElement('div')
     m.querySelector('.card').innerHTML=`<h2 style="text-align:center">축복을 받았어!</h2><div class="row" style="justify-content:center"><span data-spr="star" data-sc="7"></span></div><p style="text-align:center">보스들이 벌써 비틀거려. 오늘 체크로 마무리하자!</p><button class="btn" id="go">보스 보러 가기</button>`;
     hydrate(m);m.querySelector('#go').onclick=()=>{m.remove();UI.tab='boss';render()}}}
 /* 과목 보스 한 달 흐름: 축복으로 미리 깎고 → 날마다 데미지, 체크 없는 날은 반격(회복). 쓰러지면 끝 */
+function giftBossFrac(mk,st,preview){st=st||S;const J=joinDay(st);if(!J)return 0;const jm=monthKeyOf(J);const jf=lateFrac(jm+'-01',monthEnd(jm),st,preview);
+  if(mk===jm)return jf;const cm=preview?monthKeyOf(TODAY()):(st.gift&&st.gift.at?monthKeyOf(st.gift.at):'');return mk===cm&&mk>jm?jf:0}
 function bossState(s,mk,st){st=st||S;const hp=SUBJ[s].hp,start=mk+'-01',end=monthEnd(mk),today=TODAY();
-  const late=Math.round(hp*lateFrac(start,end,st)*(SK.LATE.boss||0)/100);let left=Math.max(0,hp-late),heal=0,healDays=[];const J=joinDay(st);
+  const late=Math.round(hp*giftBossFrac(mk,st)*(SK.LATE.boss||0)/100);let left=Math.max(0,hp-late),heal=0,healDays=[];const J=joinDay(st);
   const maxHeal=Math.round(hp*(SK.REGEN.maxPct||0)/100);
   for(let k=start;k<=end&&k<=today;k=addDays(k,1)){
     if(left<=0)break;left=Math.max(0,left-dayBossDmg(st,k,s));
@@ -624,6 +626,7 @@ function damageFor(q,L,k){
   if(kd==='ukk'&&!L.q.some(x=>x.done&&x!==q)&&![1,2,3].some(i=>hasDone(S.logs[addDays(k,-i)]))&&Object.keys(S.logs).some(d=>d<addDays(k,-3)&&hasDone(S.logs[d]))){bonus+=50;why.push('다시 일어나기 +50%')}
   const pot=S.potion[k];if(pot&&pot.until>Date.now()){bonus+=15;why.push('힘내기 물약 +15%')}
   if(blessActive()){bonus+=BLESS_PCT;why.push('마스터의 가호 +'+BLESS_PCT+'%')}
+  if(SK.EARLY.pct&&SK.seoulHour()<SK.EARLY.hour){bonus+=SK.EARLY.pct;why.push('밤 '+(SK.EARLY.hour-12)+'시 전 +'+SK.EARLY.pct+'%')}
   bonus=Math.min(100,bonus);
   let mult=(1+bonus/100)*crit;
   if(S.gauge>=100){mult*=3;S.gauge=0;why.push('궁극기 ×3')}

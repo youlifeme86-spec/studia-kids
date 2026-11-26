@@ -144,6 +144,10 @@ SK.LATE={boss:100,raid:75,hidden:100};
  * 가입한 뒤 체크를 하나도 안 한 날마다 그달 과목 보스가 최대 체력의 pct% 회복해요 (한 달 합계 maxPct%까지).
  * 이미 쓰러뜨린 보스는 회복하지 않아요. 점수는 깎이지 않아요. pct를 0으로 하면 꺼져요. */
 SK.REGEN={pct:3,maxPct:15};
+/* ---------- 일찍 끝낸 용사 ----------
+ * 서울 시각으로 hour시 전에 체크하면 그 공격 데미지 +pct%. (랭킹 점수는 그대로) pct를 0으로 하면 꺼져요. */
+SK.EARLY={hour:22,pct:1};
+SK.seoulHour=function(t){try{const h=+new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Seoul',hour:'numeric',hourCycle:'h23'}).format(t?new Date(t):new Date());return isNaN(h)?(t?new Date(t):new Date()).getHours():h%24}catch(e){return (t?new Date(t):new Date()).getHours()}};
 
 
 /* ---------- 마음 체크 8칸 ---------- */
