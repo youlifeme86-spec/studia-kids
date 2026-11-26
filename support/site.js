@@ -20,17 +20,34 @@
 
   var head = document.createElement('header');
   head.className = 'top';
-  head.innerHTML = '<div class="wrap"><a class="logo" href="index.html">'+mark+'<span>스터디아 왕국 키즈 <small>지원센터</small></span></a>'+
+  head.innerHTML = '<div class="wrap"><a class="logo" href="index.html">'+(window.SK?'<span class="mk" data-spr="logo" data-sc="2"></span>':mark)+'<span>스터디아 왕국 키즈<small>HELP</small></span></a>'+
     '<nav class="menu" id="menu" aria-label="주 메뉴">'+MENU.map(function(m){return '<a href="'+m[1]+'"'+(m[0]===page?' aria-current="page"':'')+'>'+m[2]+'</a>'}).join('')+'</nav>'+
     '<button class="iconbtn" id="menuBtn" aria-label="메뉴 열기" aria-expanded="false" aria-controls="menu">'+burger+'</button>'+
     '<button class="iconbtn" id="themeBtn" aria-label="밝게·어둡게 바꾸기"></button></div>';
   document.body.insertBefore(head, document.body.firstChild);
 
   var foot = document.createElement('footer');
-  foot.innerHTML = '<div class="wrap"><div><b style="color:var(--ink)">스터디아 왕국 키즈 지원센터</b><br>초등 1~6학년 · 공부가 모험이 되는 곳</div>'+
+  foot.innerHTML = '<div class="wrap"><div><b>스터디아 왕국 키즈 지원센터</b><br>초등 1~6학년 · 공부가 모험이 되는 곳</div>'+
     '<nav aria-label="바로 가기"><a href="'+APP+'">스터디아 입장</a><a href="'+APP+'rank.html">랭킹</a><a href="student.html">학생 가이드</a><a href="parent.html">보호자 안내</a><a href="faq.html">자주 묻는 질문</a></nav>'+
     '<div class="tiny" style="flex-basis:100%">아이디·비밀번호·보호자 링크는 이 사이트에 없어요. 선생님께 직접 받아 주세요. 다른 사람에게 보내지 마세요.</div></div>';
   document.body.appendChild(foot);
+
+
+  /* 페이지 머리 꾸미기: 구름 + 페이지마다 다른 캐릭터 */
+  var DECO = {
+    student:'<span class="bob" data-hero data-a="rabbit" data-c="#9B4DFF" data-j="마법사" data-sc="5"></span><span data-spr="m" data-sc="5"></span>',
+    rules:'<span class="bob" data-spr="chest" data-sc="7"></span><span data-spr="k" data-sc="5"></span>',
+    parent:'<span data-hero data-a="bear" data-c="#2E9E6B" data-j="" data-sc="5"></span><span class="bob" data-spr="owl" data-sc="5"></span>',
+    faq:'<span class="bob" data-hero data-a="cat" data-c="#FF7A2F" data-j="탐험가" data-sc="5"></span><span data-spr="star" data-sc="5"></span>',
+    admin:'<span data-hero data-a="dog" data-c="#4FA9E8" data-j="기사" data-sc="5"></span><span class="bob" data-spr="sword" data-sc="6"></span>'
+  };
+  var ph = document.querySelector('.page-hero');
+  if (ph && window.SK) {
+    ph.insertAdjacentHTML('afterbegin','<span class="cl" style="top:14px;left:0" data-spr="cloud" data-sc="4"></span><span class="cl c2" style="top:70px;left:0" data-spr="cloud" data-sc="3"></span>');
+    var w = ph.querySelector('.wrap');
+    if (DECO[page] && w) w.insertAdjacentHTML('beforeend','<div class="deco" aria-hidden="true">'+DECO[page]+'</div>');
+  }
+  if (window.SK) SK.hydrate(document);
 
   var btn = document.getElementById('menuBtn'), menu = document.getElementById('menu');
   btn.onclick = function(){ var o = menu.classList.toggle('open'); btn.setAttribute('aria-expanded', o); };
