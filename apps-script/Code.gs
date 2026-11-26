@@ -209,7 +209,7 @@ function roster_(b) {
   eachState_(function (id, sum) {
     if (!sum || !sum.char) return;
     var daily = {};
-    Object.keys(sum.daily || {}).forEach(function (k) { if (k >= since) daily[k] = { r: sum.daily[k].r || 0 }; });
+    Object.keys(sum.daily || {}).forEach(function (k) { if (k >= since) daily[k] = { r: sum.daily[k].r || 0, dm: sum.daily[k].dm || 0 }; });  // dm: 반 협동 레이드 합산용
     out[id] = { char: { name: sum.char.name, color: sum.char.color, kingdom: sum.char.kingdom, job: sum.char.job, animal: sum.char.animal || '' }, daily: daily, board: sum.board || null };
   });
   try { cache.put('roster', JSON.stringify(out), 30); } catch (x) {}

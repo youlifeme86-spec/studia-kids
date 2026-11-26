@@ -288,6 +288,8 @@ window.SK=SK;
  * 체력 = 캐릭터 있는 학생 수(최소 minKids) × perKid. 처치하면 그 주에 참여한 친구 알 부화 가속 +egg점.
  * 상: 최다 딜러(그 주 데미지 1등), 매일 출석상(그 주 지난 날 매일 체크), 결정적 막타(처치한 날 가장 많이 때린 친구) */
 SK.COOP={start:'2026-12-01',perKid:800,minKids:3,egg:10,
+  /* 깜짝 협동 이벤트: day 날 from시에 문이 열리고, 그날 반 전체 데미지(열리기 전에 한 체크 포함)로 to시(=마감)까지 처치 */
+  events:[{day:'2026-11-28',from:22,to:24,n:'개국 전야 그림자 대왕',spr:'hidden',perKid:200,showUntil:'2026-11-30'}],
   bosses:[{n:'숙제 먹는 구름 거인',spr:'sleepy'},{n:'딴짓 유령 군단',spr:'autumn'},{n:'게으름 눈보라 골렘',spr:'winter'},{n:'핑계 대장 꽃마녀',spr:'spring'},{n:'스마트폰 블랙홀 드래곤',spr:'icedragon'},{n:'졸음 아이스크림 왕',spr:'summer'}]};
 /* students: [{id, name, daily:{'YYYY-MM-DD':{dm,r}}}] */
 SK.coop=function(students,today){const C=SK.COOP;if(!C||today<C.start)return null;const ws=SK.weekKey(today),from=ws<C.start?C.start:ws,to=SK.addDays(ws,6);
@@ -299,3 +301,9 @@ SK.coop=function(students,today){const C=SK.COOP;if(!C||today<C.start)return nul
   const per=kids.map(s=>({id:s.id,name:s.name,dm:days.reduce((a,k)=>a+dmOf(s,k),0),all:days.length>0&&days.filter(k=>k<today||dmOf(s,k)>0).every(k=>dmOf(s,k)>0)})).sort((a,b)=>b.dm-a.dm);
   const top=per[0]&&per[0].dm>0?per[0]:null;const lastHit=killDay?kids.map(s=>({id:s.id,name:s.name,dm:dmOf(s,killDay)})).sort((a,b)=>b.dm-a.dm)[0]:null;
   return {ws,from,to,boss,hp,dmg:cum,left:Math.max(0,hp-cum),dead:cum>=hp,killDay,per,top,lastHit,daily:per.filter(p=>p.all&&p.dm>0),kids:kids.length}};
+/* 깜짝 협동 이벤트 상태. 열리기 전이면 {soon:true} */
+SK.coopEvent=function(students,today,hour){const C=SK.COOP;if(!C||!C.events)return null;const E=C.events.find(e=>today>=SK.addDays(e.day,-1)&&today<=(e.showUntil||e.day));if(!E)return null;
+  if(today<E.day||(today===E.day&&hour<E.from))return {ev:E,soon:true};
+  const kids=students.filter(s=>s.daily);const hp=Math.max(C.minKids,kids.length)*E.perKid;const dmOf=s=>Math.max(0,(s.daily[E.day]&&s.daily[E.day].dm)||0);
+  const per=kids.map(s=>({id:s.id,name:s.name,dm:dmOf(s)})).sort((a,b)=>b.dm-a.dm);const dmg=per.reduce((a,p)=>a+p.dm,0);
+  return {ev:E,boss:{n:E.n,spr:E.spr},ws:E.day,from:E.day,to:E.day,hp,dmg,left:Math.max(0,hp-dmg),dead:dmg>=hp,killDay:dmg>=hp?E.day:null,per,top:per[0]&&per[0].dm>0?per[0]:null,lastHit:null,daily:[],kids:kids.length,over:today>E.day,live:today===E.day}};

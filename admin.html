@@ -7,10 +7,10 @@
 <title>스터디아 키즈 선생님</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap">
-<script>window.PAGE_VERSION='2026.11.26-1637';/* 옛 화면이 캐시에 남아 있으면 새 버전으로 한 번 다시 불러와요 */
+<script>window.PAGE_VERSION='2026.11.26-1641';/* 옛 화면이 캐시에 남아 있으면 새 버전으로 한 번 다시 불러와요 */
 (function(){fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(v){if(!v||!v.version||v.version===window.PAGE_VERSION)return;var k='sk-reload-'+v.version;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1')}catch(e){return}var u=new URL(location.href);u.searchParams.set('v',v.version);location.replace(u.toString())}).catch(function(){})})();</script>
-<script src="config.js?v=2026.11.26-1637"></script>
-<script src="game-data.js?v=2026.11.26-1637"></script>
+<script src="config.js?v=2026.11.26-1641"></script>
+<script src="game-data.js?v=2026.11.26-1641"></script>
 <style>
 :root{--bg:#FBF4E6;--paper:#FFFDF8;--ink:#3A2C22;--muted:#8A7766;--line:#EADFCB;--accent:#F08A4B;--soft:#FDE6D3;--good:#3E9B6B;--bad:#D2504A;--purple:#7A4FD0;
   --f-display:'Jua',system-ui,sans-serif;--f-body:'Noto Sans KR',system-ui,-apple-system,sans-serif;--shadow:0 2px 0 rgba(90,60,30,.06),0 8px 24px rgba(90,60,30,.05)}
@@ -127,6 +127,11 @@ function render(){
         <td class="r">${e.r||0}</td><td class="r">${sumRange(s.daily,ws,today)}</td><td class="r">${s.monthPts||sumRange(s.daily,ms,today,'raw')} <span class="tiny muted">/300</span></td><td>${e.cell?`<span class="pill ${['불안','무관심','걱정'].includes(e.cell)?'bad':''}">${e.cell}</span>`:'-'}</td>
         <td>${s.bless&&today<=s.bless.until?'<span class="pill p">~'+fmt(s.bless.until)+'</span>':'-'}</td><td>${s.consent?'<span class="tiny">'+esc(String(s.consent).slice(0,10))+'</span>':'<span class="pill bad">없음</span>'}</td><td class="tiny">${ago(s.savedAt)}</td></tr>`}).join('')||'<tr><td colspan="9" class="muted">아직 학생 계정이 없어요. [계정 만들기]에서 만들어 주세요.</td></tr>'}
     </tbody></table></div><p class="tiny muted">[분석 ↗]을 누르면 보호자가 보는 분석 리포트가 새 창으로 열려요. 점수는 랭킹 점수(하루 30점 상한, 연속 보너스·추가 포인트는 따로). 이번 달은 기준치 300점 대비 원점수. 30초마다 자동으로 새로 고침돼요.</p></div>
+    ${(()=>{const ST=stu.filter(x=>x.active&&x.char).map(x=>({id:x.id,name:x.name,daily:x.daily||{}}));const R=SK.coopEvent&&SK.coopEvent(ST,today,SK.seoulHour());if(!R)return '';const E=R.ev;
+      if(R.soon)return `<div class="card"><h2>🌙 깜짝 협동 이벤트 · ${esc(E.n)}</h2><p class="small">${fmt(E.day)} 밤 ${E.from-12}시에 열려요 (밤 12시 마감까지). 그날 반 전체 데미지로 처치. 체력 = 학생 수 × ${E.perKid} (지금 ${(Math.max(SK.COOP.minKids,ST.length)*E.perKid).toLocaleString()}).</p></div>`;
+      return `<div class="card"><h2>🌙 깜짝 협동 이벤트 · ${esc(E.n)}</h2><div class="bar"><i style="width:${Math.round((R.hp-R.left)*100/R.hp)}%;background:var(--purple)"></i></div>
+      <p class="small">${R.dead?'<b>처치 완료!</b>':'HP '+R.left.toLocaleString()+' / '+R.hp.toLocaleString()} · 참여 ${R.per.filter(p=>p.dm>0).length}/${R.kids}명 · 🏆 ${R.top?esc(R.top.name)+' ('+R.top.dm.toLocaleString()+')':'-'}</p>
+      <p class="tiny muted">아직 데미지 없는 학생: ${R.per.filter(p=>!p.dm).map(p=>esc(p.name)).join(', ')||'없음'}</p></div>`})()}
     ${(()=>{const R=SK.coop&&SK.coop(stu.filter(x=>x.active&&x.char).map(x=>({id:x.id,name:x.name,daily:x.daily||{}})),today);if(!R)return `<div class="card"><h2>반 협동 주간 레이드</h2><p class="small muted">${fmt(SK.COOP.start)}부터 시작해요. 매주 월요일 새 보스, 반 전체 데미지로 일요일까지 처치.</p></div>`;
       return `<div class="card"><h2>반 협동 주간 레이드 · ${esc(R.boss.n)}</h2><div class="bar"><i style="width:${Math.round((R.hp-R.left)*100/R.hp)}%;background:var(--accent)"></i></div>
       <p class="small">${fmt(R.from)}~${fmt(R.to)} · ${R.dead?'<b>처치 완료</b> ('+fmt(R.killDay)+')':'HP '+R.left.toLocaleString()+' / '+R.hp.toLocaleString()} · 참여 ${R.per.filter(p=>p.dm>0).length}/${R.kids}명</p>
