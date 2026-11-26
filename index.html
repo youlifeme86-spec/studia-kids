@@ -6,10 +6,11 @@
 <meta name="theme-color" content="#46B1D8">
 <meta name="robots" content="noindex">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%2346B1D8'/%3E%3Crect x='3' y='9' width='10' height='4' fill='%237CC242'/%3E%3Crect x='6' y='3' width='4' height='6' fill='%23E2453C'/%3E%3C/svg%3E">
-<script src="config.js?v=2026.11.26-1058"></script>
-<script src="game-data.js?v=2026.11.26-1058"></script>
+<script src="config.js?v=2026.11.26-1111"></script>
+<script src="game-data.js?v=2026.11.26-1111"></script>
+<script src="sound.js?v=2026.11.26-1111"></script>
 <script>
-window.RR_VERSION='2026.11.26-1058';
+window.RR_VERSION='2026.11.26-1111';
 /* 실시간 오류 기록: 학생 폰에서 난 오류를 구글 시트 [오류] 탭으로 보냄 */
 (function(){var n=0;window.RR_REPORT=function(msg,stack,extra){try{var C=window.RR_CONFIG||{};if(!C.API_URL||n>=8)return;n++;var a=null;try{a=JSON.parse(localStorage.getItem('sk-auth-v1')||'null')}catch(e){}
 fetch(C.API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},keepalive:true,body:JSON.stringify({action:'logError',token:a&&a.token||'',msg:String(msg||'').slice(0,1000),stack:String(stack||'').slice(0,3000),page:location.pathname+(location.hash.indexOf('#parent')===0?' (학부모)':''),tab:(window.RR_TAB||'')+(extra?' '+extra:''),ver:window.RR_VERSION||'',ua:navigator.userAgent.slice(0,300)})}).catch(function(){})}catch(e){}};
@@ -67,6 +68,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 .modebar{display:flex;gap:6px;background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:4px;width:100%;max-width:420px}
 .modebar button{flex:1;border:0;background:transparent;border-radius:999px;padding:7px 10px;font-size:13px;color:var(--muted)}
 .modebar button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.modebar #sndBtn,.modebar #sndBtn[aria-pressed]{flex:none;width:44px;padding:4px;font-size:16px;color:var(--ink);background:transparent}
 .phone{width:100%;max-width:420px;background:var(--bg);display:flex;flex-direction:column;position:relative}
 @media (min-width:700px){.phone{border:1px solid var(--line);border-radius:32px;box-shadow:var(--shadow);height:820px;overflow:hidden}}
 .screen{flex:1;overflow-y:auto;padding:16px 14px 90px;display:flex;flex-direction:column;gap:12px}
@@ -331,6 +333,7 @@ details summary{cursor:pointer;padding:4px 0}
   <div class="modebar" role="group" aria-label="화면 선택">
     <button id="modeStudent" aria-pressed="true">학생 화면</button>
     <button id="modeParent" aria-pressed="false">보호자 화면</button>
+    <button id="sndBtn" type="button" aria-label="소리 켜고 끄기"></button>
   </div>
   <div class="phone" id="phone">
     <main class="screen" id="screen"></main>
@@ -387,18 +390,32 @@ function dayExtraDmg(st,k){const L=st.logs[k];if(!L)return 0;const d=dayScoreOf(
 function dayBossDmg(st,k,s){const L=st.logs[k];if(!L)return 0;let t=0;L.q.forEach(q=>{if(q.done&&ACT[q.a].s===s)t+=qDmg(q)});
   adjOf(L,'bonus').forEach(a=>{if(a.s===s)t+=(+a.pts||0)*10*(a.crit||1)});adjOf(L,'check').forEach(a=>{if(ACT[a.a]&&ACT[a.a].s===s)t+=(+a.pts||0)*10});return t}
 function dmgIn(from,to,st){st=st||S;let t=0;Object.keys(st.logs||{}).forEach(k=>{if(k<from||k>to)return;st.logs[k].q.forEach(q=>{if(q.done)t+=qDmg(q)});t+=dayExtraDmg(st,k)});return Math.max(0,t)}
-function monthBossDmg(s,mk,st){st=st||S;let t=0;Object.keys(st.logs||{}).forEach(k=>{if(k.startsWith(mk))t+=dayBossDmg(st,k,s)});return t}
-function bossLeft(s,mk){return Math.max(0,SUBJ[s].hp-monthBossDmg(s,mk||monthKeyOf(TODAY())))}
+function rawBossDmg(s,mk,st){st=st||S;let t=0;Object.keys(st.logs||{}).forEach(k=>{if(k.startsWith(mk))t+=dayBossDmg(st,k,s)});return t}
+/* 늦게 온 용사의 축복: 가입일 전에 지나간 날의 비율 (from~to 기간 중) */
+function joinDay(st){return (st.char&&st.char.created)||''}
+function lateFrac(from,to,st){const J=joinDay(st||S);if(!J||J<=from)return 0;const tot=Math.round((parseDay(to)-parseDay(from))/864e5)+1;const miss=Math.min(tot,Math.round((parseDay(J)-parseDay(from))/864e5));return Math.max(0,miss/tot)}
+function monthEnd(mk){return ymd(+mk.slice(0,4),+mk.slice(5,7)+1,0)}
+/* 과목 보스 한 달 흐름: 축복으로 미리 깎고 → 날마다 데미지, 체크 없는 날은 반격(회복). 쓰러지면 끝 */
+function bossState(s,mk,st){st=st||S;const hp=SUBJ[s].hp,start=mk+'-01',end=monthEnd(mk),today=TODAY();
+  const late=Math.round(hp*lateFrac(start,end,st)*(SK.LATE.boss||0)/100);let left=Math.max(0,hp-late),heal=0,healDays=[];const J=joinDay(st);
+  const maxHeal=Math.round(hp*(SK.REGEN.maxPct||0)/100);
+  for(let k=start;k<=end&&k<=today;k=addDays(k,1)){
+    if(left<=0)break;left=Math.max(0,left-dayBossDmg(st,k,s));
+    if(left>0&&k<today&&J&&k>=J&&SK.REGEN.pct&&!hasDone(st.logs[k])&&heal<maxHeal){const h=Math.min(Math.round(hp*SK.REGEN.pct/100),maxHeal-heal,hp-left);if(h>0){left+=h;heal+=h;healDays.push([k,h])}}}
+  return {left,late,heal,healDays}}
+/* 다른 화면이 쓰던 '이달 데미지'는 이제 체력에서 남은 체력을 뺀 값 (축복·반격 포함) */
+function monthBossDmg(s,mk,st){return SUBJ[s].hp-bossState(s,mk,st).left}
+function bossLeft(s,mk){return bossState(s,mk||monthKeyOf(TODAY())).left}
 function raidInst(r,today){today=today||TODAY();const y=+today.slice(0,4);let best=null;
   [y-1,y,y+1].forEach(yy=>r.specs.forEach(sp=>{const openStart=ymd(yy,sp.m,1);const openEnd=ymd(yy,sp.m+1,0);const accStart=ymd(yy,sp.m-sp.n,1);
     if(openEnd>=today&&(!best||openEnd<best.openEnd))best={r,sp,openStart,openEnd,accStart,id:r.id+'-'+openStart}}));
   const b=best,cap=b.sp.n*BASE*10,hp=cap+1500;const open=today>=b.openStart;
-  const charge=dmgIn(b.accStart,open?addDays(b.openStart,-1):today);
+  const lateCharge=Math.round(cap*lateFrac(b.accStart,addDays(b.openStart,-1))*(SK.LATE.raid||0)/100);const charge=dmgIn(b.accStart,open?addDays(b.openStart,-1):today)+lateCharge;
   const items=(S.itemUse||[]).filter(u=>u.inst===b.id).reduce((a,u)=>a+u.dmg,0);
   const direct=open?dmgIn(b.openStart,today)+items:0;
   const left=open?Math.max(0,hp-Math.min(charge,cap)-direct):hp;
-  return {...b,cap,hp,open,charge,direct,items,left}}
-function hiddenState(st){st=st||S;const t=TODAY();const y=+t.slice(0,4),m=+t.slice(5,7);const start=ymd(m>=3?y:y-1,3,1);const d=dmgIn(start,t,st);return {start,dmg:d,left:Math.max(0,HIDDEN.hp-d)}}
+  return {...b,cap,hp,open,charge,direct,items,left,lateCharge}}
+function hiddenState(st){st=st||S;const t=TODAY();const y=+t.slice(0,4),m=+t.slice(5,7);const start=ymd(m>=3?y:y-1,3,1);const late=Math.round(HIDDEN.hp*lateFrac(start,addDays(ymd(m>=3?y+1:y,3,1),-1),st)*(SK.LATE.hidden||0)/100);const d=dmgIn(start,t,st)+late;return {start,dmg:d,late,left:Math.max(0,HIDDEN.hp-d)}}
 function blessActive(){return S.bless&&TODAY()<=S.bless.until}
 function partyOn(k){const f=S.party&&ALL[S.party];return !!(f&&f.daily&&f.daily[k]&&f.daily[k].r>0)}
 
@@ -442,7 +459,10 @@ let writeTimer=null,retryTimer=null,flushing=false,flushAgain=false,SYNC='idle',
 function computeDaily(st){const out={};Object.keys(st.logs||{}).forEach(k=>{const d=dayScoreOf(st,k);const e=st.emo&&st.emo[k];const L=st.logs[k];
   if(d.raw||e||L.hiddenReq){const bd={};SUBJ_KEYS.forEach(s=>{const v=dayBossDmg(st,k,s);if(v)bd[s]=v});
     let dm=dayExtraDmg(st,k);L.q.forEach(q=>{if(q.done)dm+=qDmg(q)});
-    out[k]={r:d.rank,raw:d.raw,min:d.min,n:d.subjects,cell:e?e.cell:null,cond:e?e.cond:null,al:e&&e.alert?1:0,hr:L.hiddenReq&&!L.hidden?1:0,dm:Math.max(0,dm),bd}}});return out}
+    out[k]={r:d.rank,raw:d.raw,min:d.min,n:d.subjects,cell:e?e.cell:null,cond:e?e.cond:null,al:e&&e.alert?1:0,hr:L.hiddenReq&&!L.hidden?1:0,dm:Math.max(0,dm),bd}}});
+  if(st.char){const mk=monthKeyOf(TODAY()),f=mk+'-01';const off={};SUBJ_KEYS.forEach(s=>{const v=monthBossDmg(s,mk,st)-rawBossDmg(s,mk,st);if(v)off[s]=v});
+    if(Object.keys(off).length){const e=out[f]||(out[f]={r:0,raw:0,min:0,n:0,cell:null,cond:null,al:0,hr:0,dm:0,bd:{}});e.bd={...e.bd};Object.keys(off).forEach(s=>e.bd[s]=(e.bd[s]||0)+off[s])}}
+  return out}
 function isDirty(){try{return localStorage.getItem(KEY()+':dirty')==='1'}catch(e){return false}}
 function setDirty(v){try{v?localStorage.setItem(KEY()+':dirty','1'):localStorage.removeItem(KEY()+':dirty')}catch(e){}}
 function cacheLocal(){try{localStorage.setItem(KEY(),JSON.stringify(S))}catch(e){}}
@@ -556,7 +576,8 @@ const ICONS={
 function renderNav(items,cur,on){nav.hidden=false;nav.innerHTML=items.map(([id,label])=>`<button data-id="${id}" ${id===cur?'aria-current="page"':''}>${ICONS[id]}<span>${label}</span></button>`).join('');
   nav.querySelectorAll('button').forEach(b=>b.onclick=()=>on(b.dataset.id))}
 
-function render(){
+function syncBgm(){if(!window.SKSound)return;const want=(!NEED_LOGIN&&!PARENT_CODE&&UI.mode==='student'&&S&&S.char&&(UI.tab==='boss'||UI.tab==='raid'))?UI.tab:null;SKSound.bgm(want)}
+function render(){setTimeout(syncBgm,0);
   document.getElementById('modeStudent').setAttribute('aria-pressed',UI.mode==='student');
   document.getElementById('modeParent').setAttribute('aria-pressed',UI.mode==='parent');
   phone.classList.toggle('game',UI.mode==='student');
@@ -574,6 +595,13 @@ function render(){
 }
 document.getElementById('modeStudent').onclick=()=>{UI.mode='student';render()};
 document.getElementById('modeParent').onclick=()=>{UI.mode='parent';render()};
+
+/* ---------- 소리 ---------- */
+(function(){const b=document.getElementById('sndBtn');if(!b||!window.SKSound)return;
+  const paint=()=>{b.textContent=SKSound.on?'🔊':'🔇';b.setAttribute('aria-pressed',SKSound.on);b.title=SKSound.on?'소리 끄기':'소리 켜기'};paint();
+  b.onclick=()=>{const v=SKSound.toggle();paint();if(v){SKSound.play('confirm');syncBgm()}toast(v?'소리와 진동을 켰어요':'소리와 진동을 껐어요')};
+  document.addEventListener('pointerdown',e=>{const t=e.target.closest('button,.btn,.chip,.opt,a.card,[data-b],[data-r]');if(!t||t.id==='sndBtn'||t.disabled)return;
+    if(t.closest('#nav'))SKSound.play('tab');else if(t.id==='yes'||t.id==='ok')SKSound.play('confirm');else SKSound.play('click')},{capture:true,passive:true})})();
 
 /* ---------- 로그인 ---------- */
 function renderLogin(){
@@ -741,14 +769,15 @@ function toggleQuest(i){
 /* ---------- 보스전 ---------- */
 function renderBoss(){
   const s=UI.boss,B=SUBJ[s],mk=monthKeyOf(TODAY());const fx=UI.pendingFx&&UI.pendingFx.s===s?UI.pendingFx:null;UI.pendingFx=null;
+  const BS=bossState(s,mk);const yd=addDays(TODAY(),-1);const healY=(BS.healDays.find(d=>d[0]===yd)||[0,0])[1];
   const dmgNow=monthBossDmg(s,mk);const shown=fx?fx.before:dmgNow;const hp=Math.max(0,B.hp-shown);const p=pctOf(hp,B.hp);
   const K=KINGDOMS[S.char.kingdom];const pot=S.potion[TODAY()]||{n:0,until:0};const potOn=pot.until>Date.now();
-  const line=hp===0?'"으앙... 꿈의 문 자물쇠 하나가 풀렸다..."':p<=50?`"제법인걸? 하지만 [${B.sk[2]}]은 못 피할걸!"`:`"[${B.sk[0]}]! 오늘은 공부 안 할걸?"`;
+  const line=hp>0&&healY&&!fx?`"어제는 체크가 하나도 없었지? 반격이다! 체력 +${healY} 회복!"`:hp===0?'"으앙... 꿈의 문 자물쇠 하나가 풀렸다..."':p<=50?`"제법인걸? 하지만 [${B.sk[2]}]은 못 피할걸!"`:`"[${B.sk[0]}]! 오늘은 공부 안 할걸?"`;
   const L=log();const openQ=L.q.findIndex(q=>ACT[q.a].s===s&&!q.done&&!ACT[q.a].teacher&&!weekFull(q.a,TODAY()));
   let h=sceneHTML(`<div class="hud"><div class="nm">${esc(B.boss)}<small>${B.n} 보스 · ${Number(mk.slice(5))}월</small></div>${p<=50&&hp>0?'<div class="tagr" style="color:#E2453C">화났다!</div>':''}</div>
     <div class="speech">${esc(line)}</div>${heroHTML()}<div class="boss ${hp===0?'gone':''}" id="bossSpr"><span data-spr="${s}" data-sc="7"></span></div>`)+
   `<div class="card"><div class="row between"><b>HP</b><span class="num px" id="hpnum">${fmtN(hp)} / ${fmtN(B.hp)}</span></div><div class="bar" style="height:18px"><i id="hpbar" style="width:${p}%"></i></div>
-    <p class="tiny muted">방해 스킬: ${B.sk.map(esc).join(' · ')}</p></div>
+    <p class="tiny muted">방해 스킬: ${B.sk.map(esc).join(' · ')}</p>${BS.late?`<p class="tiny"><span class="pill purple">늦게 온 용사의 축복</span> 이달 보스 체력을 ${fmtN(BS.late)} 미리 깎아 줬어요.</p>`:''}${BS.heal?`<p class="tiny" style="color:#B3261E">보스 반격: 체크 없는 날 ${BS.healDays.length}번, 체력 +${fmtN(BS.heal)} 회복 (한 달 최대 ${SK.REGEN.maxPct}%)</p>`:''}</div>
   <div class="bossgrid">${SUBJ_KEYS.map(x=>`<button class="bcell ${bossLeft(x,mk)?'':'kill'}" data-b="${x}" aria-pressed="${x===s}"><span data-spr="${x}" data-sc="2"></span><span class="nm">${SUBJ[x].boss}</span><div class="bar"><i style="width:${pctOf(bossLeft(x,mk),SUBJ[x].hp)}%"></i></div></button>`).join('')}</div>
   ${hp>0?(openQ>=0&&!SK.closed()?`<button class="btn" id="atk">${esc(ACT[L.q[openQ].a].n)} 다 하고 공격!</button>`:`<div class="card"><p class="small">오늘은 ${B.n} 체크가 더 없어요. 다른 보스를 공격해 볼까?</p></div>`)
     :`<div class="card"><h3>처치 완료!</h3><p class="small">장비 [${esc(B.gear)}] · 칭호 [${esc(B.title)}]. 한 달이 끝나면 장비 카드로 받아서 레이드에서 쓸 수 있어요.</p></div>`}
@@ -763,16 +792,19 @@ function renderBoss(){
   $('#pot').onclick=()=>{S.potion[TODAY()]={n:pot.n+1,until:Date.now()+30*60e3};save();toast(`${S.char.food} 물약! 30분 동안 데미지 +15%`);render()};
   $('#tm').onclick=timerSheet;
   if(fx)playHit(fx,B);
+  else if(healY&&hp>0){const sk='sk-heal-'+yd+'-'+s;let seen=false;try{seen=localStorage.getItem(sk)==='1';localStorage.setItem(sk,'1')}catch(e){}
+    if(!seen){setTimeout(()=>{const bs=$('#bossSpr');if(bs){bs.classList.remove('hit');void bs.offsetWidth;bs.classList.add('hit')}sbanner('보스 반격!');if(window.SKSound){SKSound.play('heal');SKSound.buzz([30,50,30])}},400)}}
 }
 function playHit(fx,B){
   const hero=$('#hero'),boss=$('#bossSpr');if(hero){hero.classList.remove('dash');void hero.offsetWidth;hero.classList.add('dash')}
   setTimeout(()=>{
     if(boss){boss.classList.remove('hit');void boss.offsetWidth;boss.classList.add('hit')}
-    const sc=$('#scene');const bx=sc?sc.clientWidth-90:300;burst(bx,150,FIRE,fx.why.some(w=>w.includes('궁극기'))?60:32);flashFx();
+    const sc=$('#scene');const bx=sc?sc.clientWidth-90:300;const big=fx.why.some(w=>w.includes('궁극기')||w.includes('치명타'));burst(bx,150,FIRE,big?60:32);flashFx();
+    if(window.SKSound){SKSound.play(big?'crit':'attack');SKSound.buzz(big?[40,30,70]:35)}
     dmgText('-'+fx.dmg,bx-30,90,true);
     const after=Math.max(0,B.hp-fx.before-fx.dmg);const bar=$('#hpbar');if(bar)bar.style.width=pctOf(after,B.hp)+'%';const n=$('#hpnum');if(n)n.textContent=fmtN(after)+' / '+fmtN(B.hp);
     if(fx.ac)setTimeout(()=>sbanner('올클리어!'),400);
-    if(fx.killed){setTimeout(()=>{if(boss)boss.classList.add('dead');burst(bx,140,['#fff','#F7C531','#EE7FAE','#8FE3DB'],70);sbanner('처치!');setTimeout(()=>killModal(UI.boss),1300)},500)}
+    if(fx.killed){setTimeout(()=>{if(window.SKSound){SKSound.play('kill');SKSound.buzz([60,40,140])}if(boss)boss.classList.add('dead');burst(bx,140,['#fff','#F7C531','#EE7FAE','#8FE3DB'],70);sbanner('처치!');setTimeout(()=>killModal(UI.boss),1300)},500)}
     else setTimeout(()=>toast(`+${fx.pts}점 · ${fx.dmg} 데미지${fx.why.length?' ('+fx.why.join(', ')+')':''}`),900);
   },280)}
 function killModal(s){const B=SUBJ[s];if(document.querySelector('.modal')){toast(B.boss+' 처치! 칭호 ['+B.title+'] 획득');return}const m=document.createElement('div');m.className='modal';
@@ -807,17 +839,18 @@ function renderRaid(){
     <div class="chips">${RAIDS.map(x=>{const xi=raidInst(x);return `<button class="chip" data-r="${x.id}" aria-pressed="${x.id===r.id}">${esc(x.n.split(' ').pop())}${xi.open?' ●':''}</button>`}).join('')}</div></div>
   <div class="card"><div class="row between"><b>충전 게이지</b><span class="num px">${fmtN(Math.min(I.charge,I.cap))} / ${fmtN(I.cap)}</span></div><div class="bar charge"><i style="width:${pctOf(I.charge,I.cap)}%"></i></div>
     <div class="row between"><b>보스 HP</b><span class="num px">${fmtN(I.left)} / ${fmtN(I.hp)}</span></div><div class="bar"><i id="rhp" style="width:${pctOf(I.left,I.hp)}%"></i></div>
+    ${I.lateCharge?`<p class="tiny"><span class="pill purple">늦게 온 용사의 축복</span> 충전 게이지를 ${fmtN(I.lateCharge)} 미리 채워 줬어요.</p>`:''}
     <p class="tiny muted">${fmt(I.accStart)}부터 충전, ${fmt(I.openStart)}에 문이 열려요. 문이 열리면 모아 둔 게이지가 한 번에 터지고, 남은 체력은 그달 공부와 아이템으로 깎아요.</p>
     ${dead?`<p><b>처치 완료!</b> 칭호 [${esc(r.title)}]</p>`:''}</div>
   ${I.open&&!dead?`<div class="card"><div class="row between"><h3>모아 둔 아이템</h3><span class="pill">${items.length}개</span></div>
      ${items.length?items.map((it,i)=>`<div class="item"><span data-spr="${it.kind==='chest'?'chest':it.s}" data-sc="${it.kind==='chest'?3:2}"></span><div style="flex:1;min-width:0"><b class="small">${esc(it.name)}</b><div class="tiny muted">${esc(it.from)} 획득 · ${it.dmg} 데미지</div></div><button class="chip" data-use="${i}">사용</button></div>`).join(''):'<p class="small muted">아직 아이템이 없어요. 한 달을 마치면 처치한 과목 보스마다 장비 카드, 300점을 채운 달엔 보물상자를 받아요.</p>'}</div>`
    :!I.open?`<div class="card"><p class="small">${esc(r.when)} 때 문이 열려요. 지금은 평소 공부가 게이지로 모이는 중이에요. (아이템 ${items.length}개 보관 중)</p></div>`:''}
   <div class="card" style="background:#3A2A20;color:#F6E3B4"><div class="row between"><h3>히든보스 · ${HIDDEN.n}</h3><span data-spr="hidden" data-sc="2"></span></div>
-    <div class="bar hid"><i style="width:${pctOf(hs.left,HIDDEN.hp)}%"></i></div><p class="tiny" style="opacity:.85">${fmt(hs.start)}부터 1년 동안 모든 데미지가 쌓여요. HP ${fmtN(hs.left)} / ${fmtN(HIDDEN.hp)}. 쓰러뜨리면 꿈의 문이 열리고 내 꿈이 새겨진 엔딩 카드를 받아요.</p></div>`;
+    <div class="bar hid"><i style="width:${pctOf(hs.left,HIDDEN.hp)}%"></i></div><p class="tiny" style="opacity:.85">${fmt(hs.start)}부터 1년 동안 모든 데미지가 쌓여요. HP ${fmtN(hs.left)} / ${fmtN(HIDDEN.hp)}.${hs.late?` 늦게 온 용사의 축복으로 ${fmtN(hs.late)} 미리 깎았어요.`:''} 쓰러뜨리면 꿈의 문이 열리고 내 꿈이 새겨진 엔딩 카드를 받아요.</p></div>`;
   scr.innerHTML=h;hydrate(scr);
   scr.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{UI.raid=b.dataset.r;render()});
   scr.querySelectorAll('[data-use]').forEach(b=>b.onclick=()=>{const it=S.items.splice(+b.dataset.use,1)[0];(S.itemUse=S.itemUse||[]).push({inst:I.id,dmg:it.dmg,name:it.name,k});save();
-    const sc=$('#scene');const bx=sc.clientWidth-110;const bs=$('#bossSpr');for(let i=0;i<3;i++)setTimeout(()=>{burst(bx,140,i%2?FIRE:['#5BC0EB','#B9ECF8','#fff'],36);flashFx();if(bs){bs.classList.remove('hit');void bs.offsetWidth;bs.classList.add('hit')}},200+i*220);
+    if(window.SKSound)SKSound.play('item');const sc=$('#scene');const bx=sc.clientWidth-110;const bs=$('#bossSpr');for(let i=0;i<3;i++)setTimeout(()=>{if(window.SKSound){SKSound.play('attack');SKSound.buzz(30)}burst(bx,140,i%2?FIRE:['#5BC0EB','#B9ECF8','#fff'],36);flashFx();if(bs){bs.classList.remove('hit');void bs.offsetWidth;bs.classList.add('hit')}},200+i*220);
     dmgText('-'+it.dmg,bx-30,80,true);sbanner(it.name);setTimeout(()=>render(),1700)});
 }
 /* ---------- 월간 시즌 ---------- */

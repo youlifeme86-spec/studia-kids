@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Press+Start+2P&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=2026.11.26-1058">
-<script src="../game-data.js?v=2026.11.26-1058"></script>
+<link rel="stylesheet" href="style.css?v=2026.11.26-1111">
+<script src="../game-data.js?v=2026.11.26-1111"></script>
 </head>
 <body data-page="rules">
 
@@ -56,6 +56,15 @@
       <div class="note"><b>예시</b> 12월 눈사람 왕 프로스트는 10~11월에 충전(최대 6,000)하고, 12월에 HP 7,500과 싸워요. 충전을 꽉 채우면 12월에 1,500만 더 때리면 돼요.</div>
       <h3>③ 히든보스: 1년짜리 대장정</h3>
       <p>꿈의 문 수문장은 3월 1일부터 다음 해 2월 말까지 모든 데미지가 쌓여요. HP는 36,000. 한 달 300점을 1년 동안 이어 가면 쓰러뜨릴 수 있어요.</p>
+      <h3>보스 반격: 체크를 하나도 안 한 날</h3>
+      <p>가입한 뒤 체크를 <b>하나도</b> 안 한 날이 지나면, 그달 과목 보스가 최대 체력의 <b>3%</b>를 회복해요. 한 달에 최대 <b>15%</b>까지만 회복하고, 이미 쓰러뜨린 보스는 살아나지 않아요. 내 점수는 절대 깎이지 않아요. 책읽기나 청소 하나만 해도 반격을 막을 수 있어요.</p>
+      <h3>늦게 온 용사의 축복: 중간에 들어온 친구</h3>
+      <p>학기 중간에 들어와도 보스를 잡을 수 있게, 캐릭터를 만든 날 <b>전에 지나간 날만큼</b> 보스 체력을 미리 깎아 줘요. 랭킹 점수에는 들어가지 않고 보스 데미지에만 들어가요.</p>
+      <div class="tbl"><table><thead><tr><th>보스</th><th>미리 깎아 주는 양</th><th>11월 28일에 들어오면</th></tr></thead><tbody>
+        <tr><td>그달 과목 보스</td><td>체력 × 지나간 날 비율</td><td>11월 보스 90% 미리 깎임 (남은 3일에 수학 8점 정도면 처치)</td></tr>
+        <tr><td>계절 레이드</td><td>충전 최대치 × 지나간 날 비율 × 75%</td><td>12월 눈사람 왕 충전 4,279 미리 채움 (12월에 300점 정도면 처치)</td></tr>
+        <tr><td>히든보스</td><td>체력 × 지나간 날 비율</td><td>26,827 미리 깎임 (남은 3달 동안 한 달 300점이면 처치)</td></tr>
+      </tbody></table></div>
       <h3>보너스와 감점은?</h3>
       <p>올클리어·연속 보너스와 과목을 고르지 않은 선생님 추가 포인트는 레이드와 히든보스에만 들어가요. 거짓 체크 감점은 레이드와 히든보스 데미지에서 빠져요.</p>
       <div class="tip"><b>랭킹 점수와는 따로예요</b> 랭킹의 월간 점수는 매달 1일 0점부터 다시 시작하지만, 누적 레벨·도감·칭호 같은 기록은 그대로 남아요.</div>
@@ -74,7 +83,7 @@
   </div>
 </div>
 
-<script src="site.js?v=2026.11.26-1058"></script>
+<script src="site.js?v=2026.11.26-1111"></script>
 <script>
 (function(){const e=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 document.getElementById('kd').innerHTML='<div class="tbl"><table><thead><tr><th>권역</th><th>왕국</th><th>힘</th></tr></thead><tbody>'+Object.keys(SK.KINGDOMS).map(k=>{const K=SK.KINGDOMS[k];return '<tr><td>'+e(K.zn)+'</td><td><b style="color:'+K.c+'">'+e(K.n)+'</b></td><td>['+e(K.p)+'] '+e(K.d)+'</td></tr>'}).join('')+'</tbody></table></div>';
