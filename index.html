@@ -9,14 +9,37 @@
 <script src="config.js"></script>
 <script src="game-data.js"></script>
 <script>
-window.RR_VERSION='2026.11.26-k1';
+window.RR_VERSION='2026.11.26-k2';
 /* 실시간 오류 기록: 학생 폰에서 난 오류를 구글 시트 [오류] 탭으로 보냄 */
 (function(){var n=0;window.RR_REPORT=function(msg,stack,extra){try{var C=window.RR_CONFIG||{};if(!C.API_URL||n>=8)return;n++;var a=null;try{a=JSON.parse(localStorage.getItem('sk-auth-v1')||'null')}catch(e){}
 fetch(C.API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},keepalive:true,body:JSON.stringify({action:'logError',token:a&&a.token||'',msg:String(msg||'').slice(0,1000),stack:String(stack||'').slice(0,3000),page:location.pathname+(location.hash.indexOf('#parent')===0?' (학부모)':''),tab:(window.RR_TAB||'')+(extra?' '+extra:''),ver:window.RR_VERSION||'',ua:navigator.userAgent.slice(0,300)})}).catch(function(){})}catch(e){}};
 window.addEventListener('error',function(e){if(!e.filename&&e.message==='Script error.')return;RR_REPORT(e.message+' @'+String(e.filename||'').split('/').pop()+':'+e.lineno+':'+e.colno,e.error&&e.error.stack)});
 window.addEventListener('unhandledrejection',function(e){var r=e.reason;RR_REPORT('Promise: '+(r&&r.message||r),r&&r.stack)});})();
 </script>
-<style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;padding:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;padding:0}img{max-width:100%}[hidden]{display:none!important}
+/* ---------- 시작 화면 ---------- */
+.splash{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:24px 16px;text-align:center;cursor:pointer;
+  background:linear-gradient(180deg,#BFE6FF 0%,#E3F4FF 38%,#FFF6E4 72%,#FBF4E6 100%);transition:opacity .35s ease;overflow:hidden}
+.splash.out{opacity:0;pointer-events:none}
+.splash .cl{position:absolute;opacity:.9;animation:skDrift 18s linear infinite}
+.splash .cl.c2{animation-duration:26s;animation-delay:-9s}
+.splash .isl{position:relative;margin-bottom:10px;animation:skBob 3.2s ease-in-out infinite;filter:drop-shadow(0 14px 0 rgba(46,158,107,.12))}
+.splash .isl canvas{display:block;image-rendering:pixelated}
+.splash .isl .walker{position:absolute;left:50%;bottom:var(--gb);transform:translateX(-50%)}
+.splash .glow{position:absolute;left:50%;top:22%;width:90px;height:90px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(#E9D8FF 0%,rgba(233,216,255,0) 70%);animation:skPulse 2.4s ease-in-out infinite}
+.splash .sub{font-family:'Gowun Dodum',var(--f-body);color:#6B5A4C;letter-spacing:.35em;font-size:15px;margin-right:-.35em}
+.splash h1{font-family:'Jua',var(--f-display);font-size:clamp(54px,17vw,84px);line-height:1;color:#3A2C22;letter-spacing:.02em;
+  text-shadow:4px 4px 0 #FFD23F,8px 8px 0 rgba(58,44,34,.12);margin:2px 0}
+.splash .kids{font-family:'Press Start 2P',monospace;font-size:13px;color:#fff;background:#7B3FE0;padding:7px 10px 6px;border-radius:4px;box-shadow:0 4px 0 #4E22A6;letter-spacing:.15em;transform:rotate(-3deg)}
+.splash .slogan{font-family:'Jua',var(--f-display);color:#FF7A2F;font-size:clamp(18px,5.4vw,23px);margin-top:12px;line-height:1.35}
+.splash .go{margin-top:18px;width:auto;padding:14px 34px;font-size:20px}
+.splash .hint{font-family:'Press Start 2P',monospace;font-size:9px;color:#8A7766;margin-top:10px;animation:skBlink 1.2s steps(2) infinite}
+@keyframes skBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes skDrift{from{transform:translateX(-30vw)}to{transform:translateX(130vw)}}
+@keyframes skPulse{0%,100%{opacity:.55;transform:translateX(-50%) scale(.9)}50%{opacity:1;transform:translateX(-50%) scale(1.1)}}
+@keyframes skBlink{50%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.splash .isl,.splash .cl,.splash .glow,.splash .hint{animation:none}}
+</style>
 <title>스터디아 왕국 초등</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&family=Do+Hyeon&family=Press+Start+2P&family=Noto+Sans+KR:wght@400;500;700&display=swap">
@@ -293,6 +316,17 @@ details summary{cursor:pointer;padding:4px 0}
 
 </head>
 <body>
+<div class="splash" id="splash" role="dialog" aria-label="스터디아 키즈 시작 화면" hidden>
+  <span class="cl" style="top:9%;left:0" data-spr="cloud" data-sc="5"></span>
+  <span class="cl c2" style="top:24%;left:0" data-spr="cloud" data-sc="3"></span>
+  <div class="isl"><div class="glow"></div><span data-spr="logo" data-sc="7"></span></div>
+  <p class="sub">공부가 모험이 되는 곳</p>
+  <h1>스터디아</h1>
+  <span class="kids">KIDS</span>
+  <p class="slogan">매일 한 번 체크해서<br>괴물을 물리치고 꿈의 문을 열자!</p>
+  <button class="btn go" id="splashGo" type="button">모험 시작!</button>
+  <p class="hint">PRESS START</p>
+</div>
 <div class="shell">
   <div class="modebar" role="group" aria-label="화면 선택">
     <button id="modeStudent" aria-pressed="true">학생 화면</button>
@@ -1019,6 +1053,14 @@ function setFoot(){const f=document.getElementById('foot');if(!f)return;
   f.textContent=PARENT_CODE?'보호자 화면 · 읽기 전용':NEED_LOGIN?'':!API?'서버 주소(config.js)가 없어 이 기기에만 저장돼요.':
    ({ok:'기록은 자동으로 저장돼요 ✓',saving:'저장 중...',wait:'곧 저장돼요',fail:'저장 대기 중 · 인터넷이 되면 자동으로 올라가요',offline:'서버에 연결하지 못해 이 기기에 보관 중이에요',loading:'기록을 불러오는 중...'}[SYNC]||'')}
 async function loadParent(){try{const j=await api('parent',{code:PARENT_CODE});S=j.state?JSON.parse(j.state):freshState();PARENT_ERR=''}catch(e){if(!S.char){S=freshState();PARENT_ERR=e.message}}LOADING=false;setFoot();render()}
+/* ---------- 시작 화면 (보호자 링크가 아닐 때, 브라우저를 열 때마다 한 번) ---------- */
+(function(){const sp=document.getElementById('splash');if(!sp)return;
+  let seen=false;try{seen=sessionStorage.getItem('sk-splash')==='1'}catch(e){}
+  if(PARENT_CODE||seen){sp.remove();return}
+  sp.hidden=false;SK.hydrate(sp);
+  let done=false;const close=()=>{if(done)return;done=true;try{sessionStorage.setItem('sk-splash','1')}catch(e){}sp.classList.add('out');setTimeout(()=>sp.remove(),400)};
+  sp.addEventListener('click',close);document.addEventListener('keydown',function k(e){if(e.key==='Enter'||e.key===' '){close();document.removeEventListener('keydown',k)}});
+  setTimeout(close,4500)})();
 async function boot(){
   if(PARENT_CODE){render();await loadParent();setInterval(()=>{if(!document.hidden)loadParent()},5*60000);return}
   if(!API){S=load()||freshState();LOADING=false;setFoot();render();return}
