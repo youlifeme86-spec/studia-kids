@@ -155,6 +155,18 @@ SK.EARLY={hour:22,pct:0};   /* 골든타임으로 바뀌어서 꺼 둠 */
 SK.SHIELD={every:5,max:2};
 /* 최소 시동 퀘스트: 오늘 체크가 하나도 없을 때 '문제 1개만' → dmg 데미지 + 출석 인정 (랭킹 점수 0) */
 SK.MINI={dmg:5};
+/* ---------- 알 부화 (파트너) ----------
+ * 알을 고른 날부터 랭킹 점수(raw)가 쌓여 자라요: 1차 부화 30점 → 2차 성장 150점(버프 강해짐) → 최종 각성 300점.
+ * 부화한 파트너는 도감에 들어가고, 한 번에 1마리만 내 캐릭터 옆에 데리고 다녀요(도감에서 바꿔 끼기). 알은 한 번에 1개만 품어요.
+ * buf: 단계별(1차·2차·최종) 수치 */
+SK.EGG_STAGES=[30,150,300];
+SK.EGGS={
+  fire:{egg:'불꽃알',n:['아기 드레이크','불꽃 드레이크','이그니스 드래곤'],buf:[5,8,10],d:v=>`크리티컬 확률 +${v}%`,who:'한 방의 짜릿함을 좋아하는 용사'},
+  leaf:{egg:'비취알',n:['숲 부엉이','숲지기 부엉이','가디언 아울'],buf:[4,4,4],d:v=>`스트릭 방패를 ${v}일 연속마다 받아요 (원래 5일)`,d2:'콤보 +5% 추가',who:'끊기지 않고 꾸준히 하고 싶은 용사'},
+  sea:{egg:'심해알',n:['수정 여우','파도 여우','아쿠아 울프'],buf:[20,30,40],d:v=>`약점 과목 데미지 +${v}%`,who:'미루는 과목이 있는 용사'},
+  star:{egg:'성운알',n:['별 고양이','은하 고양이','코스모 링스'],buf:[15,25,30],d:v=>`골든타임(저녁 7~9시) 데미지 +${v}% 추가`,who:'저녁에 집중이 잘 되는 용사'}
+};
+SK.EGG_KEYS=['fire','leaf','sea','star'];
 SK.CRIT={pct:15,mult:1.5,megaPct:3,megaMult:2};
 SK.COMBO=[0,0,10,20,30];
 SK.GOLDEN={from:19,to:21,pct:20};
@@ -231,6 +243,15 @@ SK.SPR={
  winter:{pal:{y:'#F7C531',W:'#D8EEF7',w:'#FFFFFF',k:'#2B1D16',o:'#F7A531',B:'#3B82F6'},rows:["....y.y.y.y.....","....yyyyyyy.....",".....WwwwW......","....WwkwkwW.....","....WwwoowW.....",".....WwwwW......","...BBBBBBBBB....","..WwwwwBBwwwW...",".WwwwwwkwwwwwW..",".WwwwwwwwwwwwW..",".WwwwwwkwwwwwW..","..WwwwwwwwwwW...","...WWWWWWWWW...."]},
  icedragon:{pal:{d:'#2B6CB0',D:'#BDEBFF',k:'#1B2A40'},rows:["..........dddd..",".........dDDDDd.",".........dDkDDd.",".........dDDDDDd",".........dDDddd.","...d....dDDDd...","..dd...dDDDDd...",".dDd..dDDDDDDd..",".dDDddDDDDDDDdd.","..dDDDDDDDDDDd..","...dDDDDDDDDd...","....dDDDDDDd....",".....dDd.dDd....",".....dd...dd...."]},
  hidden:{pal:{n:'#2D1B4E',N:'#5B3B8C',y:'#F7C531',w:'#FFFFFF'},rows:["....nnnnnnnn....","...nNNNNNNNNn...","..nNNyNNNNyNNn..","..nNNNNNNNNNNn..","..nNNwwNNwwNNn..","..nNNNNNNNNNNn..","..nNNNNyyNNNNn..",".nnNNNNNNNNNNnn.","nNNnNNNyyNNNnNNn","nNNnNNNyyNNNnNNn","nNNnNNNNNNNNnNNn","nnn.nNNNNNNn.nnn","....nNNnnNNn....","....nNn..nNn....","...nnNn..nNnn..."]},
+ egg_fire:{"pal": {"o": "#2B1D16", "x": "#F26B1D", "s": "#FFD84A"}, "rows": ["...oooo...", "..oxxxxo..", ".oxxxxxxo.", ".oxxsxxxo.", "oxxxxxxxxo", "oxsxxxxsxo", "oxxxxxxxxo", "oxxxsxxxxo", ".oxxxxxxo.", ".oxxxxxxo.", "..oooooo.."]},
+ egg_leaf:{"pal": {"o": "#2B1D16", "x": "#5FBF7A", "s": "#D8F5C0"}, "rows": ["...oooo...", "..oxxxxo..", ".oxxxxxxo.", ".oxxsxxxo.", "oxxxxxxxxo", "oxsxxxxsxo", "oxxxxxxxxo", "oxxxsxxxxo", ".oxxxxxxo.", ".oxxxxxxo.", "..oooooo.."]},
+ egg_sea:{"pal": {"o": "#2B1D16", "x": "#3A8FD8", "s": "#B9ECF8"}, "rows": ["...oooo...", "..oxxxxo..", ".oxxxxxxo.", ".oxxsxxxo.", "oxxxxxxxxo", "oxsxxxxsxo", "oxxxxxxxxo", "oxxxsxxxxo", ".oxxxxxxo.", ".oxxxxxxo.", "..oooooo.."]},
+ egg_star:{"pal": {"o": "#2B1D16", "x": "#6B4FC8", "s": "#FFE066"}, "rows": ["...oooo...", "..oxxxxo..", ".oxxxxxxo.", ".oxxsxxxo.", "oxxxxxxxxo", "oxsxxxxsxo", "oxxxxxxxxo", "oxxxsxxxxo", ".oxxxxxxo.", ".oxxxxxxo.", "..oooooo.."]},
+ pet_fire:{"pal": {"r": "#E2453C", "y": "#FFD84A", "w": "#FFFFFF", "k": "#2B1D16", "o": "#F7A531"}, "rows": ["..y......y..", "..yr....ry..", "..rrrrrrrr..", ".rrwkrrwkrr.", ".rrrrrrrrrr.", ".rrrryyrrrr.", "oorrrrrrrroo", "o.ryyyyyyr.o", "..ryyyyyyr..", "..rr....rr.."]},
+ pet_leaf:{"pal": {"g": "#3E9B5B", "l": "#BDE8B0", "w": "#FFFFFF", "k": "#2B1D16", "y": "#FFB020"}, "rows": [".g........g.", ".gg......gg.", ".gggggggggg.", "gglllgglllgg", "glwklgglwklg", "gglllyylllgg", ".ggggyygggg.", ".gllllllllg.", ".gllllllllg.", "..gggggggg..", "...y....y..."]},
+ pet_sea:{"pal": {"b": "#3A8FD8", "B": "#CFF1FF", "w": "#FFFFFF", "k": "#2B1D16"}, "rows": ["b..........b", "bb........bb", "bBb......bBb", "bbbbbbbbbbbb", "bbwkbbbbwkbb", "bbbbbBBbbbbb", ".bbbBkkBbbb.", "..bbBBBBbb..", "..bBBBBBBb..", "..bb.bb.bb.B", "..........BB"]},
+ pet_star:{"pal": {"p": "#7A4FD0", "P": "#D9C9FF", "w": "#FFFFFF", "k": "#2B1D16", "y": "#FFE066"}, "rows": ["p..........p", "pp...y....pp", "pppppppppppp", "ppwkppppwkpp", "pPpppkkpppPp", ".pppppppppp.", "..pPPPPPPp..", "..pPPyPPPp..", "..pPPPPPPp.y", "..pp.pp.ppyy"]},
+ crown:{"pal": {"y": "#FFD84A", "k": "#2B1D16", "r": "#E2453C"}, "rows": ["y.y.y", "yyyyy", "yrkry"]},
  star:{pal:{y:'#F7C531'},rows:["..y..",".yyy.","yyyyy",".yyy.",".y.y."]},
  coin:{pal:{y:'#C9901A',Y:'#FFD84A'},rows:[".yyy.","yYyYy","yYYYy","yYyYy",".yyy."]},
  logo:{pal:{k:'#2B1D16',s:'#D9D2E6',S:'#A79FC0',p:'#7B3FE0',P:'#C9A2FF',w:'#FFFFFF',y:'#FFD23F',Y:'#FFF0A8',g:'#6CCB5F',G:'#2E9E6B',d:'#B9783F',D:'#7A4B2A',t:'#7A4B2A',m:'#E8484A',c:'#F4E7D0'},rows:["................yy................","..............YyyyyY..............","......Y.........yy................",".............kkkkkkkk.........Y...","...........kksssyyssskk...........","..Y.......kSsssppppsssSk..........","..........kSssppppppssSk..........","..........kSSpppPPpppSSk..........","..........kSsppPppPppsSk........Y.",".....GG...kSsppPwwPppsSk..........","....GgGG..kSSpppPPpppSSk..........","...GgGgGG.kSsppppPpppsSk..........","...GGgGGG.kSspppPppppsSk...mwmm...","....GGGG..kSSppPppPppSSk..mwmmwm..",".....tt...kSsppppppppsSk....cc....",".....tt...kSsppppppppsSk....cc....","..GggGggGggGggGggGggGggGggGggGgg..",".GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG.","..DddddddddddddddddddddddddddddD..","...DdDdddDdddDdddDdddDdddDddddD...",".....DddddddddddddddddddddddD.....",".......DdDdddDdddDdddDddddD.......",".........DddddddddddddddD.........","...........DdDdddDddddD...........",".............DddddddD.............","...............DddD...............","................DD................"]},

@@ -15,11 +15,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="스터디아 키즈">
-<script src="config.js?v=2026.11.26-1629"></script>
-<script src="game-data.js?v=2026.11.26-1629"></script>
-<script src="sound.js?v=2026.11.26-1629"></script>
+<script src="config.js?v=2026.11.26-1632"></script>
+<script src="game-data.js?v=2026.11.26-1632"></script>
+<script src="sound.js?v=2026.11.26-1632"></script>
 <script>
-window.RR_VERSION='2026.11.26-1629';
+window.RR_VERSION='2026.11.26-1632';
 /* 실시간 오류 기록: 학생 폰에서 난 오류를 구글 시트 [오류] 탭으로 보냄 */
 (function(){var n=0;window.RR_REPORT=function(msg,stack,extra){try{var C=window.RR_CONFIG||{};if(!C.API_URL||n>=8)return;n++;var a=null;try{a=JSON.parse(localStorage.getItem('sk-auth-v1')||'null')}catch(e){}
 fetch(C.API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},keepalive:true,body:JSON.stringify({action:'logError',token:a&&a.token||'',msg:String(msg||'').slice(0,1000),stack:String(stack||'').slice(0,3000),page:location.pathname+(location.hash.indexOf('#parent')===0?' (학부모)':''),tab:(window.RR_TAB||'')+(extra?' '+extra:''),ver:window.RR_VERSION||'',ua:navigator.userAgent.slice(0,300)})}).catch(function(){})}catch(e){}};
@@ -285,6 +285,13 @@ img.px,canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 @keyframes drift{from{transform:translateX(-140px)}to{transform:translateX(480px)}}
 .tw{position:absolute;animation:twinkle 1.6s steps(2) infinite}
 @keyframes twinkle{50%{transform:translateY(-4px)}}
+.dex{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.dexc{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 6px;border:3px solid #2B1D16;background:#FFF6DC;font:inherit;color:#2B1D16;text-align:center;cursor:pointer}
+.dexc.on{background:#FFE9A8;box-shadow:inset 0 0 0 3px #F7C531}.dexc.off{background:#EFE7D6;cursor:default}
+.eggpick{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.egp{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 6px;border:3px solid #2B1D16;background:#FFF6DC;font:inherit;color:#2B1D16;text-align:center;cursor:pointer}.egp.on{background:#FFE9A8;box-shadow:inset 0 0 0 3px #F26B1D}
+.eggwob{display:inline-block;animation:wobble 1.6s ease-in-out infinite;transform-origin:50% 100%}
+.petbuddy{position:absolute;bottom:58px;left:128px;z-index:2;animation:bob .7s steps(2) infinite}.petbuddy.st3{filter:drop-shadow(0 0 6px #FFE066)}
+.petbuddy .pcrown{position:absolute;top:-12px;left:50%;transform:translateX(-50%)}
+.eggbuddy{position:absolute;bottom:58px;left:4px;z-index:1;animation:wobble 1.6s ease-in-out infinite;transform-origin:50% 100%}
 .hero{position:absolute;bottom:58px;left:34px;animation:bob .8s steps(2) infinite}
 @keyframes bob{50%{transform:translateY(-3px)}}
 .hero.dash{animation:dash .55s steps(6) 1}
@@ -457,10 +464,18 @@ function hasStudy(L){return !!L&&(L.q.some(q=>q.done)||(L.life&&L.life.clean)||a
 /* 연속 출석: 오뚝이 공화국은 끊긴 날 1번을 막아 줌 */
 /* 스트릭 방패: 가입일부터 하루씩 따라가며 계산 (오뚝이 공화국은 방패 1개 들고 시작) */
 function shieldState(st){st=st||S;const t=TODAY(),SH=SK.SHIELD||{every:0,max:0};const days=Object.keys(st.logs||{}).sort();let J=joinDay(st)||days[0];if(days[0]&&days[0]<J)J=days[0];
-  let n=0,sh=st.char&&st.char.kingdom==='ukk'?1:0,used=[],got=[];if(!J)return {n:0,shields:sh,used,got};
-  for(let k=J;k<=t;k=addDays(k,1)){if(hasDone(st.logs[k])){n++;if(SH.every&&n%SH.every===0&&sh<SH.max){sh++;got.push(k)}}else if(k<t){if(sh>0){sh--;used.push(k)}else n=0}}
+  let n=0,sh=st.char&&st.char.kingdom==='ukk'?1:0,used=[],got=[];const ev=petBuf('leaf',st)||SH.every;if(!J)return {n:0,shields:sh,used,got};
+  for(let k=J;k<=t;k=addDays(k,1)){if(hasDone(st.logs[k])){n++;if(ev&&n%ev===0&&sh<SH.max){sh++;got.push(k)}}else if(k<t){if(sh>0){sh--;used.push(k)}else n=0}}
   return {n,shields:sh,used,got}}
 function streak(st){return shieldState(st).n}
+/* ---------- 알 부화 ---------- */
+function eggXp(e,st){st=st||S;return Object.keys(st.logs||{}).filter(k=>k>=e.start).reduce((a,k)=>a+dayScoreOf(st,k).raw,0)}
+function eggStage(xp){let n=0;SK.EGG_STAGES.forEach(t=>{if(xp>=t)n++});return n}
+function eggList(st){st=st||S;return (st.eggs||[]).map(e=>{const xp=eggXp(e,st);return {...e,xp,stage:eggStage(xp)}})}
+function incubating(st){return eggList(st).find(e=>e.stage<SK.EGG_STAGES.length)||null}
+function partner(st){st=st||S;const L=eggList(st).filter(e=>e.stage>=1);return L.find(e=>e.id===st.partner)||null}
+function petName(e){return SK.EGGS[e.id].n[Math.max(0,e.stage-1)]}
+function petBuf(id,st){const p=partner(st);return p&&p.id===id?SK.EGGS[id].buf[p.stage-1]:0}
 function weekScore(k){const w=weekKey(k||TODAY());let t=0;for(let i=0;i<7;i++)t+=dayScore(addDays(w,i)).rank;return t}
 function monthScoreRaw(mk,st){st=st||S;mk=mk||monthKeyOf(TODAY());return Object.keys(st.logs||{}).filter(x=>x.startsWith(mk)).reduce((a,x)=>a+dayScoreOf(st,x).raw,0)}
 
@@ -556,7 +571,10 @@ function sceneHTML(inner,opts){opts=opts||{};
    ${opts.deco===false?'':'<div data-spr="tree" data-sc="5" style="position:absolute;bottom:58px;left:-14px"></div><div data-spr="mush" data-sc="4" style="position:absolute;bottom:60px;left:120px"></div>'}
    <div class="ground" style="background-image:url(${GROUND})"></div>${inner}
    <div class="fx" id="fx"></div><canvas class="fx" id="pfx" width="420" height="250"></canvas><div class="flash" id="flash"></div></div>`}
-function heroHTML(){const c=S.char||{};return `<div class="hero" id="hero"><div class="aura" style="background:${esc(c.color||'#EE7FAE')}"></div>${SK.heroTag(c,6)}</div>`}
+function heroHTML(){const c=S.char||{};const P=S.char?partner():null,E=S.char?incubating():null;
+  return `<div class="hero" id="hero"><div class="aura" style="background:${esc(c.color||'#EE7FAE')}"></div>${SK.heroTag(c,6)}</div>
+  ${P?`<div class="petbuddy st${P.stage}" title="${esc(petName(P))}">${P.stage>=3?'<span class="pcrown" data-spr="crown" data-sc="3"></span>':''}<span data-spr="pet_${P.id}" data-sc="${P.stage>=2?4:3}"></span></div>`:''}
+  ${E&&(!P||E.id!==P.id)?`<div class="eggbuddy" title="${esc(SK.EGGS[E.id].egg)} 부화 중"><span data-spr="egg_${E.id}" data-sc="${P?2:3}"></span></div>`:''}`}
 const FIRE=['#FFE066','#F7A531','#E2453C','#FFF3B0','#D7263D'];
 function burst(x,y,colors,n){const cv=document.getElementById('pfx');if(!cv||matchMedia('(prefers-reduced-motion: reduce)').matches)return;const g=cv.getContext('2d');const sx=cv.width/(cv.clientWidth||420);
   const P=[...Array(n||28)].map(()=>({x:x*sx,y:y*sx,vx:(Math.random()-.5)*9,vy:(Math.random()-.8)*8,s:4+Math.floor(Math.random()*3)*3,c:colors[Math.floor(Math.random()*colors.length)],l:26+Math.random()*16}));
@@ -677,12 +695,13 @@ function damageFor(q,L,k){
   if(blessActive()){bonus+=BLESS_PCT;why.push('마스터의 가호 +'+BLESS_PCT+'%')}
   if(SK.EARLY.pct&&SK.seoulHour()<SK.EARLY.hour){bonus+=SK.EARLY.pct;why.push('밤 '+(SK.EARLY.hour-12)+'시 전 +'+SK.EARLY.pct+'%')}
   const nth=L.q.filter(x=>x.done&&x!==q).length+(L.life&&L.life.clean?1:0)+1,cb=SK.COMBO[Math.min(nth,SK.COMBO.length-1)]||0;let combo=0;
-  if(cb){bonus+=cb;combo=nth;why.push(nth+' COMBO +'+cb+'%')}
-  const hr=SK.seoulHour(),G=SK.GOLDEN;let golden=false;if(G&&G.pct&&hr>=G.from&&hr<G.to){bonus+=G.pct;golden=true;why.push('골든타임 +'+G.pct+'%')}
+  if(cb){bonus+=cb;combo=nth;why.push(nth+' COMBO +'+cb+'%');const P=partner();if(P&&P.id==='leaf'&&P.stage>=2){bonus+=5;why.push('숲 파트너 콤보 +5%')}}
+  {const P=partner();if(P&&P.id==='sea'&&P.weak&&ACT[q.a].s===P.weak){const v=petBuf('sea');bonus+=v;why.push(petName(P)+' 약점 과목 +'+v+'%')}}
+  const hr=SK.seoulHour(),G=SK.GOLDEN;let golden=false;if(G&&G.pct&&hr>=G.from&&hr<G.to){bonus+=G.pct;golden=true;why.push('골든타임 +'+G.pct+'%');const v=petBuf('star');if(v){bonus+=v;why.push('별 파트너 +'+v+'%')}}
   bonus=Math.min(100,bonus);
   let mult=1+bonus/100,hit='';
   if(S.gauge>=100){mult*=3;S.gauge=0;hit='ult';why.push('궁극기 MEGA ×3')}
-  else{const C=SK.CRIT,r=Math.random()*100;if(r<C.megaPct){mult*=C.megaMult;hit='mega';why.push('MEGA HIT ×'+C.megaMult)}else if(r<C.megaPct+C.pct){mult*=C.mult;hit='crit';why.push('CRITICAL ×'+C.mult)}}
+  else{const C=SK.CRIT,r=Math.random()*100;if(r<C.megaPct){mult*=C.megaMult;hit='mega';why.push('MEGA HIT ×'+C.megaMult)}else if(r<C.megaPct+C.pct+petBuf('fire')){mult*=C.mult;hit='crit';why.push('CRITICAL ×'+C.mult)}}
   mult=Math.min(4,mult);
   return {dmg:Math.round(base*mult),why,hit,combo,golden}}
 
@@ -719,7 +738,8 @@ function render(){setTimeout(syncBgm,0);setTimeout(enhanceScroll,30);
   if(UI.tab==='emo'){nav.hidden=true;return renderEmotion()}
   renderNav([['today','오늘'],['boss','보스전'],['raid','레이드'],['rank','랭킹'],['me','나']],UI.tab,id=>{UI.tab=id;render();scr.scrollTop=0});
   ({today:renderToday,boss:renderBoss,raid:renderRaid,rank:renderRank,me:renderMe})[UI.tab]();
-  hydrate(scr);checkSeason();checkWelcome();
+  {const pe=scr.querySelector('#pickEgg');if(pe)pe.onclick=eggPicker;scr.querySelectorAll('[data-equip]').forEach(b=>b.onclick=()=>{S.partner=b.dataset.equip;save();toast(petName(partner())+'(이)랑 함께 가자!');render()})}
+  hydrate(scr);checkSeason();checkWelcome();checkHatch();
 }
 
 /* ---------- 스크롤 표시: 아래에 더 있으면 알려 주고, 옆으로 밀 수 있는 곳에는 화살표 ---------- */
@@ -884,8 +904,9 @@ function renderToday(){
   L.q.forEach((q,i)=>{h+=questRow(q,i,L,k)});
   h+=`<div class="quest ${L.life.clean?'done':''}"><span class="dot" style="background:var(--gold)"></span><div class="body"><div class="t">${ACT.clean.n}</div><div class="tiny muted">+1점 · 궁극기 게이지 +20%</div></div><button class="check" data-life="clean" ${closed?'disabled':''}>${L.life.clean?'✓':'완료'}</button></div></div>`;
   {const SS=shieldState();const showMini=SK.MINI&&(!hasStudy(L)||L.life.mini);
+   {const E=incubating(),P=partner();h+=`<button class="card evcard" id="eggc" type="button" style="background:linear-gradient(180deg,#FFF3D6,#fff)"><div class="row" style="gap:10px">${E?`<span class="${E.stage?'':'eggwob'}" data-spr="${E.stage?'pet_'+E.id:'egg_'+E.id}" data-sc="3"></span><div style="flex:1"><b>${E.stage?esc(petName(E))+' 키우는 중':esc(SK.EGGS[E.id].egg)+' 품는 중'}</b><div class="tiny">${E.xp}점 · ${SK.EGG_STAGES.find(t=>E.xp<t)-E.xp}점 더 하면 ${['부화','2차 성장','최종 각성'][E.stage]}!</div></div>`:`<span data-spr="egg_fire" data-sc="3"></span><div style="flex:1"><b>${P?'새 알을 품어 볼까?':'알을 골라 품어 봐!'}</b><div class="tiny">공부 점수 30점이면 부화해서 내 옆에 따라다녀요</div></div>`}</div></button>`}
    h+=`<div class="card shcard"><div class="row between"><b>🛡 스트릭 방패 ${'🛡'.repeat(SS.shields)}${'<span style="opacity:.25">🛡</span>'.repeat(Math.max(0,SK.SHIELD.max-SS.shields))}</b><span class="small">연속 <b>${SS.n}</b>일</span></div>
-     <p class="tiny muted">${SK.SHIELD.every}일 연속 출석마다 방패 1개 (최대 ${SK.SHIELD.max}개). 못 한 날엔 방패가 자동으로 연속 기록을 지키고 보스 반격도 막아 줘요. 다음 방패까지 ${SS.shields>=SK.SHIELD.max?'가득 찼어요!':(SK.SHIELD.every-SS.n%SK.SHIELD.every)+'일'}</p>
+     ${(()=>{const ev=petBuf('leaf')||SK.SHIELD.every;return `<p class="tiny muted">${ev}일 연속 출석마다 방패 1개 (최대 ${SK.SHIELD.max}개)${petBuf('leaf')?' · 비취알 파트너 효과':''}. 못 한 날엔 방패가 자동으로 연속 기록을 지키고 보스 반격도 막아 줘요. 다음 방패까지 ${SS.shields>=SK.SHIELD.max?'가득 찼어요!':(ev-SS.n%ev)+'일'}</p>`})()}
      ${showMini?`<div class="quest ${L.life.mini?'done':''}" style="margin-top:6px"><span class="dot" style="background:#7FC8A9"></span><div class="body"><div class="t">오늘 너무 힘들어? 문제 1개만!</div><div class="tiny muted">최소 시동 퀘스트 · 책상에 앉아 딱 1문제 · ${SK.MINI.dmg} 데미지 + 출석 인정</div></div><button class="check" data-life="mini" ${closed||L.life.mini?'disabled':''}>${L.life.mini?'✓':'했어'}</button></div>`:''}</div>`}
   h+=`<div class="card" style="gap:4px"><div class="row between"><b>보너스</b><span class="small">${sc.ac?'<span class="pill">올클리어 +2</span>':''} ${sc.sb?'<span class="pill">연속 +'+sc.sb+'</span>':''} ${sc.bonus?'<span class="pill purple">선생님 +'+sc.bonus+'</span>':''} ${sc.pen?'<span class="pill red">감점 -'+sc.pen+'</span>':''}</span></div>
     <p class="tiny muted">오늘 할 수 있는 체크를 다 하면 올클리어 +2점, 3일 연속 +2점, 7일 연속 +5점. 보너스는 레이드와 히든보스에 들어가요.</p>
@@ -897,6 +918,7 @@ function renderToday(){
   if($('#evc'))$('#evc').onclick=()=>{UI.tab=k<=WIN.novEnd?'boss':'raid';if(UI.tab==='boss')UI.bm=WIN.nov;render()};
   if($('#gift'))$('#gift').onclick=giftModal;
   scr.querySelectorAll('.check[data-i]').forEach(b=>b.onclick=()=>askQuest(+b.dataset.i));
+  {const ec=scr.querySelector('#eggc');if(ec)ec.onclick=()=>{if(!incubating())eggPicker();else{UI.tab='me';render();setTimeout(()=>{const x=document.getElementById('eggs');if(x)x.scrollIntoView({block:'start'})},60)}}}
   scr.querySelectorAll('.check[data-life="mini"]').forEach(b=>b.onclick=()=>{if(SK.closed()){toast('밤 12시가 지나서 마감됐어');return}
     confirmSheet('문제 1개 풀었니?','책상에 앉아서 딱 1문제! 그것만 해도 오늘 출석이야.',()=>{L.life.mini=true;afterCheck(k);save();if(window.SKSound){SKSound.play('attack');SKSound.buzz(30)}toast(`시동 걸렸다! ${SK.MINI.dmg} 데미지 · 출석 인정. 내일도 같이 하자!`);render()})});
   scr.querySelectorAll('.check[data-life="clean"]').forEach(b=>b.onclick=()=>{if(SK.closed()){toast('밤 12시가 지나서 마감됐어');return}L.life.clean=!L.life.clean;if(L.life.clean){S.gauge=Math.min(100,S.gauge+20);toast(`방이 반짝반짝! +1점 · 궁극기 게이지 ${S.gauge}%`)}else S.gauge=Math.max(0,S.gauge-20);afterCheck(k);save();render()});
@@ -1165,6 +1187,35 @@ function renderRank(){
   scr.innerHTML=h;scr.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{UI.rankTab=b.dataset.t;render()});
 }
 
+/* ---------- 알·파트너 도감 ---------- */
+function eggCardHTML(){const E=incubating(),P=partner(),L=eggList(),T=SK.EGG_STAGES;
+  let h=`<div class="card" id="eggs"><div class="row between"><h3>알 부화 · 파트너</h3>${P?`<span class="pill">함께하는 중: ${esc(petName(P))}</span>`:''}</div>`;
+  if(E){const nx=T.find(t=>E.xp<t);const pv=T[T.indexOf(nx)-1]||0;
+    h+=`<div class="row" style="gap:12px"><span class="${E.stage?'':'eggwob'}" data-spr="${E.stage?'pet_'+E.id:'egg_'+E.id}" data-sc="4"></span><div style="flex:1;min-width:0"><b>${E.stage?esc(petName(E)):esc(SK.EGGS[E.id].egg)+' 품는 중'}</b>
+      <div class="bar gauge"><i style="width:${pctOf(E.xp-pv,nx-pv)}%"></i></div><p class="tiny muted">${E.xp}점 · ${nx-E.xp}점 더 하면 ${['1차 부화','2차 성장','최종 각성'][T.indexOf(nx)]}! (알을 고른 날부터 공부 점수로 자라요)</p></div></div>`}
+  else h+=`<p class="small">${L.length?'최종 각성 완료! 새 알을 골라 품어 볼까?':'알을 하나 골라서 품어 봐! 공부 점수 30점이면 부화해서 내 옆에 따라다녀요.'}</p><button class="btn" id="pickEgg">알 고르기</button>`;
+  h+=`<h3 style="margin-top:10px">파트너 도감</h3><div class="dex">${SK.EGG_KEYS.map(id=>{const own=L.filter(e=>e.id===id&&e.stage>=1).sort((a,b)=>b.stage-a.stage)[0];const on=P&&P.id===id;
+    return own?`<button class="dexc ${on?'on':''}" data-equip="${id}"><span data-spr="pet_${id}" data-sc="3"></span><b>${esc(petName(own))}</b><span class="tiny">${'★'.repeat(own.stage)} · ${esc(SK.EGGS[id].d(SK.EGGS[id].buf[own.stage-1]))}</span><span class="tiny">${on?'✓ 함께하는 중':'눌러서 데려가기'}</span></button>`
+      :`<div class="dexc off"><span data-spr="egg_${id}" data-sc="3" style="filter:grayscale(1);opacity:.4"></span><b>???</b><span class="tiny">${esc(SK.EGGS[id].egg)}에서 태어나요</span></div>`}).join('')}</div>
+    <p class="tiny muted">파트너는 한 번에 1마리만 데리고 다닐 수 있어요. 1차 부화 30점 → 2차 성장 150점(버프 강화) → 최종 각성 300점(왕관).</p></div>`;
+  return h}
+function eggPicker(){const own=new Set((S.eggs||[]).map(e=>e.id));const m=document.createElement('div');m.className='modal';let pick=null,weak='m';
+  const draw=()=>{m.innerHTML=`<div class="card" role="dialog" aria-label="알 고르기"><h2 style="text-align:center">어떤 알을 품을까?</h2>
+   <div class="eggpick">${SK.EGG_KEYS.map(id=>{const E=SK.EGGS[id];return `<button class="egp ${pick===id?'on':''}" data-pk="${id}"><span data-spr="egg_${id}" data-sc="4"></span><b>${esc(E.egg)}${own.has(id)?' <span class="tiny">(또)</span>':''}</b><span class="tiny">${esc(E.d(E.buf[0]))}</span><span class="tiny muted">${esc(E.who)}</span></button>`}).join('')}</div>
+   ${pick==='sea'?`<p class="small"><b>약점 과목</b>을 골라 줘</p><div class="chips">${SUBJ_KEYS.map(x=>`<button class="chip" data-wk="${x}" aria-pressed="${x===weak}">${esc(SUBJ[x].n)}</button>`).join('')}</div>`:''}
+   <button class="btn" id="eok" ${pick?'':'disabled'}>이 알로 할래!</button><button class="btn ghost" id="ex">나중에</button></div>`;hydrate(m);
+   m.querySelectorAll('[data-pk]').forEach(b=>b.onclick=()=>{pick=b.dataset.pk;draw()});m.querySelectorAll('[data-wk]').forEach(b=>b.onclick=()=>{weak=b.dataset.wk;draw()});
+   m.querySelector('#ex').onclick=()=>m.remove();
+   m.querySelector('#eok').onclick=()=>{if(!pick)return;(S.eggs=S.eggs||[]).push({id:pick,start:TODAY(),...(pick==='sea'?{weak}:{})});S.eggSeen=S.eggSeen||{};save();m.remove();if(window.SKSound)SKSound.play('item');toast(SK.EGGS[pick].egg+'을(를) 품었어! 공부 점수로 자라요');render()}};
+  phone.appendChild(m);draw()}
+/* 부화·성장 순간 연출 (한 번만) */
+function checkHatch(){if(READONLY||!S.char||UI.mode!=='student'||document.querySelector('.modal,.sheet'))return;const seen=S.eggSeen=S.eggSeen||{};
+  const e=eggList().find(x=>x.stage>(seen[x.id+'@'+x.start]||0));if(!e)return;seen[e.id+'@'+e.start]=e.stage;if(e.stage===1&&!partner())S.partner=e.id;save();
+  const txt=['','알이 깨졌다! 부화 성공!','쑥쑥 컸다! 2차 성장!','최종 각성! 도감 완성!'][e.stage];const m=document.createElement('div');m.className='modal';
+  m.innerHTML=`<div class="card" role="dialog" aria-label="부화"><h2 style="text-align:center">${txt}</h2><div class="row" style="justify-content:center;position:relative">${e.stage>=3?'<span data-spr="crown" data-sc="5" style="position:absolute;top:-22px"></span>':''}<span data-spr="pet_${e.id}" data-sc="${4+e.stage}"></span></div>
+   <p style="text-align:center"><b>${esc(petName(e))}</b>${e.stage===1?'(이)가 태어났어!':'(으)로 변신!'}</p><p class="small" style="text-align:center">능력: ${esc(SK.EGGS[e.id].d(SK.EGGS[e.id].buf[e.stage-1]))}${e.stage>=2&&SK.EGGS[e.id].d2?' · '+esc(SK.EGGS[e.id].d2):''}</p>
+   <p class="tiny muted" style="text-align:center">"오늘 같이 공부해서 힘이 났어! 최고야!"</p><button class="btn gold" id="hok">좋아!</button></div>`;
+  phone.appendChild(m);hydrate(m);if(window.SKSound){SKSound.play('kill');SKSound.buzz([60,40,140])}m.querySelector('#hok').onclick=()=>{m.remove();render()}}
 /* ---------- 나 ---------- */
 function renderMe(){
   const c=S.char,K=KINGDOMS[c.kingdom];const total=Object.keys(S.logs).reduce((a,k)=>a+dayScore(k).raw,0);const lv=Math.floor(total/300)+1;
@@ -1178,6 +1229,7 @@ function renderMe(){
     <p>${esc(c.food)}을(를) 좋아하는 ${esc(c.per)} ${esc(ANIMALS[c.animal]?ANIMALS[c.animal].n:'')} ${esc(c.job)}.</p>
     <div class="dream"><span class="tiny" style="opacity:.8">나의 꿈</span><br>${esc(c.dream)}</div>
     <p class="tiny" style="opacity:.85">모험의 목표: ${esc(c.goal)} · 오라 ${esc(c.colorName||'')}</p></div>
+  ${eggCardHTML()}
   <div class="card"><div class="row between"><h3>${Number(TODAY().slice(5,7))}월 성장 단계</h3><span class="pill">${esc(stg[1])}${stg[2]?' · '+esc(stg[2]):''}</span></div><div class="bar gauge"><i style="width:${pctOf(ms,BASE)}%"></i></div>
     <p class="tiny muted">${ms}점 · ${nextStg?`${nextStg[0]-ms}점 더 하면 '${nextStg[1]}' (${nextStg[2]})`:'최고 단계!'} · 기준치 ${BASE}점을 채우면 보스 6마리를 모두 잡을 수 있어요. 매달 1일 새로 시작.</p>
     <div class="bossgrid">${SUBJ_KEYS.map(x=>`<div class="bcell ${bossLeft(x)?'':'kill'}"><span data-spr="${x}" data-sc="2"></span><span class="nm">${SUBJ[x].n}</span><div class="bar"><i style="width:${pctOf(bossLeft(x),bossHp(x,monthKeyOf(TODAY())))}%"></i></div></div>`).join('')}</div></div>
