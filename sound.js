@@ -12,7 +12,7 @@
       noiseBuf=ctx.createBuffer(1,ctx.sampleRate*0.5,ctx.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}
     if(ctx.state==='suspended')ctx.resume();return ctx}
   // 첫 터치 때 오디오를 깨워요 (브라우저 규칙)
-  const wake=()=>{if(on)ac()};['pointerdown','keydown','touchstart'].forEach(ev=>document.addEventListener(ev,wake,{capture:true,passive:true}));
+  const wake=()=>{if(!on)return;const c=ac();if(c&&!wake.done){try{const b=c.createBuffer(1,1,22050),src=c.createBufferSource();src.buffer=b;src.connect(c.destination);src.start(0);wake.done=true}catch(e){}}};['pointerdown','keydown','touchstart','touchend','click'].forEach(ev=>document.addEventListener(ev,wake,{capture:true,passive:true}));
 
   function tone(t,f1,f2,dur,type,vol,bus){const o=ctx.createOscillator(),g=ctx.createGain();o.type=type||'square';o.frequency.setValueAtTime(f1,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+dur);
     g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+0.008);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);o.connect(g);g.connect(bus||sfxBus);o.start(t);o.stop(t+dur+0.02)}

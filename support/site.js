@@ -49,6 +49,14 @@
   }
   if (window.SK) SK.hydrate(document);
 
+  /* 옆으로 밀 수 있는 표·목차에 화살표 표시 (아이들이 알아보게) */
+  function hscroll(){document.querySelectorAll('.tbl,.toc').forEach(function(el){
+    if(el.scrollWidth<=el.clientWidth+4||el.parentElement.classList.contains('hwrap'))return;
+    var w=document.createElement('div');w.className='hwrap at-start';el.parentNode.insertBefore(w,el);w.appendChild(el);
+    w.insertAdjacentHTML('beforeend','<span class="harrow l" aria-hidden="true"><b>◀</b></span><span class="harrow r" aria-hidden="true"><b>▶</b></span><span class="hhint" aria-hidden="true">옆으로 밀어 보세요</span>');
+    var upd=function(){w.classList.toggle('at-start',el.scrollLeft<6);w.classList.toggle('at-end',el.scrollLeft+el.clientWidth>=el.scrollWidth-6)};el.addEventListener('scroll',upd,{passive:true});upd()})}
+  window.addEventListener('load',function(){setTimeout(hscroll,100)});window.addEventListener('resize',hscroll);
+
   var btn = document.getElementById('menuBtn'), menu = document.getElementById('menu');
   btn.onclick = function(){ var o = menu.classList.toggle('open'); btn.setAttribute('aria-expanded', o); };
   menu.addEventListener('click', function(e){ if(e.target.tagName==='A'){ menu.classList.remove('open'); btn.setAttribute('aria-expanded', false); } });

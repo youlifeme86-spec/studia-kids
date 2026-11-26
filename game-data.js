@@ -116,7 +116,7 @@ SK.ORDER=['math','eng','kor','ebs','m1','m2','school','book','clean'];
 /* ---------- 시즌·점수 규칙 ---------- */
 SK.BASE=300;            /* 한 달 기준치 300점 = 3,000 데미지 */
 SK.DAILY_CAP=30;        /* 하루 랭킹 상한 (체크 + 올클리어) */
-SK.DEADLINE_HOUR=22;    /* 그날 밤 10시 마감 */
+SK.DEADLINE_HOUR=24;    /* 그날 밤 12시(자정) 마감. 22로 바꾸면 밤 10시 마감 */
 SK.ALLCLEAR=2; SK.STREAK3=2; SK.STREAK7=5;
 SK.BLESS_PCT=10; SK.ITEM_GEAR=100; SK.ITEM_CHEST=300;
 SK.TIMER_MIN=15;
@@ -223,7 +223,7 @@ SK.hydrate=function(root){(root||document).querySelectorAll('[data-spr],[data-he
 SK.heroTag=function(c,sc,extra){c=c||{};const e=s=>String(s??'').replace(/[&<>"]/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[x]));
   return `<span data-hero data-a="${e(c.animal||'rabbit')}" data-c="${e(c.color||'#EE7FAE')}" data-j="${e(c.job||'')}" data-sc="${sc||3}" ${extra||''}></span>`};
 
-/* ---------- 날짜 (그날 0시~24시가 하루, 체크는 밤 10시 마감) ---------- */
+/* ---------- 날짜 (그날 0시~24시가 하루, 체크는 밤 12시 마감) ---------- */
 SK.key=function(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 SK.dayKey=function(d){return SK.key(d||new Date())};
 SK.parseDay=function(k){const [y,m,d]=k.split('-').map(Number);return new Date(y,m-1,d)};

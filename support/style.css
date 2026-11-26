@@ -162,3 +162,23 @@ footer nav{display:flex;flex-wrap:wrap;gap:6px 16px}
 .logo .mk canvas{height:40px;width:auto}
 .logo .mark{width:30px;height:30px;flex:none}
 .doc section>h3{margin-top:22px}
+
+/* 스크롤 표시 */
+html{scrollbar-color:var(--orange) var(--line)}
+::-webkit-scrollbar{width:12px;height:10px}
+::-webkit-scrollbar-track{background:var(--line)}
+::-webkit-scrollbar-thumb{background:var(--orange);border:2px solid var(--edge);border-radius:3px}
+.hwrap{position:relative;min-width:0;margin-bottom:1em}
+.hwrap>.tbl{margin-bottom:0}
+.hwrap>.harrow{position:absolute;top:3px;bottom:3px;width:46px;display:flex;align-items:center;pointer-events:none;transition:opacity .2s;z-index:2}
+.hwrap>.harrow.r{right:3px;justify-content:flex-end;background:linear-gradient(90deg,transparent,var(--surface) 75%)}
+.hwrap>.harrow.l{left:3px;justify-content:flex-start;background:linear-gradient(270deg,transparent,var(--surface) 75%)}
+.hwrap>.harrow b{width:26px;height:26px;display:grid;place-items:center;background:var(--orange);color:#fff;font-size:13px;border:2px solid var(--edge);border-radius:50%;box-shadow:0 2px 0 var(--edge)}
+.hwrap>.harrow.r b{animation:nudgeR 1s ease-in-out infinite}.hwrap>.harrow.l b{animation:nudgeL 1s ease-in-out infinite}
+.hwrap.at-end>.harrow.r,.hwrap.at-start>.harrow.l{opacity:0}
+.hwrap>.hhint{position:absolute;right:8px;top:-22px;font-size:12px;font-weight:700;color:var(--orange)}
+.hwrap.at-end>.hhint{display:none}
+@keyframes nudgeR{50%{transform:translateX(4px)}}@keyframes nudgeL{50%{transform:translateX(-4px)}}
+@media (prefers-reduced-motion:reduce){.hwrap>.harrow b{animation:none}}
+html{-webkit-text-size-adjust:100%}body{-webkit-tap-highlight-color:transparent}
+input,select,textarea{font-size:16px}

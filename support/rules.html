@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Press+Start+2P&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=2026.11.26-1114">
-<script src="../game-data.js?v=2026.11.26-1114"></script>
+<link rel="stylesheet" href="style.css?v=2026.11.26-1205">
+<script src="../game-data.js?v=2026.11.26-1205"></script>
 </head>
 <body data-page="rules">
 
@@ -59,7 +59,7 @@
       <h3>보스 반격: 체크를 하나도 안 한 날</h3>
       <p>가입한 뒤 체크를 <b>하나도</b> 안 한 날이 지나면, 그달 과목 보스가 최대 체력의 <b>3%</b>를 회복해요. 한 달에 최대 <b>15%</b>까지만 회복하고, 이미 쓰러뜨린 보스는 살아나지 않아요. 내 점수는 절대 깎이지 않아요. 책읽기나 청소 하나만 해도 반격을 막을 수 있어요.</p>
       <h3>늦게 온 용사의 축복: 중간에 들어온 친구</h3>
-      <p>학기 중간에 들어와도 보스를 잡을 수 있게, 캐릭터를 만든 날 <b>전에 지나간 날만큼</b> 보스 체력을 미리 깎아 줘요. 랭킹 점수에는 들어가지 않고 보스 데미지에만 들어가요.</p>
+      <p>학기 중간에 들어와도 보스를 잡을 수 있게, 캐릭터를 만든 날 <b>전에 지나간 날만큼</b> 보스 체력을 미리 깎아 줘요. [오늘] 화면에 <b>신규 용사 선물</b> 상자가 뜨면 눌러서 받아요. 상자를 열면 보스마다 얼마나 깎이는지 먼저 보여 주고, <b>선물 받기</b>를 눌러야 적용돼요. 한 번만 받을 수 있고, 랭킹 점수에는 들어가지 않아요.</p>
       <div class="tbl"><table><thead><tr><th>보스</th><th>미리 깎아 주는 양</th><th>11월 30일에 들어오면</th></tr></thead><tbody>
         <tr><td>그달 과목 보스</td><td>체력 × 지나간 날 비율</td><td>11월 보스 97% 미리 깎임 (그날 과목 체크 한 번이면 거의 다 처치)</td></tr>
         <tr><td>계절 레이드</td><td>충전 최대치 × 지나간 날 비율 × 75%</td><td>12월 눈사람 왕 충전 4,426 미리 채움 (12월에 300점 정도면 처치)</td></tr>
@@ -71,7 +71,7 @@
     </section>
     <section id="bosses"><h2>과목 보스</h2><p class="small muted">매달 1일 새로 나타나요. 한 달 300점을 하면 모두 쓰러뜨릴 수 있게 맞췄어요.</p><div id="bs"></div></section>
     <section id="raids"><h2>레이드와 히든보스</h2><p class="small muted">충전하는 달에 쌓인 데미지가 문이 열리는 달 1일에 한 번에 들어가요. HP = 충전 달 수 × 3,000 + 1,500.</p><div id="rd"></div></section>
-    <section id="checks"><h2>점수표</h2><div id="ck"></div><p class="small">하루 랭킹 상한 30점 · 체크 마감 밤 10시 · 1점 = 10 데미지 · 버프 합은 최대 +100%, 한 번에 최대 4배.</p></section>
+    <section id="checks"><h2>점수표</h2><div id="ck"></div><p class="small">하루 랭킹 상한 30점 · 체크 마감 밤 12시 · 1점 = 10 데미지 · 버프 합은 최대 +100%, 한 번에 최대 4배.</p></section>
     <section id="grow"><h2>성장과 보상</h2>
       <div class="tbl"><table><thead><tr><th>무엇</th><th>어떻게</th></tr></thead><tbody>
       <tr><td>월간 성장 단계</td><td>아기(0) → 꼬마(80, 리본) → 씩씩이(180, 망토) → 챔피언(300, 왕관) → 전설(420). 매달 1일 다시 시작</td></tr>
@@ -83,7 +83,7 @@
   </div>
 </div>
 
-<script src="site.js?v=2026.11.26-1114"></script>
+<script src="site.js?v=2026.11.26-1205"></script>
 <script>
 (function(){const e=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 document.getElementById('kd').innerHTML='<div class="tbl"><table><thead><tr><th>권역</th><th>왕국</th><th>힘</th></tr></thead><tbody>'+Object.keys(SK.KINGDOMS).map(k=>{const K=SK.KINGDOMS[k];return '<tr><td>'+e(K.zn)+'</td><td><b style="color:'+K.c+'">'+e(K.n)+'</b></td><td>['+e(K.p)+'] '+e(K.d)+'</td></tr>'}).join('')+'</tbody></table></div>';

@@ -681,7 +681,7 @@ function appendError_(e) {
 }
 
 function dayKey_(offsetDays) {
-  // 초등판: 그날 0시~24시가 하루 (체크 마감은 앱에서 밤 10시)
+  // 초등판: 그날 0시~24시가 하루 (체크 마감은 앱에서 밤 12시(자정))
   var t = new Date(Date.now() + (offsetDays || 0) * 864e5);
   return Utilities.formatDate(t, TZ, 'yyyy-MM-dd');
 }
