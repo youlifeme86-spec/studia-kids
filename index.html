@@ -15,11 +15,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="스터디아 키즈">
-<script src="config.js?v=2026.11.26-1408"></script>
-<script src="game-data.js?v=2026.11.26-1408"></script>
-<script src="sound.js?v=2026.11.26-1408"></script>
+<script src="config.js?v=2026.11.26-1419"></script>
+<script src="game-data.js?v=2026.11.26-1419"></script>
+<script src="sound.js?v=2026.11.26-1419"></script>
 <script>
-window.RR_VERSION='2026.11.26-1408';
+window.RR_VERSION='2026.11.26-1419';
 /* 실시간 오류 기록: 학생 폰에서 난 오류를 구글 시트 [오류] 탭으로 보냄 */
 (function(){var n=0;window.RR_REPORT=function(msg,stack,extra){try{var C=window.RR_CONFIG||{};if(!C.API_URL||n>=8)return;n++;var a=null;try{a=JSON.parse(localStorage.getItem('sk-auth-v1')||'null')}catch(e){}
 fetch(C.API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},keepalive:true,body:JSON.stringify({action:'logError',token:a&&a.token||'',msg:String(msg||'').slice(0,1000),stack:String(stack||'').slice(0,3000),page:location.pathname+(location.hash.indexOf('#parent')===0?' (학부모)':''),tab:(window.RR_TAB||'')+(extra?' '+extra:''),ver:window.RR_VERSION||'',ua:navigator.userAgent.slice(0,300)})}).catch(function(){})}catch(e){}};
@@ -358,6 +358,7 @@ details summary{cursor:pointer;padding:4px 0}
 .shell.zoomed{padding-block:8px;gap:8px;min-height:0}.shell.zoomed .phone{width:100%}.shell.zoomed.land #foot{display:none}
 @media (min-width:700px) and (max-height:760px){.shell{padding-block:6px;gap:6px}.phone{height:calc(100vh - 64px);height:calc(100dvh - 64px)}}
 /* 신규 용사 선물상자 */
+.evcard{display:block;width:100%;text-align:left;background:linear-gradient(180deg,#DDF1FF,#FFFFFF);border:3px solid #2B3A67;cursor:pointer;font:inherit;color:inherit}.evcard .tiny{line-height:1.7;margin-top:4px}
 .giftcard{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:3px solid #2B1D16;background:linear-gradient(135deg,#FFE27A,#FFB347);color:#2B1D16;padding:12px 14px;box-shadow:0 4px 0 #2B1D16;border-radius:12px;cursor:pointer;font:inherit;animation:skGiftPulse 1.6s ease-in-out infinite}
 .giftcard b{font-family:var(--f-title);font-size:19px;display:block}
 .giftcard p{margin:0}
@@ -486,18 +487,25 @@ function giftModal(){const G=giftPreview();const m=document.createElement('div')
     if(window.SKSound){SKSound.play('kill');SKSound.buzz([60,40,140])}
     m.querySelector('.card').innerHTML=`<h2 style="text-align:center">축복을 받았어!</h2><div class="row" style="justify-content:center"><span data-spr="star" data-sc="7"></span></div><p style="text-align:center">보스들이 벌써 비틀거려. 오늘 체크로 마무리하자!</p><button class="btn" id="go">보스 보러 가기</button>`;
     hydrate(m);m.querySelector('#go').onclick=()=>{m.remove();UI.tab='boss';render()}}}
+/* 겨울 이벤트: 11월 연습 보스 */
+const WIN=SK.WINTER||null;
+function novPrac(mk){return !!(WIN&&mk===WIN.nov)}
+function bossHp(s,mk){return novPrac(mk)?WIN.novHp[s]:SUBJ[s].hp}
+function novOpen(t){t=t||TODAY();return !!(WIN&&t>WIN.nov+'-31'&&t<=WIN.novEnd)}
 /* 과목 보스 한 달 흐름: 축복으로 미리 깎고 → 날마다 데미지, 체크 없는 날은 반격(회복). 쓰러지면 끝 */
-function giftBossFrac(mk,st,preview){st=st||S;const J=joinDay(st);if(!J)return 0;const jm=monthKeyOf(J);const jf=lateFrac(jm+'-01',monthEnd(jm),st,preview);
+function giftBossFrac(mk,st,preview){st=st||S;const J=joinDay(st);if(!J||novPrac(mk))return 0;const jm=monthKeyOf(J);if(novPrac(jm)&&mk>jm)return 0;const jf=lateFrac(jm+'-01',monthEnd(jm),st,preview);
   if(mk===jm)return jf;const cm=preview?monthKeyOf(TODAY()):(st.gift&&st.gift.at?monthKeyOf(st.gift.at):'');return mk===cm&&mk>jm?jf:0}
-function bossState(s,mk,st){st=st||S;const hp=SUBJ[s].hp,start=mk+'-01',end=monthEnd(mk),today=TODAY();
+function bossState(s,mk,st){st=st||S;const P=novPrac(mk);const hp=bossHp(s,mk),start=mk+'-01',end=P?WIN.novEnd:monthEnd(mk),today=TODAY();
   const late=Math.round(hp*giftBossFrac(mk,st)*(SK.LATE.boss||0)/100);let left=Math.max(0,hp-late),heal=0,healDays=[];const J=joinDay(st);
   const maxHeal=Math.round(hp*(SK.REGEN.maxPct||0)/100);
   for(let k=start;k<=end&&k<=today;k=addDays(k,1)){
     if(left<=0)break;left=Math.max(0,left-dayBossDmg(st,k,s));
-    if(left>0&&k<today&&J&&k>=J&&SK.REGEN.pct&&!hasDone(st.logs[k])&&heal<maxHeal){const h=Math.min(Math.round(hp*SK.REGEN.pct/100),maxHeal-heal,hp-left);if(h>0){left+=h;heal+=h;healDays.push([k,h])}}}
+    if(!P&&left>0&&k<today&&J&&k>=J&&SK.REGEN.pct&&!hasDone(st.logs[k])&&heal<maxHeal){const h=Math.min(Math.round(hp*SK.REGEN.pct/100),maxHeal-heal,hp-left);if(h>0){left+=h;heal+=h;healDays.push([k,h])}}}
   return {left,late,heal,healDays}}
 /* 다른 화면이 쓰던 '이달 데미지'는 이제 체력에서 남은 체력을 뺀 값 (축복·반격 포함) */
-function monthBossDmg(s,mk,st){return SUBJ[s].hp-bossState(s,mk,st).left}
+function monthBossDmg(s,mk,st){return bossHp(s,mk)-bossState(s,mk,st).left}
+/* 랭킹 화면용: 연습 보스는 원래 체력 비율로 환산 (처치하면 원래 체력만큼) */
+function rankBossDmg(s,mk,st){if(!novPrac(mk))return monthBossDmg(s,mk,st);const lf=bossState(s,mk,st).left,hp=bossHp(s,mk);return lf===0?SUBJ[s].hp:Math.round(SUBJ[s].hp*(1-lf/hp))}
 function bossLeft(s,mk){return bossState(s,mk||monthKeyOf(TODAY())).left}
 function raidInst(r,today){today=today||TODAY();const y=+today.slice(0,4);let best=null;
   [y-1,y,y+1].forEach(yy=>r.specs.forEach(sp=>{const openStart=ymd(yy,sp.m,1);const openEnd=ymd(yy,sp.m+1,0);const accStart=ymd(yy,sp.m-sp.n,1);
@@ -506,8 +514,14 @@ function raidInst(r,today){today=today||TODAY();const y=+today.slice(0,4);let be
   const lateCharge=Math.round(cap*lateFrac(b.accStart,addDays(b.openStart,-1))*(SK.LATE.raid||0)/100);const charge=dmgIn(b.accStart,open?addDays(b.openStart,-1):today)+lateCharge;
   const items=(S.itemUse||[]).filter(u=>u.inst===b.id).reduce((a,u)=>a+u.dmg,0);
   const direct=open?dmgIn(b.openStart,today)+items:0;
-  const left=open?Math.max(0,hp-Math.min(charge,cap)-direct):hp;
-  return {...b,cap,hp,open,charge,direct,items,left,lateCharge}}
+  const ev=!!(WIN&&r.id==='winter'&&openStart_(b)===WIN.raidOpen);
+  const left=open?Math.max(0,(ev?Math.round((hp-Math.min(charge,cap))*WIN.raidMax/hp):hp-Math.min(charge,cap))-direct):hp;
+  return {...b,cap,hp:ev&&open?WIN.raidMax:hp,open,charge,direct,items,left,lateCharge,ev}}
+function openStart_(b){return b.openStart}
+/* 겨울 이벤트 히든보스: 12월 데미지로 문 게이지 → 열리면 크리스마스까지 처치 */
+function winterHid(st){st=st||S;if(!WIN)return null;const t=TODAY();if(t<WIN.hidFrom||t>monthEnd(monthKeyOf(WIN.hidTo)))return null;
+  const D=dmgIn(WIN.hidFrom,t<WIN.hidTo?t:WIN.hidTo,st);const open=D>=WIN.hidGate;const left=open?Math.max(0,WIN.hidHp-(D-WIN.hidGate)):WIN.hidHp;
+  return {D,open,left,dead:open&&left===0,over:t>WIN.hidTo}}
 function hiddenState(st){st=st||S;const t=TODAY();const y=+t.slice(0,4),m=+t.slice(5,7);const start=ymd(m>=3?y:y-1,3,1);const late=Math.round(HIDDEN.hp*lateFrac(start,addDays(ymd(m>=3?y+1:y,3,1),-1),st)*(SK.LATE.hidden||0)/100);const d=dmgIn(start,t,st)+late;return {start,dmg:d,late,left:Math.max(0,HIDDEN.hp-d)}}
 function blessActive(){return S.bless&&TODAY()<=S.bless.until}
 function partyOn(k){const f=S.party&&ALL[S.party];return !!(f&&f.daily&&f.daily[k]&&f.daily[k].r>0)}
@@ -553,7 +567,9 @@ function computeDaily(st){const out={};Object.keys(st.logs||{}).forEach(k=>{cons
   if(d.raw||e||L.hiddenReq){const bd={};SUBJ_KEYS.forEach(s=>{const v=dayBossDmg(st,k,s);if(v)bd[s]=v});
     let dm=dayExtraDmg(st,k);L.q.forEach(q=>{if(q.done)dm+=qDmg(q)});
     out[k]={r:d.rank,raw:d.raw,min:d.min,n:d.subjects,cell:e?e.cell:null,cond:e?e.cond:null,al:e&&e.alert?1:0,hr:L.hiddenReq&&!L.hidden?1:0,dm:Math.max(0,dm),bd}}});
-  if(st.char){const mk=monthKeyOf(TODAY()),f=mk+'-01';const off={};SUBJ_KEYS.forEach(s=>{const v=monthBossDmg(s,mk,st)-rawBossDmg(s,mk,st);if(v)off[s]=v});
+  if(st.char){const mk=monthKeyOf(TODAY()),f=mk+'-01';const off={};SUBJ_KEYS.forEach(s=>{const v=rankBossDmg(s,mk,st)-rawBossDmg(s,mk,st);if(v)off[s]=v});
+    if(WIN&&mk!==WIN.nov&&mk>WIN.nov){const nf=WIN.nov+'-01',no={};SUBJ_KEYS.forEach(s=>{const v=rankBossDmg(s,WIN.nov,st)-rawBossDmg(s,WIN.nov,st);if(v)no[s]=v});
+      if(Object.keys(no).length){const e=out[nf]||(out[nf]={r:0,raw:0,min:0,n:0,cell:null,cond:null,al:0,hr:0,dm:0,bd:{}});e.bd={...e.bd};Object.keys(no).forEach(s=>e.bd[s]=(e.bd[s]||0)+no[s])}}
     if(Object.keys(off).length){const e=out[f]||(out[f]={r:0,raw:0,min:0,n:0,cell:null,cond:null,al:0,hr:0,dm:0,bd:{}});e.bd={...e.bd};Object.keys(off).forEach(s=>e.bd[s]=(e.bd[s]||0)+off[s])}}
   return out}
 function isDirty(){try{return localStorage.getItem(KEY()+':dirty')==='1'}catch(e){return false}}
@@ -837,12 +853,15 @@ function questRow(q,i,L,k){const A=ACT[q.a];const wf=weekFull(q.a,k);const close
     <button class="check" data-i="${i}" aria-label="${esc(A.n)} ${q.done?'완료 취소':'완료하고 공격'}" ${(wf||closed)&&!q.done||closed?'disabled':''}>${q.done?'✓':'공격!'}</button></div>`}
 function renderToday(){
   const k=TODAY(),L=log(k),sc=dayScore(k);const closed=SK.closed();
-  const mk=monthKeyOf(k);const firstOpen=L.q.find(q=>!q.done&&!ACT[q.a].teacher&&!weekFull(q.a,k));const bossS=firstOpen?ACT[firstOpen.a].s:SUBJ_KEYS.sort((a,b)=>bossLeft(b,mk)/SUBJ[b].hp-bossLeft(a,mk)/SUBJ[a].hp)[0];
-  const left=pctOf(bossLeft(bossS,mk),SUBJ[bossS].hp);const ms=monthScoreRaw();const stg=SK.stage(ms);
+  const mk=monthKeyOf(k);const firstOpen=L.q.find(q=>!q.done&&!ACT[q.a].teacher&&!weekFull(q.a,k));const bossS=firstOpen?ACT[firstOpen.a].s:SUBJ_KEYS.sort((a,b)=>bossLeft(b,mk)/bossHp(b,mk)-bossLeft(a,mk)/bossHp(a,mk))[0];
+  const left=pctOf(bossLeft(bossS,mk),bossHp(bossS,mk));const ms=monthScoreRaw();const stg=SK.stage(ms);
   const done=L.q.filter(q=>q.done).length+(L.life.clean?1:0);
   let h=sceneHTML(`<div class="hud"><div class="nm">${esc(S.char.name)}<small>${esc(KINGDOMS[S.char.kingdom].n)} · ${esc(ANIMALS[S.char.animal]?ANIMALS[S.char.animal].n:'')} ${esc(S.char.job)}</small></div><div class="tagr">${Number(k.slice(5,7))}월 ${ms}/${BASE}<br>${esc(stg[1])}</div></div>${heroHTML()}<div class="boss sleep" style="right:20px;transform:scale(.8);transform-origin:bottom right"><span data-spr="${bossS}" data-sc="6"></span></div>`)+
    `<div><p class="tiny muted">${fmt(k)} · 밤 ${SK.DEADLINE_HOUR-12}시 마감</p><h1>오늘의 퀘스트</h1></div>
     <div class="bubble">${closed?'"밤 12시가 지나서 오늘 체크는 끝났어. 빠뜨린 게 있으면 내일 선생님께 말해 줘!"':`"${done}개 했어! ${esc(SUBJ[bossS].boss)} 체력 ${left}% 남았어"`}</div>`;
+  if(WIN&&k>=WIN.nov+'-26'&&k<=WIN.hidTo){const nl=SUBJ_KEYS.filter(x=>!bossLeft(x,WIN.nov)).length,WH=winterHid(),RI=raidInst(RAIDS.find(r=>r.id==='winter'));
+    h+=`<button class="card evcard" id="evc" type="button"><div class="row between"><b>❄ 겨울 이벤트</b><span class="tiny">크리스마스까지</span></div>
+     <div class="tiny">${k<=WIN.novEnd?`· 11월 연습 보스 ${nl}/6 처치 (${fmt(WIN.novEnd)}까지)<br>`:''}${RI.open?`· 눈사람 왕 HP ${fmtN(RI.left)} 남음<br>`:`· 12/1 눈사람 왕 레이드 열림 (체력 최대 ${fmtN(WIN.raidMax)})<br>`}${WH?(WH.open?(WH.dead?'· 꿈의 문 수문장 처치 완료!':`· 꿈의 문 수문장 HP ${fmtN(WH.left)} 남음`):`· 꿈의 문 열쇠 ${pctOf(Math.min(WH.D,WIN.hidGate),WIN.hidGate)}% 모음`):'· 12/1부터 꿈의 문 열쇠 모으기'}</div></button>`}
   if(giftReady())h+=`<button class="giftcard" id="gift" type="button"><span class="giftbox" data-spr="chest" data-sc="5"></span><div><b>신규 용사 선물이 도착했어!</b><p class="small">눌러서 열어 봐</p></div></button>`;
   if(blessActive())h+=`<div class="banner" style="background:#5B3B8C"><span data-spr="star" data-sc="5"></span><div><b>마스터의 가호</b><p class="small" style="opacity:.9">숙제검사 통과! ${fmt(S.bless.until)}까지 모든 공격 +${BLESS_PCT}%</p></div></div>`;
   h+=`<div class="card" style="gap:8px"><div class="row between"><h3>공부 체크</h3><span class="num small"><b style="font-size:20px">${sc.rank}</b> / ${DAILY_CAP}점</span></div>`;
@@ -855,6 +874,7 @@ function renderToday(){
   const emoDone=S.emo[k]&&!S.emo[k].demo;
   h+=`<button class="btn green" id="finish">${emoDone?'마음 체크 다시 하기':'오늘 끝! 마음 체크하기'}</button><p class="tiny muted" style="text-align:center">체크는 하루 1번씩, 정말 한 것만 눌러 줘. 체크 취소는 오늘 밤 12시까지만.</p>`;
   scr.innerHTML=h;
+  if($('#evc'))$('#evc').onclick=()=>{UI.tab=k<=WIN.novEnd?'boss':'raid';if(UI.tab==='boss')UI.bm=WIN.nov;render()};
   if($('#gift'))$('#gift').onclick=giftModal;
   scr.querySelectorAll('.check[data-i]').forEach(b=>b.onclick=()=>askQuest(+b.dataset.i));
   scr.querySelectorAll('.check[data-life]').forEach(b=>b.onclick=()=>{if(SK.closed()){toast('밤 12시가 지나서 마감됐어');return}L.life.clean=!L.life.clean;if(L.life.clean){S.gauge=Math.min(100,S.gauge+20);toast(`방이 반짝반짝! +1점 · 궁극기 게이지 ${S.gauge}%`)}else S.gauge=Math.max(0,S.gauge-20);afterCheck(k);save();render()});
@@ -873,11 +893,13 @@ function afterCheck(k){const L=log(k);const n=hasDone(L)?streak():0;L.sb=n===3?S
 function toggleQuest(i){
   const k=TODAY(),L=log(k),q=L.q[i];
   if(!q.done){
-    const s=ACT[q.a].s;const mk=monthKeyOf(k);const before=monthBossDmg(s,mk);
+    const s=ACT[q.a].s;let mk=monthKeyOf(k);if(s&&novOpen(k)&&bossLeft(s,WIN.nov)>0)mk=WIN.nov;const hp=s?bossHp(s,mk):0;const before=s?monthBossDmg(s,mk):0;
     const r=damageFor(q,L,k);q.done=true;q.at=Date.now();q.dmg=r.dmg;afterCheck(k);
+    const killed=!!s&&before<hp&&before+r.dmg>=hp;
+    if(killed&&mk!==monthKeyOf(k)&&S.seasons&&S.seasons[mk]&&!(S.seasons[mk].killed||[]).includes(s)){S.seasons[mk].killed.push(s);S.seasons[mk].items++;(S.items=S.items||[]).push({kind:'gear',s,name:SUBJ[s].gear,dmg:ITEM_GEAR,from:Number(mk.slice(5))+'월 연습'})}
     save();
-    UI.pendingFx={s,before,dmg:r.dmg,pts:qPts(q),why:r.why,killed:before<SUBJ[s].hp&&before+r.dmg>=SUBJ[s].hp,ac:dayScore(k).ac};
-    UI.tab='boss';UI.boss=s;render();scr.scrollTop=0;window.scrollTo(0,0);return;
+    UI.pendingFx={s,mk,hp,before,dmg:r.dmg,pts:qPts(q),why:r.why,killed,ac:dayScore(k).ac};
+    UI.tab='boss';UI.boss=s;UI.bm=mk;render();scr.scrollTop=0;window.scrollTo(0,0);return;
   } else {
     q.done=false;delete q.dmg;q.cancelled=(q.cancelled||0)+1;afterCheck(k);save();toast('체크를 취소했어요 (취소한 기록은 남아요)');
   }
@@ -886,19 +908,21 @@ function toggleQuest(i){
 
 /* ---------- 보스전 ---------- */
 function renderBoss(){
-  const s=UI.boss,B=SUBJ[s],mk=monthKeyOf(TODAY());const fx=UI.pendingFx&&UI.pendingFx.s===s?UI.pendingFx:null;UI.pendingFx=null;
+  const cur=monthKeyOf(TODAY()),NO=novOpen();if(!NO||(UI.bm!==WIN.nov&&UI.bm!==cur))UI.bm=cur;
+  const s=UI.boss,mk=UI.bm,PR=novPrac(mk),B={...SUBJ[s],hp:bossHp(s,mk)};const fx=UI.pendingFx&&UI.pendingFx.s===s?UI.pendingFx:null;UI.pendingFx=null;
   const BS=bossState(s,mk);const yd=addDays(TODAY(),-1);const healY=(BS.healDays.find(d=>d[0]===yd)||[0,0])[1];
   const dmgNow=monthBossDmg(s,mk);const shown=fx?fx.before:dmgNow;const hp=Math.max(0,B.hp-shown);const p=pctOf(hp,B.hp);
   const K=KINGDOMS[S.char.kingdom];const pot=S.potion[TODAY()]||{n:0,until:0};const potOn=pot.until>Date.now();
   const line=hp>0&&healY&&!fx?`"어제는 체크가 하나도 없었지? 반격이다! 체력 +${healY} 회복!"`:hp===0?'"으앙... 꿈의 문 자물쇠 하나가 풀렸다..."':p<=50?`"제법인걸? 하지만 [${B.sk[2]}]은 못 피할걸!"`:`"[${B.sk[0]}]! 오늘은 공부 안 할걸?"`;
   const L=log();const openQ=L.q.findIndex(q=>ACT[q.a].s===s&&!q.done&&!ACT[q.a].teacher&&!weekFull(q.a,TODAY()));
-  let h=sceneHTML(`<div class="hud"><div class="nm">${esc(B.boss)}<small>${B.n} 보스 · ${Number(mk.slice(5))}월</small></div>${p<=50&&hp>0?'<div class="tagr" style="color:#E2453C">화났다!</div>':''}</div>
+  let h=sceneHTML(`<div class="hud"><div class="nm">${esc(B.boss)}<small>${B.n} 보스 · ${Number(mk.slice(5))}월${PR?' 연습':''}</small></div>${p<=50&&hp>0?'<div class="tagr" style="color:#E2453C">화났다!</div>':''}</div>
     <div class="speech">${esc(line)}</div>${heroHTML()}<div class="boss ${hp===0?'gone':''}" id="bossSpr"><span data-spr="${s}" data-sc="7"></span></div>`)+
   `<div class="card"><div class="row between"><b>HP</b><span class="num px" id="hpnum">${fmtN(hp)} / ${fmtN(B.hp)}</span></div><div class="bar" style="height:18px"><i id="hpbar" style="width:${p}%"></i></div>
-    <p class="tiny muted">방해 스킬: ${B.sk.map(esc).join(' · ')}</p>${BS.late?`<p class="tiny"><span class="pill purple">늦게 온 용사의 축복</span> 이달 보스 체력을 ${fmtN(BS.late)} 미리 깎아 줬어요.</p>`:''}${BS.heal?`<p class="tiny" style="color:#B3261E">보스 반격: 체크 없는 날 ${BS.healDays.length}번, 체력 +${fmtN(BS.heal)} 회복 (한 달 최대 ${SK.REGEN.maxPct}%)</p>`:''}</div>
-  <div class="bossgrid">${SUBJ_KEYS.map(x=>`<button class="bcell ${bossLeft(x,mk)?'':'kill'}" data-b="${x}" aria-pressed="${x===s}"><span data-spr="${x}" data-sc="2"></span><span class="nm">${SUBJ[x].boss}</span><div class="bar"><i style="width:${pctOf(bossLeft(x,mk),SUBJ[x].hp)}%"></i></div></button>`).join('')}</div>
+    <p class="tiny muted">방해 스킬: ${B.sk.map(esc).join(' · ')}</p>${PR?`<p class="tiny"><span class="pill purple">겨울 이벤트</span> 11월 연습 보스예요. 체력이 작고 ${fmt(WIN.novEnd)}까지 싸울 수 있어요. 처치하면 장비 카드를 받아요.</p>`:''}${BS.late?`<p class="tiny"><span class="pill purple">늦게 온 용사의 축복</span> 이달 보스 체력을 ${fmtN(BS.late)} 미리 깎아 줬어요.</p>`:''}${BS.heal?`<p class="tiny" style="color:#B3261E">보스 반격: 체크 없는 날 ${BS.healDays.length}번, 체력 +${fmtN(BS.heal)} 회복 (한 달 최대 ${SK.REGEN.maxPct}%)</p>`:''}</div>
+  ${NO?`<div class="chips" style="justify-content:center">${[WIN.nov,cur].map(m=>`<button class="chip" data-bm="${m}" aria-pressed="${m===mk}">${Number(m.slice(5))}월${novPrac(m)?' 연습':''} 보스 · 처치 ${SUBJ_KEYS.filter(x=>!bossLeft(x,m)).length}/6</button>`).join('')}</div><p class="tiny muted" style="text-align:center;margin:0">${fmt(WIN.novEnd)}까지는 체크 한 번이 11월 연습 보스와 12월 보스에 같이 들어가요.</p>`:''}
+  <div class="bossgrid">${SUBJ_KEYS.map(x=>`<button class="bcell ${bossLeft(x,mk)?'':'kill'}" data-b="${x}" aria-pressed="${x===s}"><span data-spr="${x}" data-sc="2"></span><span class="nm">${SUBJ[x].boss}</span><div class="bar"><i style="width:${pctOf(bossLeft(x,mk),bossHp(x,mk))}%"></i></div></button>`).join('')}</div>
   ${hp>0?(openQ>=0&&!SK.closed()?`<button class="btn" id="atk">${esc(ACT[L.q[openQ].a].n)} 다 하고 공격!</button>`:`<div class="card"><p class="small">오늘은 ${B.n} 체크가 더 없어요. 다른 보스를 공격해 볼까?</p></div>`)
-    :`<div class="card"><h3>처치 완료!</h3><p class="small">장비 [${esc(B.gear)}] · 칭호 [${esc(B.title)}]. 한 달이 끝나면 장비 카드로 받아서 레이드에서 쓸 수 있어요.</p></div>`}
+    :`<div class="card"><h3>처치 완료!</h3><p class="small">장비 [${esc(B.gear)}] · 칭호 [${esc(B.title)}]. ${PR&&mk!==cur?'장비 카드를 바로 받았어요. 레이드에서 쓸 수 있어요.':'한 달이 끝나면 장비 카드로 받아서 레이드에서 쓸 수 있어요.'}</p></div>`}
   <div class="card"><div class="row">${SK.heroTag(S.char,3)}<div style="min-width:0"><b>${esc(S.char.name)}</b> <span class="tiny muted">${esc(S.char.job)}</span><p class="small" style="color:${K.c}">${K.n} · [${K.p}] ${K.d}</p></div></div>
     ${blessActive()?`<p class="small"><span class="pill purple">마스터의 가호</span> ${fmt(S.bless.until)}까지 데미지 +${BLESS_PCT}%</p>`:''}
     <div><div class="row between small"><span>궁극기 게이지</span><span class="num px">${S.gauge}%</span></div><div class="bar gauge"><i style="width:${S.gauge}%"></i></div><p class="tiny muted">100%가 되면 다음 공격 3배! 청소 +20%, 집중 타이머 +${S.char.kingdom==='ult'?40:20}%</p></div>
@@ -906,10 +930,11 @@ function renderBoss(){
     <p class="tiny muted">1점 = 10 데미지. 공격 한 번이 과목 보스, 레이드, 히든보스에 함께 들어가요. 랭킹과 보호자 리포트에는 원래 점수 그대로 나가요.</p></div>`;
   scr.innerHTML=h;hydrate(scr);
   scr.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>{UI.boss=b.dataset.b;render()});
+  scr.querySelectorAll('[data-bm]').forEach(b=>b.onclick=()=>{UI.bm=b.dataset.bm;render()});
   if($('#atk'))$('#atk').onclick=()=>askQuest(openQ);
   $('#pot').onclick=()=>{S.potion[TODAY()]={n:pot.n+1,until:Date.now()+30*60e3};save();toast(`${S.char.food} 물약! 30분 동안 데미지 +15%`);render()};
   $('#tm').onclick=timerSheet;
-  if(fx)playHit(fx,B);
+  if(fx){playHit(fx,B);if(fx.mk&&fx.mk!==cur)setTimeout(()=>toast(`12월 ${SUBJ[s].boss}도 -${fx.dmg}!`),2600)}
   else if(healY&&hp>0){const sk='sk-heal-'+yd+'-'+s;let seen=false;try{seen=localStorage.getItem(sk)==='1';localStorage.setItem(sk,'1')}catch(e){}
     if(!seen){setTimeout(()=>{const bs=$('#bossSpr');if(bs){bs.classList.remove('hit');void bs.offsetWidth;bs.classList.add('hit')}sbanner('보스 반격!');if(window.SKSound){SKSound.play('heal');SKSound.buzz([30,50,30])}},400)}}
 }
@@ -920,14 +945,14 @@ function playHit(fx,B){
     const sc=$('#scene');const bx=sc?sc.clientWidth-90:300;const big=fx.why.some(w=>w.includes('궁극기')||w.includes('치명타'));burst(bx,150,FIRE,big?60:32);flashFx();
     if(window.SKSound){SKSound.play(big?'crit':'attack');SKSound.buzz(big?[40,30,70]:35)}
     dmgText('-'+fx.dmg,bx-30,90,true);
-    const after=Math.max(0,B.hp-fx.before-fx.dmg);const bar=$('#hpbar');if(bar)bar.style.width=pctOf(after,B.hp)+'%';const n=$('#hpnum');if(n)n.textContent=fmtN(after)+' / '+fmtN(B.hp);
+    const after=Math.max(0,B.hp-fx.before-fx.dmg);/* B.hp = 지금 보는 보스 체력 */const bar=$('#hpbar');if(bar)bar.style.width=pctOf(after,B.hp)+'%';const n=$('#hpnum');if(n)n.textContent=fmtN(after)+' / '+fmtN(B.hp);
     if(fx.ac)setTimeout(()=>sbanner('올클리어!'),400);
     if(fx.killed){setTimeout(()=>{if(window.SKSound){SKSound.play('kill');SKSound.buzz([60,40,140])}if(boss)boss.classList.add('dead');burst(bx,140,['#fff','#F7C531','#EE7FAE','#8FE3DB'],70);sbanner('처치!');setTimeout(()=>killModal(UI.boss),1300)},500)}
     else setTimeout(()=>toast(`+${fx.pts}점 · ${fx.dmg} 데미지${fx.why.length?' ('+fx.why.join(', ')+')':''}`),900);
   },280)}
-function killModal(s){const B=SUBJ[s];if(document.querySelector('.modal')){toast(B.boss+' 처치! 칭호 ['+B.title+'] 획득');return}const m=document.createElement('div');m.className='modal';
+function killModal(s){const B=SUBJ[s];const PRK=UI.bm&&UI.bm!==monthKeyOf(TODAY());if(document.querySelector('.modal')){toast(B.boss+' 처치! 칭호 ['+B.title+'] 획득');return}const m=document.createElement('div');m.className='modal';
   m.innerHTML=`<div class="card" role="dialog" aria-label="보스 처치"><h1 style="text-align:center">${esc(B.boss)} 처치!</h1><div class="row" style="justify-content:center"><span data-spr="${s}" data-sc="5" style="opacity:.35"></span></div>
-   <p>칭호 <b>[${esc(B.title)}]</b> 획득</p><p class="small">한 달이 끝나면 장비 카드 <b>${esc(B.gear)}</b>(레이드 ${ITEM_GEAR} 데미지)를 받아요.</p>
+   <p>칭호 <b>[${esc(B.title)}]</b> 획득</p><p class="small">${PRK?`장비 카드 <b>${esc(B.gear)}</b>(레이드 ${ITEM_GEAR} 데미지)를 바로 받았어요!`:`한 달이 끝나면 장비 카드 <b>${esc(B.gear)}</b>(레이드 ${ITEM_GEAR} 데미지)를 받아요.`}</p>
    <button class="btn gold" id="ok">계속 모험하기</button></div>`;phone.appendChild(m);hydrate(m);m.querySelector('#ok').onclick=()=>m.remove()}
 function timerSheet(){
   const sh=document.createElement('div');sh.className='sheet';let left=SK.TIMER_MIN*60,iv=null;
@@ -946,7 +971,7 @@ function timerSheet(){
 /* ---------- 레이드 ---------- */
 function renderRaid(){
   if(!UI.raid){const all=RAIDS.map(r=>raidInst(r));const open=all.find(x=>x.open);UI.raid=(open||all.sort((a,b)=>a.openStart<b.openStart?-1:1)[0]).r.id}
-  const r=RAIDS.find(x=>x.id===UI.raid),I=raidInst(r),k=TODAY();const hs=hiddenState();
+  const r=RAIDS.find(x=>x.id===UI.raid),I=raidInst(r),k=TODAY();const hs=hiddenState();const WH=winterHid();
   const openM=+I.openStart.slice(5,7);const accMonths=[];for(let i=0;i<I.sp.n;i++)accMonths.push(((+I.accStart.slice(5,7)-1+i)%12)+1);
   const items=S.items||[];const dead=I.open&&I.left===0;
   let h=sceneHTML(`<div class="hud"><div class="nm">${esc(r.n)}<small>${esc(r.when)}</small></div><div class="tagr" style="color:${I.open?'#E2453C':'#2B1D16'}">${I.open?(dead?'CLEAR':'OPEN'):'D-'+Math.round((parseDay(I.openStart)-parseDay(k))/864e5)}</div></div>
@@ -957,14 +982,20 @@ function renderRaid(){
     <div class="chips">${RAIDS.map(x=>{const xi=raidInst(x);return `<button class="chip" data-r="${x.id}" aria-pressed="${x.id===r.id}">${esc(x.n.split(' ').pop())}${xi.open?' ●':''}</button>`}).join('')}</div></div>
   <div class="card"><div class="row between"><b>충전 게이지</b><span class="num px">${fmtN(Math.min(I.charge,I.cap))} / ${fmtN(I.cap)}</span></div><div class="bar charge"><i style="width:${pctOf(I.charge,I.cap)}%"></i></div>
     <div class="row between"><b>보스 HP</b><span class="num px">${fmtN(I.left)} / ${fmtN(I.hp)}</span></div><div class="bar"><i id="rhp" style="width:${pctOf(I.left,I.hp)}%"></i></div>
+    ${I.ev?`<p class="tiny"><span class="pill purple">겨울 이벤트</span> 눈사람 왕 체력이 ${fmtN(I.cap+1500)}에서 ${fmtN(WIN.raidMax)}로 줄었어요. 충전 게이지를 채운 만큼 더 줄어요. 크리스마스 전에 쓰러뜨려 보자!</p>`:''}
     ${I.lateCharge?`<p class="tiny"><span class="pill purple">늦게 온 용사의 축복</span> 충전 게이지를 ${fmtN(I.lateCharge)} 미리 채워 줬어요.</p>`:''}
     <p class="tiny muted">${fmt(I.accStart)}부터 충전, ${fmt(I.openStart)}에 문이 열려요. 문이 열리면 모아 둔 게이지가 한 번에 터지고, 남은 체력은 그달 공부와 아이템으로 깎아요.</p>
     ${dead?`<p><b>처치 완료!</b> 칭호 [${esc(r.title)}]</p>`:''}</div>
   ${I.open&&!dead?`<div class="card"><div class="row between"><h3>모아 둔 아이템</h3><span class="pill">${items.length}개</span></div>
      ${items.length?items.map((it,i)=>`<div class="item"><span data-spr="${it.kind==='chest'?'chest':it.s}" data-sc="${it.kind==='chest'?3:2}"></span><div style="flex:1;min-width:0"><b class="small">${esc(it.name)}</b><div class="tiny muted">${esc(it.from)} 획득 · ${it.dmg} 데미지</div></div><button class="chip" data-use="${i}">사용</button></div>`).join(''):'<p class="small muted">아직 아이템이 없어요. 한 달을 마치면 처치한 과목 보스마다 장비 카드, 300점을 채운 달엔 보물상자를 받아요.</p>'}</div>`
    :!I.open?`<div class="card"><p class="small">${esc(r.when)} 때 문이 열려요. 지금은 평소 공부가 게이지로 모이는 중이에요. (아이템 ${items.length}개 보관 중)</p></div>`:''}
-  <div class="card" style="background:#3A2A20;color:#F6E3B4"><div class="row between"><h3>히든보스 · ${HIDDEN.n}</h3><span data-spr="hidden" data-sc="2"></span></div>
-    <div class="bar hid"><i style="width:${pctOf(hs.left,HIDDEN.hp)}%"></i></div><p class="tiny" style="opacity:.85">${fmt(hs.start)}부터 1년 동안 모든 데미지가 쌓여요. HP ${fmtN(hs.left)} / ${fmtN(HIDDEN.hp)}.${hs.late?` 늦게 온 용사의 축복으로 ${fmtN(hs.late)} 미리 깎았어요.`:''} 쓰러뜨리면 꿈의 문이 열리고 내 꿈이 새겨진 엔딩 카드를 받아요.</p></div>`;
+  ${WH?`<div class="card" style="background:#1E2A4A;color:#F6E3B4"><div class="row between"><h3>겨울 이벤트 · ${HIDDEN.n}</h3><span data-spr="hidden" data-sc="2"></span></div>
+    ${!WH.open?`<div class="row between small"><b>꿈의 문 열쇠 게이지</b><span class="num px">${fmtN(Math.min(WH.D,WIN.hidGate))} / ${fmtN(WIN.hidGate)}</span></div><div class="bar charge"><i style="width:${pctOf(Math.min(WH.D,WIN.hidGate),WIN.hidGate)}%"></i></div>
+      <p class="tiny" style="opacity:.9">${fmt(WIN.hidFrom)}부터 공부 데미지가 열쇠 게이지에 모여요. 게이지가 차면 문이 열리고 수문장이 나타나요!${WH.over?' 이번 이벤트는 끝났어요.':''}</p>`
+    :`<div class="row between small"><b>${WH.dead?'처치 완료!':'문이 열렸다!'}</b><span class="num px">HP ${fmtN(WH.left)} / ${fmtN(WIN.hidHp)}</span></div><div class="bar hid"><i style="width:${pctOf(WH.left,WIN.hidHp)}%"></i></div>
+      <p class="tiny" style="opacity:.9">${WH.dead?`꿈의 문 수문장을 쓰러뜨렸어! 칭호 [${esc(WIN.hidTitle)}] 획득. 1월부터는 1년짜리 진짜 히든보스가 다시 기다려요.`:WH.over?'크리스마스가 지나서 이벤트가 끝났어요. 1월부터 원래 히든보스로 돌아가요.':`${fmt(WIN.hidTo)} 크리스마스까지 쓰러뜨리면 칭호 [${esc(WIN.hidTitle)}]!`}</p>`}
+    <p class="tiny" style="opacity:.7">1년짜리 히든보스(HP ${fmtN(hs.left)} 남음)에도 데미지는 그대로 쌓이고 있어요.</p></div>`:`<div class="card" style="background:#3A2A20;color:#F6E3B4"><div class="row between"><h3>히든보스 · ${HIDDEN.n}</h3><span data-spr="hidden" data-sc="2"></span></div>
+    <div class="bar hid"><i style="width:${pctOf(hs.left,HIDDEN.hp)}%"></i></div><p class="tiny" style="opacity:.85">${fmt(hs.start)}부터 1년 동안 모든 데미지가 쌓여요. HP ${fmtN(hs.left)} / ${fmtN(HIDDEN.hp)}.${hs.late?` 늦게 온 용사의 축복으로 ${fmtN(hs.late)} 미리 깎았어요.`:''} 쓰러뜨리면 꿈의 문이 열리고 내 꿈이 새겨진 엔딩 카드를 받아요.</p></div>`}`;
   scr.innerHTML=h;hydrate(scr);
   scr.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{UI.raid=b.dataset.r;render()});
   scr.querySelectorAll('[data-use]').forEach(b=>b.onclick=()=>{const it=S.items.splice(+b.dataset.use,1)[0];(S.itemUse=S.itemUse||[]).push({inst:I.id,dmg:it.dmg,name:it.name,k});save();
@@ -973,7 +1004,7 @@ function renderRaid(){
 }
 /* ---------- 월간 시즌 ---------- */
 function settleMonth(mk){S.seasons=S.seasons||{};if(S.seasons[mk])return S.seasons[mk];
-  const pts=monthScoreRaw(mk);const killed=SUBJ_KEYS.filter(x=>monthBossDmg(x,mk)>=SUBJ[x].hp);
+  const pts=monthScoreRaw(mk);const killed=SUBJ_KEYS.filter(x=>monthBossDmg(x,mk)>=bossHp(x,mk));
   const label=Number(mk.slice(5))+'월';S.items=S.items||[];
   killed.forEach(x=>S.items.push({kind:'gear',s:x,name:SUBJ[x].gear,dmg:ITEM_GEAR,from:label}));
   if(pts>=BASE)S.items.push({kind:'chest',name:'시즌 보물상자',dmg:ITEM_CHEST,from:label});
@@ -984,7 +1015,7 @@ function checkSeason(){if(READONLY||!S.char||UI.mode!=='student'||document.query
   const m=document.createElement('div');m.className='modal';
   m.innerHTML=`<div class="card" role="dialog" aria-label="새 시즌"><h1 style="text-align:center">${Number(cur.slice(5))}월 시즌 시작!</h1>
    <p class="small"><b>${Number(prev.slice(5))}월 결과</b> ${r.pts}점 · ${esc(r.stage)} 단계 · 과목 보스 ${r.killed.length}/6 처치</p>
-   <p class="small">받은 아이템 ${r.items}개. 이번 달 점수는 0점부터, 과목 보스 6마리도 새로 나타났어요. 레이드 게이지와 히든보스는 그대로 이어져요.</p>
+   <p class="small">받은 아이템 ${r.items}개. 이번 달 점수는 0점부터, 과목 보스 6마리도 새로 나타났어요. 레이드 게이지와 히든보스는 그대로 이어져요.${novPrac(prev)&&novOpen()?` <b>11월 연습 보스는 ${fmt(WIN.novEnd)}까지 계속 싸울 수 있어요!</b>`:''}</p>
    <h3>이번 달 나는?</h3>
    <button class="btn gold" data-c="keep">${esc(S.char.name)} · ${esc(KINGDOMS[S.char.kingdom].n)} 그대로</button>
    <button class="btn ghost" data-c="kingdom">왕국만 이사하기</button>
@@ -1093,7 +1124,7 @@ function renderMe(){
   const c=S.char,K=KINGDOMS[c.kingdom];const total=Object.keys(S.logs).reduce((a,k)=>a+dayScore(k).raw,0);const lv=Math.floor(total/300)+1;
   const ms=monthScoreRaw();const stg=SK.stage(ms);const nextStg=SK.STAGES.find(x=>x[0]>ms);const st=streak();
   const titles=[];Object.keys(S.seasons||{}).forEach(mk=>(S.seasons[mk].killed||[]).forEach(x=>titles.push(SUBJ[x].title)));SUBJ_KEYS.forEach(x=>{if(!bossLeft(x))titles.push(SUBJ[x].title)});
-  RAIDS.forEach(r=>{const I=raidInst(r);if(I.open&&I.left===0)titles.push(r.title)});
+  RAIDS.forEach(r=>{const I=raidInst(r);if(I.open&&I.left===0)titles.push(r.title)});{const wh=winterHid();if(wh&&wh.dead)titles.push(WIN.hidTitle)}
   const friends=Object.keys(ALL).filter(id=>id!==UID&&ALL[id].char);
   let h=`${UI.justMade?'<h1>캐릭터 카드 완성!</h1>':''}
   <div class="charcard" style="background:linear-gradient(150deg,${c.color},${K.c})">
@@ -1103,7 +1134,7 @@ function renderMe(){
     <p class="tiny" style="opacity:.85">모험의 목표: ${esc(c.goal)} · 오라 ${esc(c.colorName||'')}</p></div>
   <div class="card"><div class="row between"><h3>${Number(TODAY().slice(5,7))}월 성장 단계</h3><span class="pill">${esc(stg[1])}${stg[2]?' · '+esc(stg[2]):''}</span></div><div class="bar gauge"><i style="width:${pctOf(ms,BASE)}%"></i></div>
     <p class="tiny muted">${ms}점 · ${nextStg?`${nextStg[0]-ms}점 더 하면 '${nextStg[1]}' (${nextStg[2]})`:'최고 단계!'} · 기준치 ${BASE}점을 채우면 보스 6마리를 모두 잡을 수 있어요. 매달 1일 새로 시작.</p>
-    <div class="bossgrid">${SUBJ_KEYS.map(x=>`<div class="bcell ${bossLeft(x)?'':'kill'}"><span data-spr="${x}" data-sc="2"></span><span class="nm">${SUBJ[x].n}</span><div class="bar"><i style="width:${pctOf(bossLeft(x),SUBJ[x].hp)}%"></i></div></div>`).join('')}</div></div>
+    <div class="bossgrid">${SUBJ_KEYS.map(x=>`<div class="bcell ${bossLeft(x)?'':'kill'}"><span data-spr="${x}" data-sc="2"></span><span class="nm">${SUBJ[x].n}</span><div class="bar"><i style="width:${pctOf(bossLeft(x),bossHp(x,monthKeyOf(TODAY())))}%"></i></div></div>`).join('')}</div></div>
   <div class="card"><div class="row between"><h3>누적 레벨</h3><span class="num small">${total % 300} / 300</span></div><div class="bar gauge"><i style="width:${(total%300)/3}%"></i></div><p class="tiny muted">누적 ${total}점 · 300점마다 레벨업, 사라지지 않아요</p></div>
   <div class="card"><h3>모험 도감</h3><p class="small">칭호: ${titles.length?[...new Set(titles)].map(t=>`<span class="pill">${esc(t)}</span>`).join(' '):'<span class="muted">보스를 쓰러뜨리면 칭호가 생겨요</span>'}</p>
     <div class="row" style="gap:12px"><span data-spr="owl" data-sc="3" style="${st>=7||(S.pets||{}).owl?'':'opacity:.25;filter:grayscale(1)'}"></span><span class="small">알람 부엉이 ${st>=7?'(함께하는 중)':'· 7일 연속'}</span>
@@ -1185,7 +1216,7 @@ function renderParent(){
     h+=`<h1>과목별</h1><p class="small muted">${fmt(w)} ~ ${fmt(days[6])}</p></div>
     ${SUBJ_KEYS.map(s=>{const B=SUBJ[s];let n=0,mn=0;days.forEach(d=>doneList(S.logs[d]).forEach(a=>{if(a.s===s){n++;mn+=a.min||0}}));
       return `<div class="card"><div class="row between"><h3><span style="color:var(--${s})">●</span> ${B.n}</h3><span class="small muted num">이번 주 ${n}번 · 약 ${mn}분</span></div>
-        <div class="row small"><span data-spr="${s}" data-sc="2"></span><span>${esc(B.boss)} ${bossLeft(s,mk)?'HP '+pctOf(bossLeft(s,mk),B.hp)+'% 남음':'처치 완료!'}</span></div>
+        <div class="row small"><span data-spr="${s}" data-sc="2"></span><span>${esc(B.boss)} ${bossLeft(s,mk)?'HP '+pctOf(bossLeft(s,mk),bossHp(s,mk))+'% 남음':'처치 완료!'}</span></div>
         <p class="tiny muted">${TIP[s]}</p></div>`}).join('')}`;
   }
   if(t==='heart'){

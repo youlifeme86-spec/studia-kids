@@ -147,6 +147,14 @@ SK.REGEN={pct:3,maxPct:15};
 /* ---------- 일찍 끝낸 용사 ----------
  * 서울 시각으로 hour시 전에 체크하면 그 공격 데미지 +pct%. (랭킹 점수는 그대로) pct를 0으로 하면 꺼져요. */
 SK.EARLY={hour:22,pct:1};
+/* ---------- 겨울 이벤트 (2026 런칭 기념, 한 번만) ----------
+ * 1) 11월 과목 보스 = 연습 보스: 체력을 작게(novHp) 하고 novEnd까지 싸울 수 있어요. 12월 첫 주 체크는 11월 연습 보스와 12월 보스에 같이 들어가요.
+ * 2) 눈사람 왕 레이드(12월): 문이 열린 뒤 남은 체력을 최대 raidMax로.
+ * 3) 히든보스 겨울판: hidFrom부터 모은 데미지가 hidGate를 넘으면 문이 열리고, hidHp를 hidTo(크리스마스)까지 깎으면 처치.
+ * 1월부터는 원래 규칙. 이벤트를 끄려면 SK.WINTER=null */
+SK.WINTER={nov:'2026-11',novEnd:'2026-12-07',novHp:{m:150,e:150,k:90,b:90,r:30,w:70},
+  raidOpen:'2026-12-01',raidMax:3000,
+  hidFrom:'2026-12-01',hidTo:'2026-12-25',hidGate:1000,hidHp:1500,hidTitle:'크리스마스 꿈의 용사'};
 SK.seoulHour=function(t){try{const h=+new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Seoul',hour:'numeric',hourCycle:'h23'}).format(t?new Date(t):new Date());return isNaN(h)?(t?new Date(t):new Date()).getHours():h%24}catch(e){return (t?new Date(t):new Date()).getHours()}};
 
 
