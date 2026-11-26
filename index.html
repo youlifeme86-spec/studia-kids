@@ -15,11 +15,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="스터디아 키즈">
-<script src="config.js?v=2026.11.26-1419"></script>
-<script src="game-data.js?v=2026.11.26-1419"></script>
-<script src="sound.js?v=2026.11.26-1419"></script>
+<script src="config.js?v=2026.11.26-1627"></script>
+<script src="game-data.js?v=2026.11.26-1627"></script>
+<script src="sound.js?v=2026.11.26-1627"></script>
 <script>
-window.RR_VERSION='2026.11.26-1419';
+window.RR_VERSION='2026.11.26-1627';
 /* 실시간 오류 기록: 학생 폰에서 난 오류를 구글 시트 [오류] 탭으로 보냄 */
 (function(){var n=0;window.RR_REPORT=function(msg,stack,extra){try{var C=window.RR_CONFIG||{};if(!C.API_URL||n>=8)return;n++;var a=null;try{a=JSON.parse(localStorage.getItem('sk-auth-v1')||'null')}catch(e){}
 fetch(C.API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},keepalive:true,body:JSON.stringify({action:'logError',token:a&&a.token||'',msg:String(msg||'').slice(0,1000),stack:String(stack||'').slice(0,3000),page:location.pathname+(location.hash.indexOf('#parent')===0?' (학부모)':''),tab:(window.RR_TAB||'')+(extra?' '+extra:''),ver:window.RR_VERSION||'',ua:navigator.userAgent.slice(0,300)})}).catch(function(){})}catch(e){}};
@@ -106,6 +106,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 .modebar{display:flex;gap:6px;background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:4px;width:100%;max-width:420px}
 .modebar button{flex:1;border:0;background:transparent;border-radius:999px;padding:7px 10px;font-size:13px;color:var(--muted)}
 .modebar button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.modebar .mbtitle{flex:1;align-self:center;padding-left:12px;font-family:var(--f-display);font-size:15px;color:var(--ink)}
 .modebar #sndBtn,.modebar #sndBtn[aria-pressed]{flex:none;width:44px;padding:4px;font-size:16px;color:var(--ink);background:transparent}
 .phone{width:100%;max-width:420px;background:var(--bg);display:flex;flex-direction:column;position:relative}
 @media (min-width:700px){.phone{border:1px solid var(--line);border-radius:32px;box-shadow:var(--shadow);height:820px;overflow:hidden}}
@@ -311,6 +312,17 @@ img.px,canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 .hud .nm{background:#FFF4D6;padding:5px 9px;box-shadow:var(--px);font-family:var(--f-title);font-size:17px;line-height:1.15;min-width:0;color:#2B1D16}
 .hud .nm small{display:block;font-family:var(--f-body);font-size:11px;color:#6E5844}
 .hud .tagr{margin-left:auto;background:#FFF4D6;padding:6px 8px;box-shadow:var(--px);font-family:var(--f-pixel);font-size:9px;white-space:nowrap;color:#2B1D16}
+.tags{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0 10px}
+.tagb{display:flex;flex-direction:column;align-items:center;gap:2px;padding:12px 4px;border:3px solid #2B1D16;background:#FFF6DC;font:inherit;font-family:var(--f-display);font-size:16px;color:#2B1D16;box-shadow:0 4px 0 #2B1D16;cursor:pointer}
+.tagb span{font-size:28px;line-height:1.1}.tagb:active{transform:translateY(3px);box-shadow:0 1px 0 #2B1D16}
+.boss.st1::after,.boss.st2::after,.boss.st3::after{position:absolute;top:-6px;left:-4px;font-size:22px;animation:float 1.2s ease-in-out infinite}
+.boss.st1::after{content:'💦'}.boss.st2::after{content:'💢'}.boss.st3::after{content:'🩹'}
+.boss.st2>span{filter:saturate(.8) contrast(1.1)}.boss.st3{animation:wobble .5s ease-in-out infinite}
+@keyframes wobble{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+.critb{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%) scale(.4);font-family:'Press Start 2P',var(--f-display);font-size:22px;color:#FFE066;text-shadow:3px 3px 0 #B3261E,-2px -2px 0 #2B1D16;z-index:6;white-space:nowrap;animation:critpop 1.1s ease-out forwards;pointer-events:none}
+.critb.mega{font-size:28px;color:#fff;text-shadow:3px 3px 0 #7A4FD0,-2px -2px 0 #2B1D16}
+@keyframes critpop{0%{transform:translate(-50%,-50%) scale(.4);opacity:0}25%{transform:translate(-50%,-50%) scale(1.25);opacity:1}60%{transform:translate(-50%,-50%) scale(1)}100%{transform:translate(-50%,-80%) scale(1);opacity:0}}
+.goldb{display:inline-block;background:#FFD84A;color:#2B1D16;border:2px solid #2B1D16;padding:1px 8px;font-size:12px;font-family:var(--f-display);margin-left:6px}
 .speech{position:absolute;right:12px;top:66px;max-width:52%;background:#fff;padding:6px 9px;font-size:12px;box-shadow:var(--px2);z-index:3;color:#2B1D16}
 .sbanner{position:absolute;left:0;right:0;top:40%;text-align:center;z-index:7;font-size:36px;font-family:var(--f-title);color:#F9DDB6;text-shadow:2px 0 #2B1D16,-2px 0 #2B1D16,0 2px #2B1D16,0 -2px #2B1D16,0 6px #2B1D16;animation:ban 1.6s steps(8) forwards;pointer-events:none}
 @keyframes ban{0%{transform:scale(.3);opacity:0}20%{transform:scale(1.15);opacity:1}80%{opacity:1}100%{opacity:0}}
@@ -386,8 +398,7 @@ details summary{cursor:pointer;padding:4px 0}
 </div>
 <div class="shell">
   <div class="modebar" role="group" aria-label="화면 선택">
-    <button id="modeStudent" aria-pressed="true">학생 화면</button>
-    <button id="modeParent" aria-pressed="false">보호자 화면</button>
+    <span class="mbtitle">스터디아 왕국 키즈</span>
     <button id="sndBtn" type="button" aria-label="소리 켜고 끄기"></button>
   </div>
   <div class="phone" id="phone">
@@ -510,7 +521,7 @@ function bossLeft(s,mk){return bossState(s,mk||monthKeyOf(TODAY())).left}
 function raidInst(r,today){today=today||TODAY();const y=+today.slice(0,4);let best=null;
   [y-1,y,y+1].forEach(yy=>r.specs.forEach(sp=>{const openStart=ymd(yy,sp.m,1);const openEnd=ymd(yy,sp.m+1,0);const accStart=ymd(yy,sp.m-sp.n,1);
     if(openEnd>=today&&(!best||openEnd<best.openEnd))best={r,sp,openStart,openEnd,accStart,id:r.id+'-'+openStart}}));
-  const b=best,cap=b.sp.n*BASE*10,hp=cap+1500;const open=today>=b.openStart;
+  const b=best,cap=b.sp.n*BASE*10,hp=Math.round((cap+1500)*SK.HPX/10)*10;const open=today>=b.openStart;
   const lateCharge=Math.round(cap*lateFrac(b.accStart,addDays(b.openStart,-1))*(SK.LATE.raid||0)/100);const charge=dmgIn(b.accStart,open?addDays(b.openStart,-1):today)+lateCharge;
   const items=(S.itemUse||[]).filter(u=>u.inst===b.id).reduce((a,u)=>a+u.dmg,0);
   const direct=open?dmgIn(b.openStart,today)+items:0;
@@ -660,11 +671,15 @@ function damageFor(q,L,k){
   const pot=S.potion[k];if(pot&&pot.until>Date.now()){bonus+=15;why.push('힘내기 물약 +15%')}
   if(blessActive()){bonus+=BLESS_PCT;why.push('마스터의 가호 +'+BLESS_PCT+'%')}
   if(SK.EARLY.pct&&SK.seoulHour()<SK.EARLY.hour){bonus+=SK.EARLY.pct;why.push('밤 '+(SK.EARLY.hour-12)+'시 전 +'+SK.EARLY.pct+'%')}
+  const nth=L.q.filter(x=>x.done&&x!==q).length+(L.life&&L.life.clean?1:0)+1,cb=SK.COMBO[Math.min(nth,SK.COMBO.length-1)]||0;let combo=0;
+  if(cb){bonus+=cb;combo=nth;why.push(nth+' COMBO +'+cb+'%')}
+  const hr=SK.seoulHour(),G=SK.GOLDEN;let golden=false;if(G&&G.pct&&hr>=G.from&&hr<G.to){bonus+=G.pct;golden=true;why.push('골든타임 +'+G.pct+'%')}
   bonus=Math.min(100,bonus);
-  let mult=(1+bonus/100)*crit;
-  if(S.gauge>=100){mult*=3;S.gauge=0;why.push('궁극기 ×3')}
+  let mult=1+bonus/100,hit='';
+  if(S.gauge>=100){mult*=3;S.gauge=0;hit='ult';why.push('궁극기 MEGA ×3')}
+  else{const C=SK.CRIT,r=Math.random()*100;if(r<C.megaPct){mult*=C.megaMult;hit='mega';why.push('MEGA HIT ×'+C.megaMult)}else if(r<C.megaPct+C.pct){mult*=C.mult;hit='crit';why.push('CRITICAL ×'+C.mult)}}
   mult=Math.min(4,mult);
-  return {dmg:Math.round(base*mult),why}}
+  return {dmg:Math.round(base*mult),why,hit,combo,golden}}
 
 /* ---------- 렌더 공통 ---------- */
 const $=s=>document.querySelector(s);
@@ -688,8 +703,6 @@ function renderNav(items,cur,on){nav.hidden=false;nav.innerHTML=items.map(([id,l
 
 function syncBgm(){if(!window.SKSound)return;const want=(!NEED_LOGIN&&!PARENT_CODE&&UI.mode==='student'&&S&&S.char&&(UI.tab==='boss'||UI.tab==='raid'))?UI.tab:null;SKSound.bgm(want)}
 function render(){setTimeout(syncBgm,0);setTimeout(enhanceScroll,30);
-  document.getElementById('modeStudent').setAttribute('aria-pressed',UI.mode==='student');
-  document.getElementById('modeParent').setAttribute('aria-pressed',UI.mode==='parent');
   phone.classList.toggle('game',UI.mode==='student');
   window.RR_TAB=UI.mode+'/'+UI.tab;
   if(NEED_LOGIN&&!PARENT_CODE){document.querySelector('.modebar').hidden=true;phone.classList.add('game');nav.hidden=true;renderLogin();hydrate(scr);return}
@@ -703,8 +716,6 @@ function render(){setTimeout(syncBgm,0);setTimeout(enhanceScroll,30);
   ({today:renderToday,boss:renderBoss,raid:renderRaid,rank:renderRank,me:renderMe})[UI.tab]();
   hydrate(scr);checkSeason();
 }
-document.getElementById('modeStudent').onclick=()=>{UI.mode='student';render()};
-document.getElementById('modeParent').onclick=()=>{UI.mode='parent';render()};
 
 /* ---------- 스크롤 표시: 아래에 더 있으면 알려 주고, 옆으로 밀 수 있는 곳에는 화살표 ---------- */
 const BIGSCREEN=matchMedia('(min-width:700px)');
@@ -857,7 +868,7 @@ function renderToday(){
   const left=pctOf(bossLeft(bossS,mk),bossHp(bossS,mk));const ms=monthScoreRaw();const stg=SK.stage(ms);
   const done=L.q.filter(q=>q.done).length+(L.life.clean?1:0);
   let h=sceneHTML(`<div class="hud"><div class="nm">${esc(S.char.name)}<small>${esc(KINGDOMS[S.char.kingdom].n)} · ${esc(ANIMALS[S.char.animal]?ANIMALS[S.char.animal].n:'')} ${esc(S.char.job)}</small></div><div class="tagr">${Number(k.slice(5,7))}월 ${ms}/${BASE}<br>${esc(stg[1])}</div></div>${heroHTML()}<div class="boss sleep" style="right:20px;transform:scale(.8);transform-origin:bottom right"><span data-spr="${bossS}" data-sc="6"></span></div>`)+
-   `<div><p class="tiny muted">${fmt(k)} · 밤 ${SK.DEADLINE_HOUR-12}시 마감</p><h1>오늘의 퀘스트</h1></div>
+   `<div><p class="tiny muted">${fmt(k)} · 밤 ${SK.DEADLINE_HOUR-12}시 마감${(()=>{const G=SK.GOLDEN,h=SK.seoulHour();return G&&G.pct?(h>=G.from&&h<G.to?`<span class="goldb">골든타임 진행 중 +${G.pct}%</span>`:h<G.from?` · 골든타임 ${G.from-12}~${G.to-12}시`:''):''})()}</p><h1>오늘의 퀘스트</h1></div>
     <div class="bubble">${closed?'"밤 12시가 지나서 오늘 체크는 끝났어. 빠뜨린 게 있으면 내일 선생님께 말해 줘!"':`"${done}개 했어! ${esc(SUBJ[bossS].boss)} 체력 ${left}% 남았어"`}</div>`;
   if(WIN&&k>=WIN.nov+'-26'&&k<=WIN.hidTo){const nl=SUBJ_KEYS.filter(x=>!bossLeft(x,WIN.nov)).length,WH=winterHid(),RI=raidInst(RAIDS.find(r=>r.id==='winter'));
     h+=`<button class="card evcard" id="evc" type="button"><div class="row between"><b>❄ 겨울 이벤트</b><span class="tiny">크리스마스까지</span></div>
@@ -887,18 +898,26 @@ function confirmSheet(title,msg,yes){const sh=document.createElement('div');sh.c
   phone.appendChild(sh);sh.querySelector('#no').onclick=()=>sh.remove();sh.querySelector('#yes').onclick=()=>{sh.remove();yes()};sh.onclick=e=>{if(e.target===sh)sh.remove()}}
 function askQuest(i){const k=TODAY(),L=log(k),q=L.q[i];if(SK.closed()){toast('밤 12시가 지나서 오늘 체크는 마감됐어');return}
   if(q.done)return toggleQuest(i);if(weekFull(q.a,k)){toast('이번 주는 다 채웠어!');return}
-  confirmSheet('정말 다 했니?',ACT[q.a].n+'을(를) 끝까지 했으면 눌러 줘. 거짓 체크는 감점돼요.',()=>toggleQuest(i))}
+  tagSheet(ACT[q.a].n,tag=>toggleQuest(i,tag))}
+/* 1초 감정 태그: 고르면 바로 공격 */
+const TAGS=[['easy','쉬웠어','😆'],['hard','조금 힘들어','😮‍💨'],['did','해냈다!','💪']];
+function tagSheet(name,go){const sh=document.createElement('div');sh.className='sheet';
+  sh.innerHTML=`<div class="in" role="dialog" aria-label="정말 다 했니?"><h2>${esc(name)} 다 했니?</h2><p class="small">어땠는지 하나 골라 줘. 고르면 바로 공격! <span class="muted">(거짓 체크는 감점돼요)</span></p>
+   <div class="tags">${TAGS.map(t=>`<button class="tagb" data-tag="${t[0]}"><span>${t[2]}</span>${t[1]}</button>`).join('')}</div>
+   <button class="btn ghost" id="no">아직이야</button></div>`;
+  phone.appendChild(sh);sh.querySelector('#no').onclick=()=>sh.remove();sh.onclick=e=>{if(e.target===sh)sh.remove()};
+  sh.querySelectorAll('[data-tag]').forEach(b=>b.onclick=()=>{sh.remove();go(b.dataset.tag)})}
 /* 연속 보너스(3일·7일)와 연속 출석 기록 */
 function afterCheck(k){const L=log(k);const n=hasDone(L)?streak():0;L.sb=n===3?SK.STREAK3:(n>0&&n%7===0)?SK.STREAK7:0}
-function toggleQuest(i){
+function toggleQuest(i,tag){
   const k=TODAY(),L=log(k),q=L.q[i];
   if(!q.done){
     const s=ACT[q.a].s;let mk=monthKeyOf(k);if(s&&novOpen(k)&&bossLeft(s,WIN.nov)>0)mk=WIN.nov;const hp=s?bossHp(s,mk):0;const before=s?monthBossDmg(s,mk):0;
-    const r=damageFor(q,L,k);q.done=true;q.at=Date.now();q.dmg=r.dmg;afterCheck(k);
+    const r=damageFor(q,L,k);q.done=true;q.at=Date.now();q.dmg=r.dmg;if(tag)q.tag=tag;afterCheck(k);
     const killed=!!s&&before<hp&&before+r.dmg>=hp;
     if(killed&&mk!==monthKeyOf(k)&&S.seasons&&S.seasons[mk]&&!(S.seasons[mk].killed||[]).includes(s)){S.seasons[mk].killed.push(s);S.seasons[mk].items++;(S.items=S.items||[]).push({kind:'gear',s,name:SUBJ[s].gear,dmg:ITEM_GEAR,from:Number(mk.slice(5))+'월 연습'})}
     save();
-    UI.pendingFx={s,mk,hp,before,dmg:r.dmg,pts:qPts(q),why:r.why,killed,ac:dayScore(k).ac};
+    UI.pendingFx={s,mk,hp,before,dmg:r.dmg,pts:qPts(q),why:r.why,hit:r.hit,combo:r.combo,killed,ac:dayScore(k).ac};
     UI.tab='boss';UI.boss=s;UI.bm=mk;render();scr.scrollTop=0;window.scrollTo(0,0);return;
   } else {
     q.done=false;delete q.dmg;q.cancelled=(q.cancelled||0)+1;afterCheck(k);save();toast('체크를 취소했어요 (취소한 기록은 남아요)');
@@ -913,10 +932,10 @@ function renderBoss(){
   const BS=bossState(s,mk);const yd=addDays(TODAY(),-1);const healY=(BS.healDays.find(d=>d[0]===yd)||[0,0])[1];
   const dmgNow=monthBossDmg(s,mk);const shown=fx?fx.before:dmgNow;const hp=Math.max(0,B.hp-shown);const p=pctOf(hp,B.hp);
   const K=KINGDOMS[S.char.kingdom];const pot=S.potion[TODAY()]||{n:0,until:0};const potOn=pot.until>Date.now();
-  const line=hp>0&&healY&&!fx?`"어제는 체크가 하나도 없었지? 반격이다! 체력 +${healY} 회복!"`:hp===0?'"으앙... 꿈의 문 자물쇠 하나가 풀렸다..."':p<=50?`"제법인걸? 하지만 [${B.sk[2]}]은 못 피할걸!"`:`"[${B.sk[0]}]! 오늘은 공부 안 할걸?"`;
+  const line=hp>0&&healY&&!fx?`"어제는 체크가 하나도 없었지? 반격이다! 체력 +${healY} 회복!"`:bossLine(B,hp,p);
   const L=log();const openQ=L.q.findIndex(q=>ACT[q.a].s===s&&!q.done&&!ACT[q.a].teacher&&!weekFull(q.a,TODAY()));
   let h=sceneHTML(`<div class="hud"><div class="nm">${esc(B.boss)}<small>${B.n} 보스 · ${Number(mk.slice(5))}월${PR?' 연습':''}</small></div>${p<=50&&hp>0?'<div class="tagr" style="color:#E2453C">화났다!</div>':''}</div>
-    <div class="speech">${esc(line)}</div>${heroHTML()}<div class="boss ${hp===0?'gone':''}" id="bossSpr"><span data-spr="${s}" data-sc="7"></span></div>`)+
+    <div class="speech">${esc(line)}</div>${heroHTML()}<div class="boss ${hp===0?'gone':bossStage(p)}" id="bossSpr"><span data-spr="${s}" data-sc="7"></span></div>`)+
   `<div class="card"><div class="row between"><b>HP</b><span class="num px" id="hpnum">${fmtN(hp)} / ${fmtN(B.hp)}</span></div><div class="bar" style="height:18px"><i id="hpbar" style="width:${p}%"></i></div>
     <p class="tiny muted">방해 스킬: ${B.sk.map(esc).join(' · ')}</p>${PR?`<p class="tiny"><span class="pill purple">겨울 이벤트</span> 11월 연습 보스예요. 체력이 작고 ${fmt(WIN.novEnd)}까지 싸울 수 있어요. 처치하면 장비 카드를 받아요.</p>`:''}${BS.late?`<p class="tiny"><span class="pill purple">늦게 온 용사의 축복</span> 이달 보스 체력을 ${fmtN(BS.late)} 미리 깎아 줬어요.</p>`:''}${BS.heal?`<p class="tiny" style="color:#B3261E">보스 반격: 체크 없는 날 ${BS.healDays.length}번, 체력 +${fmtN(BS.heal)} 회복 (한 달 최대 ${SK.REGEN.maxPct}%)</p>`:''}</div>
   ${NO?`<div class="chips" style="justify-content:center">${[WIN.nov,cur].map(m=>`<button class="chip" data-bm="${m}" aria-pressed="${m===mk}">${Number(m.slice(5))}월${novPrac(m)?' 연습':''} 보스 · 처치 ${SUBJ_KEYS.filter(x=>!bossLeft(x,m)).length}/6</button>`).join('')}</div><p class="tiny muted" style="text-align:center;margin:0">${fmt(WIN.novEnd)}까지는 체크 한 번이 11월 연습 보스와 12월 보스에 같이 들어가요.</p>`:''}
@@ -925,7 +944,7 @@ function renderBoss(){
     :`<div class="card"><h3>처치 완료!</h3><p class="small">장비 [${esc(B.gear)}] · 칭호 [${esc(B.title)}]. ${PR&&mk!==cur?'장비 카드를 바로 받았어요. 레이드에서 쓸 수 있어요.':'한 달이 끝나면 장비 카드로 받아서 레이드에서 쓸 수 있어요.'}</p></div>`}
   <div class="card"><div class="row">${SK.heroTag(S.char,3)}<div style="min-width:0"><b>${esc(S.char.name)}</b> <span class="tiny muted">${esc(S.char.job)}</span><p class="small" style="color:${K.c}">${K.n} · [${K.p}] ${K.d}</p></div></div>
     ${blessActive()?`<p class="small"><span class="pill purple">마스터의 가호</span> ${fmt(S.bless.until)}까지 데미지 +${BLESS_PCT}%</p>`:''}
-    <div><div class="row between small"><span>궁극기 게이지</span><span class="num px">${S.gauge}%</span></div><div class="bar gauge"><i style="width:${S.gauge}%"></i></div><p class="tiny muted">100%가 되면 다음 공격 3배! 청소 +20%, 집중 타이머 +${S.char.kingdom==='ult'?40:20}%</p></div>
+    <div><div class="row between small"><span>궁극기 게이지</span><span class="num px">${S.gauge}%</span></div><div class="bar gauge"><i style="width:${S.gauge}%"></i></div><p class="tiny muted">100%가 되면 다음 공격은 MEGA ×3 확정! 청소 +20%, 집중 타이머 +${S.char.kingdom==='ult'?40:20}%</p></div>
     <div class="row"><button class="btn ghost" id="pot" ${pot.n>=2||potOn?'disabled':''} style="font-size:15px">${potOn?`${esc(S.char.food)} 물약 효과 중`:`${esc(S.char.food)} 힘내기 물약 (${2-pot.n}/2)`}</button><button class="btn ghost" id="tm" style="font-size:15px">${SK.TIMER_MIN}분 집중 타이머</button></div>
     <p class="tiny muted">1점 = 10 데미지. 공격 한 번이 과목 보스, 레이드, 히든보스에 함께 들어가요. 랭킹과 보호자 리포트에는 원래 점수 그대로 나가요.</p></div>`;
   scr.innerHTML=h;hydrate(scr);
@@ -938,15 +957,19 @@ function renderBoss(){
   else if(healY&&hp>0){const sk='sk-heal-'+yd+'-'+s;let seen=false;try{seen=localStorage.getItem(sk)==='1';localStorage.setItem(sk,'1')}catch(e){}
     if(!seen){setTimeout(()=>{const bs=$('#bossSpr');if(bs){bs.classList.remove('hit');void bs.offsetWidth;bs.classList.add('hit')}sbanner('보스 반격!');if(window.SKSound){SKSound.play('heal');SKSound.buzz([30,50,30])}},400)}}
 }
+/* 보스 HP 구간별 대사·모습: 75% 이하 땀, 50% 이하 갑옷 금, 25% 이하 붕대 */
+function bossStage(p){return p<=25?'st3':p<=50?'st2':p<=75?'st1':''}
+function bossLine(B,hp,p){return hp<=0?'"내가 졌다! 이번 달 왕국 수호 성공!"':p<=25?'"으악! 조금만 살려줘~ 내일 쉬어!"':p<=50?`"잠깐! ${B.n}까지 하면 반칙이야!"`:p<=75?'"어라? 오늘 좀 열심히 하는데?"':`"[${B.sk[0]}]! 오늘은 공부 안 할걸?"`}
+function critBanner(t,mega){const sc=document.getElementById('scene');if(!sc)return;const b=document.createElement('div');b.className='critb'+(mega?' mega':'');b.textContent=t;sc.appendChild(b);setTimeout(()=>b.remove(),1200)}
 function playHit(fx,B){
   const hero=$('#hero'),boss=$('#bossSpr');if(hero){hero.classList.remove('dash');void hero.offsetWidth;hero.classList.add('dash')}
   setTimeout(()=>{
     if(boss){boss.classList.remove('hit');void boss.offsetWidth;boss.classList.add('hit')}
-    const sc=$('#scene');const bx=sc?sc.clientWidth-90:300;const big=fx.why.some(w=>w.includes('궁극기')||w.includes('치명타'));burst(bx,150,FIRE,big?60:32);flashFx();
+    const sc=$('#scene');const bx=sc?sc.clientWidth-90:300;const big=!!fx.hit||fx.why.some(w=>w.includes('치명타'));if(fx.hit)critBanner(fx.hit==='crit'?'CRITICAL!':'MEGA HIT!',fx.hit!=='crit');if(fx.hit&&fx.hit!=='crit')setTimeout(flashFx,180);burst(bx,150,FIRE,big?60:32);flashFx();
     if(window.SKSound){SKSound.play(big?'crit':'attack');SKSound.buzz(big?[40,30,70]:35)}
     dmgText('-'+fx.dmg,bx-30,90,true);
-    const after=Math.max(0,B.hp-fx.before-fx.dmg);/* B.hp = 지금 보는 보스 체력 */const bar=$('#hpbar');if(bar)bar.style.width=pctOf(after,B.hp)+'%';const n=$('#hpnum');if(n)n.textContent=fmtN(after)+' / '+fmtN(B.hp);
-    if(fx.ac)setTimeout(()=>sbanner('올클리어!'),400);
+    const after=Math.max(0,B.hp-fx.before-fx.dmg);/* B.hp = 지금 보는 보스 체력 */const ap=pctOf(after,B.hp);const sp=document.querySelector('.speech');if(sp)sp.textContent=bossLine(B,after,ap);if(boss&&after>0){boss.classList.remove('st1','st2','st3');const st=bossStage(ap);if(st)boss.classList.add(st)}const bar=$('#hpbar');if(bar)bar.style.width=pctOf(after,B.hp)+'%';const n=$('#hpnum');if(n)n.textContent=fmtN(after)+' / '+fmtN(B.hp);
+    if(fx.ac)setTimeout(()=>sbanner('올클리어!'),400);else if(fx.combo>=2)setTimeout(()=>sbanner(fx.combo+' COMBO!'),400);
     if(fx.killed){setTimeout(()=>{if(window.SKSound){SKSound.play('kill');SKSound.buzz([60,40,140])}if(boss)boss.classList.add('dead');burst(bx,140,['#fff','#F7C531','#EE7FAE','#8FE3DB'],70);sbanner('처치!');setTimeout(()=>killModal(UI.boss),1300)},500)}
     else setTimeout(()=>toast(`+${fx.pts}점 · ${fx.dmg} 데미지${fx.why.length?' ('+fx.why.join(', ')+')':''}`),900);
   },280)}
@@ -982,7 +1005,7 @@ function renderRaid(){
     <div class="chips">${RAIDS.map(x=>{const xi=raidInst(x);return `<button class="chip" data-r="${x.id}" aria-pressed="${x.id===r.id}">${esc(x.n.split(' ').pop())}${xi.open?' ●':''}</button>`}).join('')}</div></div>
   <div class="card"><div class="row between"><b>충전 게이지</b><span class="num px">${fmtN(Math.min(I.charge,I.cap))} / ${fmtN(I.cap)}</span></div><div class="bar charge"><i style="width:${pctOf(I.charge,I.cap)}%"></i></div>
     <div class="row between"><b>보스 HP</b><span class="num px">${fmtN(I.left)} / ${fmtN(I.hp)}</span></div><div class="bar"><i id="rhp" style="width:${pctOf(I.left,I.hp)}%"></i></div>
-    ${I.ev?`<p class="tiny"><span class="pill purple">겨울 이벤트</span> 눈사람 왕 체력이 ${fmtN(I.cap+1500)}에서 ${fmtN(WIN.raidMax)}로 줄었어요. 충전 게이지를 채운 만큼 더 줄어요. 크리스마스 전에 쓰러뜨려 보자!</p>`:''}
+    ${I.ev?`<p class="tiny"><span class="pill purple">겨울 이벤트</span> 눈사람 왕 체력이 ${fmtN(Math.round((I.cap+1500)*SK.HPX/10)*10)}에서 ${fmtN(WIN.raidMax)}로 줄었어요. 충전 게이지를 채운 만큼 더 줄어요. 크리스마스 전에 쓰러뜨려 보자!</p>`:''}
     ${I.lateCharge?`<p class="tiny"><span class="pill purple">늦게 온 용사의 축복</span> 충전 게이지를 ${fmtN(I.lateCharge)} 미리 채워 줬어요.</p>`:''}
     <p class="tiny muted">${fmt(I.accStart)}부터 충전, ${fmt(I.openStart)}에 문이 열려요. 문이 열리면 모아 둔 게이지가 한 번에 터지고, 남은 체력은 그달 공부와 아이템으로 깎아요.</p>
     ${dead?`<p><b>처치 완료!</b> 칭호 [${esc(r.title)}]</p>`:''}</div>

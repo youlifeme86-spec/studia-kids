@@ -146,7 +146,16 @@ SK.LATE={boss:100,raid:75,hidden:100};
 SK.REGEN={pct:3,maxPct:15};
 /* ---------- 일찍 끝낸 용사 ----------
  * 서울 시각으로 hour시 전에 체크하면 그 공격 데미지 +pct%. (랭킹 점수는 그대로) pct를 0으로 하면 꺼져요. */
-SK.EARLY={hour:22,pct:1};
+SK.EARLY={hour:22,pct:0};   /* 골든타임으로 바뀌어서 꺼 둠 */
+/* ---------- 손맛 엔진 (데미지만, 랭킹 점수는 그대로) ----------
+ * 크리티컬: pct% 확률로 ×mult, 슈퍼 크리(MEGA HIT): megaPct% 확률로 ×megaMult. 궁극기가 찬 공격은 무조건 MEGA ×3 (주사위 안 굴림)
+ * 데일리 콤보: 오늘 몇 번째 체크인지에 따라 +% (2번째 +10, 3번째 +20, 4번째부터 +30)
+ * 골든타임: 서울 시각 from시~to시 전 체크 +pct% */
+SK.CRIT={pct:15,mult:1.5,megaPct:3,megaMult:2};
+SK.COMBO=[0,0,10,20,30];
+SK.GOLDEN={from:19,to:21,pct:20};
+/* 크리·콤보·골든타임으로 데미지가 평균 30% 정도 늘어서, 보스 체력도 같이 올렸어요 (×HPX, 10 단위 반올림) */
+SK.HPX=1.3;
 /* ---------- 겨울 이벤트 (2026 런칭 기념, 한 번만) ----------
  * 1) 11월 과목 보스 = 연습 보스: 체력을 작게(novHp) 하고 novEnd까지 싸울 수 있어요. 12월 첫 주 체크는 11월 연습 보스와 12월 보스에 같이 들어가요.
  * 2) 눈사람 왕 레이드(12월): 문이 열린 뒤 남은 체력을 최대 raidMax로.
@@ -155,6 +164,8 @@ SK.EARLY={hour:22,pct:1};
 SK.WINTER={nov:'2026-11',novEnd:'2026-12-07',novHp:{m:150,e:150,k:90,b:90,r:30,w:70},
   raidOpen:'2026-12-01',raidMax:3000,
   hidFrom:'2026-12-01',hidTo:'2026-12-25',hidGate:1000,hidHp:1500,hidTitle:'크리스마스 꿈의 용사'};
+(function(){const r=v=>Math.round(v*SK.HPX/10)*10;SK.SUBJ_KEYS.forEach(k=>SK.SUBJ[k].hp=r(SK.SUBJ[k].hp));SK.HIDDEN.hp=r(SK.HIDDEN.hp);
+  const W=SK.WINTER;if(W){Object.keys(W.novHp).forEach(k=>W.novHp[k]=r(W.novHp[k]));W.raidMax=r(W.raidMax);W.hidGate=r(W.hidGate);W.hidHp=r(W.hidHp)}})();
 SK.seoulHour=function(t){try{const h=+new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Seoul',hour:'numeric',hourCycle:'h23'}).format(t?new Date(t):new Date());return isNaN(h)?(t?new Date(t):new Date()).getHours():h%24}catch(e){return (t?new Date(t):new Date()).getHours()}};
 
 
