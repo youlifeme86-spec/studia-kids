@@ -116,6 +116,7 @@ var ROUTES = {
   adminCreate: adminCreate_,
   adminReset: adminReset_,
   adminSetActive: adminSetActive_,
+  adminDelete: adminDelete_,
   adminRename: adminRename_,
   adminApprove: adminApprove_,
   adminStudent: adminStudent_,
@@ -322,6 +323,30 @@ function adminSetActive_(b) {
   sheet_('acc').getRange(f.rowNo, A.tv + 1).setValue(Number(f.row[A.tv] || 0) + 1);
   CacheService.getScriptCache().remove('roster');
   return {};
+}
+
+/** 학생 계정 완전 삭제: 계정·기록·승인·조정 탭에서 그 아이디 줄을 모두 지워요 (되돌릴 수 없음) */
+function adminDelete_(b) {
+  auth_(b, 'admin');
+  var id = normId_(b.id);
+  if (!id || normId_(b.confirm) !== id) fail_('지울 아이디를 똑같이 입력해 주세요', 'confirm');
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    var f = findAccount_(id);
+    if (!f) fail_('계정을 찾지 못했어요', 'no_account');
+    if (f.row[A.role] !== 'student') fail_('학생 계정만 지울 수 있어요', 'not_student');
+    var removed = {};
+    ['adj', 'ap', 'st', 'acc'].forEach(function (k) {
+      var sh = sheet_(k), rs = rows_(k), n = 0;
+      for (var i = rs.length - 1; i >= 0; i--) {
+        if (String(rs[i][0]) === id) { sh.deleteRow(i + 2); n++; }
+      }
+      removed[k] = n;
+    });
+    CacheService.getScriptCache().remove('roster');
+    return { id: id, removed: removed };
+  } finally { lock.releaseLock(); }
 }
 
 function adminRename_(b) {
