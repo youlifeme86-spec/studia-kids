@@ -1,4 +1,4 @@
-/* 스터디아 왕국 지원센터: 공통 헤더·푸터·메뉴·테마 */
+/* 스터디아 왕국 키즈 지원센터: 공통 헤더·푸터·메뉴·테마 */
 (function(){
   var APP = '../';                 // 학생 앱 (루트 index.html)
   var page = document.body.getAttribute('data-page') || 'home';
@@ -20,14 +20,14 @@
 
   var head = document.createElement('header');
   head.className = 'top';
-  head.innerHTML = '<div class="wrap"><a class="logo" href="index.html">'+mark+'<span>스터디아 왕국 <small>지원센터</small></span></a>'+
+  head.innerHTML = '<div class="wrap"><a class="logo" href="index.html">'+mark+'<span>스터디아 왕국 키즈 <small>지원센터</small></span></a>'+
     '<nav class="menu" id="menu" aria-label="주 메뉴">'+MENU.map(function(m){return '<a href="'+m[1]+'"'+(m[0]===page?' aria-current="page"':'')+'>'+m[2]+'</a>'}).join('')+'</nav>'+
     '<button class="iconbtn" id="menuBtn" aria-label="메뉴 열기" aria-expanded="false" aria-controls="menu">'+burger+'</button>'+
     '<button class="iconbtn" id="themeBtn" aria-label="밝게·어둡게 바꾸기"></button></div>';
   document.body.insertBefore(head, document.body.firstChild);
 
   var foot = document.createElement('footer');
-  foot.innerHTML = '<div class="wrap"><div><b style="color:var(--ink)">스터디아 왕국 지원센터</b><br>초등 1~6학년 · 공부가 모험이 되는 곳</div>'+
+  foot.innerHTML = '<div class="wrap"><div><b style="color:var(--ink)">스터디아 왕국 키즈 지원센터</b><br>초등 1~6학년 · 공부가 모험이 되는 곳</div>'+
     '<nav aria-label="바로 가기"><a href="'+APP+'">스터디아 입장</a><a href="'+APP+'rank.html">랭킹</a><a href="student.html">학생 가이드</a><a href="parent.html">보호자 안내</a><a href="faq.html">자주 묻는 질문</a></nav>'+
     '<div class="tiny" style="flex-basis:100%">아이디·비밀번호·보호자 링크는 이 사이트에 없어요. 선생님께 직접 받아 주세요. 다른 사람에게 보내지 마세요.</div></div>';
   document.body.appendChild(foot);
