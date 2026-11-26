@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Press+Start+2P&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=2026.11.26-1644">
-<script src="../game-data.js?v=2026.11.26-1644"></script>
+<link rel="stylesheet" href="style.css?v=2026.11.26-1653">
+<script src="../game-data.js?v=2026.11.26-1653"></script>
 </head>
 <body data-page="rules">
 
@@ -45,13 +45,13 @@
       </div>
       <h3>① 과목 보스: 한 달 300점이면 모두 처치</h3>
       <p>6마리 체력을 더하면 3,560이에요. 크리티컬·콤보·골든타임 보너스까지 생각해서, 한 달에 과목을 고르게 300점 하면 모두 쓰러뜨릴 수 있게 맞췄어요.</p>
-      <div class="tbl"><table><thead><tr><th>보스</th><th>때리는 체크</th><th>HP</th><th>처치에 필요한 점수</th></tr></thead><tbody>
-        <tr><td>분수 골렘 (수학)</td><td>수학</td><td>750</td><td>75점</td></tr>
-        <tr><td>단어 먹보 몬스터 (영어)</td><td>영어</td><td>750</td><td>75점</td></tr>
-        <tr><td>미루기 대마왕 (숙제)</td><td>미션1 숙제검사, 미션2, 학교숙제</td><td>450</td><td>45점</td></tr>
-        <tr><td>맞춤법 안개요정 (국어)</td><td>국어</td><td>300</td><td>30점</td></tr>
-        <tr><td>궁금증 슬라임 (EBS)</td><td>EBS</td><td>300</td><td>30점</td></tr>
-        <tr><td>책장 잠금 드래곤 (독서)</td><td>책읽기</td><td>180</td><td>18점</td></tr>
+      <div class="tbl"><table><thead><tr><th>보스</th><th>때리는 체크</th><th>HP</th><th>처치에 필요한 점수 (보너스 포함 약)</th></tr></thead><tbody>
+        <tr><td>분수 골렘 (수학)</td><td>수학</td><td>980</td><td>75점</td></tr>
+        <tr><td>단어 먹보 몬스터 (영어)</td><td>영어</td><td>980</td><td>75점</td></tr>
+        <tr><td>미루기 대마왕 (숙제)</td><td>미션1 숙제검사, 미션2, 학교숙제</td><td>590</td><td>45점</td></tr>
+        <tr><td>맞춤법 안개요정 (국어)</td><td>국어</td><td>390</td><td>30점</td></tr>
+        <tr><td>궁금증 슬라임 (EBS)</td><td>EBS</td><td>390</td><td>30점</td></tr>
+        <tr><td>책장 잠금 드래곤 (독서)</td><td>책읽기</td><td>230</td><td>18점</td></tr>
       </tbody></table></div>
       <p class="small muted">청소는 과목 보스 대신 궁극기 게이지를 채워요. 선생님 추가 포인트에 과목을 고르면 그 과목 보스에게도 들어가요.</p>
       <h3>② 계절 레이드: 충전하고, 열리면 공격</h3>
@@ -112,7 +112,7 @@
   </div>
 </div>
 
-<script src="site.js?v=2026.11.26-1644"></script>
+<script src="site.js?v=2026.11.26-1653"></script>
 <script>
 (function(){const e=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 document.getElementById('kd').innerHTML='<div class="tbl"><table><thead><tr><th>권역</th><th>왕국</th><th>힘</th></tr></thead><tbody>'+Object.keys(SK.KINGDOMS).map(k=>{const K=SK.KINGDOMS[k];return '<tr><td>'+e(K.zn)+'</td><td><b style="color:'+K.c+'">'+e(K.n)+'</b></td><td>['+e(K.p)+'] '+e(K.d)+'</td></tr>'}).join('')+'</tbody></table></div>';

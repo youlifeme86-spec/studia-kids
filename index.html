@@ -15,11 +15,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="스터디아 키즈">
-<script src="config.js?v=2026.11.26-1644"></script>
-<script src="game-data.js?v=2026.11.26-1644"></script>
-<script src="sound.js?v=2026.11.26-1644"></script>
+<script src="config.js?v=2026.11.26-1653"></script>
+<script src="game-data.js?v=2026.11.26-1653"></script>
+<script src="sound.js?v=2026.11.26-1653"></script>
 <script>
-window.RR_VERSION='2026.11.26-1644';
+window.RR_VERSION='2026.11.26-1653';
 /* 실시간 오류 기록: 학생 폰에서 난 오류를 구글 시트 [오류] 탭으로 보냄 */
 (function(){var n=0;window.RR_REPORT=function(msg,stack,extra){try{var C=window.RR_CONFIG||{};if(!C.API_URL||n>=8)return;n++;var a=null;try{a=JSON.parse(localStorage.getItem('sk-auth-v1')||'null')}catch(e){}
 fetch(C.API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},keepalive:true,body:JSON.stringify({action:'logError',token:a&&a.token||'',msg:String(msg||'').slice(0,1000),stack:String(stack||'').slice(0,3000),page:location.pathname+(location.hash.indexOf('#parent')===0?' (학부모)':''),tab:(window.RR_TAB||'')+(extra?' '+extra:''),ver:window.RR_VERSION||'',ua:navigator.userAgent.slice(0,300)})}).catch(function(){})}catch(e){}};
@@ -1272,6 +1272,7 @@ function renderMe(){
    <details><summary class="small">비밀번호 바꾸기</summary><div style="display:flex;flex-direction:column;gap:6px;margin-top:8px"><input type="password" id="opw" placeholder="지금 비밀번호" autocomplete="current-password"><input type="password" id="npw" placeholder="새 비밀번호 (6자 이상)" autocomplete="new-password"><button class="btn ghost" id="cpw">바꾸기</button></div></details>
    <details><summary class="small">고장·불편한 점 알리기</summary><div style="display:flex;flex-direction:column;gap:6px;margin-top:8px"><textarea id="rep" maxlength="500" placeholder="예: 공격 버튼을 눌렀는데 점수가 안 올라가요"></textarea><button class="btn ghost" id="repgo">선생님께 보내기</button></div></details>
    <button class="btn ghost" id="lout">로그아웃</button></div>`:''}
+  <a class="btn ghost" href="support/news.html" style="text-align:center;text-decoration:none">📢 공지 · 이벤트</a>
   <a class="btn ghost" href="support/student.html" style="text-align:center;text-decoration:none">사용 가이드 · 규칙 도감</a>
   <p class="tiny muted" style="text-align:center">버전 ${esc(APP_VERSION)}</p>`;
   scr.innerHTML=h;UI.justMade=false;

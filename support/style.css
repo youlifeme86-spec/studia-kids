@@ -182,3 +182,10 @@ html{scrollbar-color:var(--orange) var(--line)}
 @media (prefers-reduced-motion:reduce){.hwrap>.harrow b{animation:none}}
 html{-webkit-text-size-adjust:100%}body{-webkit-tap-highlight-color:transparent}
 input,select,textarea{font-size:16px}
+
+/* 공지·이벤트 */
+.newstabs{display:flex;gap:8px;margin-bottom:14px}.newstabs button{flex:1;padding:12px 8px;font:inherit;font-family:var(--f-title,inherit);font-size:17px;border:3px solid #2B1D16;background:#FFF6DC;color:#2B1D16;cursor:pointer;box-shadow:0 4px 0 #2B1D16}
+.newstabs button[aria-selected="true"]{background:#FFD84A}
+.card.news{margin-bottom:12px}.card.news summary{cursor:pointer;display:flex;flex-wrap:wrap;gap:6px;align-items:center;list-style:none}.card.news summary::-webkit-details-marker{display:none}
+.ndate{font-size:12px;opacity:.7}.nbadge{font-size:12px;padding:1px 8px;border:2px solid #2B1D16}.nbadge.on{background:#7FD36B}.nbadge.soon{background:#BFE6FF}.nbadge.end{background:#ddd;opacity:.8}
+.nbody{margin-top:10px}.nbody ul{padding-left:20px;line-height:1.8}

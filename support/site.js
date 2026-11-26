@@ -7,6 +7,7 @@
     ['student','student.html','학생 가이드'],
     ['rules','rules.html','규칙 도감'],
     ['parent','parent.html','보호자 안내'],
+    ['news','news.html','공지·이벤트'],
     ['faq','faq.html','자주 묻는 질문'],
     ['admin','admin.html','선생님']
   ];
@@ -28,7 +29,7 @@
 
   var foot = document.createElement('footer');
   foot.innerHTML = '<div class="wrap"><div><b>스터디아 왕국 키즈 지원센터</b><br>초등 1~6학년 · 공부가 모험이 되는 곳</div>'+
-    '<nav aria-label="바로 가기"><a href="'+APP+'">스터디아 입장</a><a href="'+APP+'rank.html">랭킹</a><a href="student.html">학생 가이드</a><a href="parent.html">보호자 안내</a><a href="faq.html">자주 묻는 질문</a></nav>'+
+    '<nav aria-label="바로 가기"><a href="'+APP+'">스터디아 입장</a><a href="'+APP+'rank.html">랭킹</a><a href="student.html">학생 가이드</a><a href="parent.html">보호자 안내</a><a href="news.html">공지·이벤트</a><a href="faq.html">자주 묻는 질문</a></nav>'+
     '<div class="tiny" style="flex-basis:100%">아이디·비밀번호·보호자 링크는 이 사이트에 없어요. 선생님께 직접 받아 주세요. 다른 사람에게 보내지 마세요.</div></div>';
   document.body.appendChild(foot);
 
@@ -39,6 +40,7 @@
     rules:'<span class="bob" data-spr="chest" data-sc="7"></span><span data-spr="k" data-sc="5"></span>',
     parent:'<span data-hero data-a="bear" data-c="#2E9E6B" data-j="" data-sc="5"></span><span class="bob" data-spr="owl" data-sc="5"></span>',
     faq:'<span class="bob" data-hero data-a="cat" data-c="#FF7A2F" data-j="탐험가" data-sc="5"></span><span data-spr="star" data-sc="5"></span>',
+    news:'<span class="bob" data-spr="chest" data-sc="6"></span><span data-spr="hidden" data-sc="5"></span>',
     admin:'<span data-hero data-a="dog" data-c="#4FA9E8" data-j="기사" data-sc="5"></span><span class="bob" data-spr="sword" data-sc="6"></span>'
   };
   var ph = document.querySelector('.page-hero');
