@@ -184,6 +184,7 @@ SK.WINTER={nov:'2026-11',novEnd:'2026-12-07',novHp:{m:150,e:150,k:90,b:90,r:30,w
   hidFrom:'2026-12-01',hidTo:'2026-12-25',hidGate:1000,hidHp:1500,hidTitle:'크리스마스 꿈의 용사'};
 (function(){const r=v=>Math.round(v*SK.HPX/10)*10;SK.SUBJ_KEYS.forEach(k=>SK.SUBJ[k].hp=r(SK.SUBJ[k].hp));SK.HIDDEN.hp=r(SK.HIDDEN.hp);
   const W=SK.WINTER;if(W){Object.keys(W.novHp).forEach(k=>W.novHp[k]=r(W.novHp[k]));W.raidMax=r(W.raidMax);W.hidGate=r(W.hidGate);W.hidHp=r(W.hidHp)}})();
+SK.seoulMin=function(t){try{const p=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Seoul',minute:'numeric',second:'numeric'}).formatToParts(t?new Date(t):new Date());const g=k=>+(p.find(x=>x.type===k)||{}).value;const m=g('minute'),sec=g('second');if(isNaN(m))throw 0;return {m,s:isNaN(sec)?0:sec}}catch(e){const d=t?new Date(t):new Date();return {m:d.getMinutes(),s:d.getSeconds()}}};
 SK.seoulHour=function(t){try{const h=+new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Seoul',hour:'numeric',hourCycle:'h23'}).format(t?new Date(t):new Date());return isNaN(h)?(t?new Date(t):new Date()).getHours():h%24}catch(e){return (t?new Date(t):new Date()).getHours()}};
 
 
@@ -320,8 +321,9 @@ window.SK=SK;
  * 상: 최다 딜러(그 주 데미지 1등), 매일 출석상(그 주 지난 날 매일 체크), 결정적 막타(처치한 날 가장 많이 때린 친구) */
 SK.COOP={start:'2026-12-01',perKid:800,minKids:3,egg:10,
   /* 깜짝 협동 이벤트: day 날 from시에 문이 열리고, since~day 반 전체 데미지(열리기 전에 한 체크 포함)로 to시(=마감)까지 처치 */
+  /* lobby: from시 정각부터 lobby분 동안 대기실(들어온 친구가 보여요). 그 뒤 다 같이 입장해서 데미지가 한꺼번에 들어가요. 0이면 대기실 없음 */
   /* levels: 앞 단계를 쓰러뜨리면 다음 단계가 나와요. 넘친 데미지는 다음 단계로 이어져요. perKid = 학생 1명당 체력, egg = 그 단계 처치 보상(알 가속 점수) */
-  events:[{day:'2026-11-28',since:'2026-11-26',from:22,to:24,showUntil:'2026-11-30',levels:[
+  events:[{day:'2026-11-28',since:'2026-11-26',from:22,lobby:5,to:24,showUntil:'2026-11-30',levels:[
     {n:'그림자 졸개 대장',spr:'autumn',perKid:40,egg:10},
     {n:'그림자 얼음 기사',spr:'icedragon',perKid:60,egg:15},
     {n:'개국 전야 그림자 대왕',spr:'hidden',perKid:80,egg:25}]}],
@@ -336,9 +338,12 @@ SK.coop=function(students,today){const C=SK.COOP;if(!C||today<C.start)return nul
   const per=kids.map(s=>({id:s.id,name:s.name,dm:days.reduce((a,k)=>a+dmOf(s,k),0),all:days.length>0&&days.filter(k=>k<today||dmOf(s,k)>0).every(k=>dmOf(s,k)>0)})).sort((a,b)=>b.dm-a.dm);
   const top=per[0]&&per[0].dm>0?per[0]:null;const lastHit=killDay?kids.map(s=>({id:s.id,name:s.name,dm:dmOf(s,killDay)})).sort((a,b)=>b.dm-a.dm)[0]:null;
   return {ws,from,to,boss,hp,dmg:cum,left:Math.max(0,hp-cum),dead:cum>=hp,killDay,per,top,lastHit,daily:per.filter(p=>p.all&&p.dm>0),kids:kids.length}};
-/* 깜짝 협동 이벤트 상태. 열리기 전이면 {soon:true} */
-SK.coopEvent=function(students,today,hour){const C=SK.COOP;if(!C||!C.events)return null;const E=C.events.find(e=>today>=SK.addDays(e.day,-1)&&today<=(e.showUntil||e.day));if(!E)return null;
+/* 깜짝 협동 이벤트 상태. 열리기 전이면 {soon:true}, 대기실이면 {lobby:true, sec:입장까지 남은 초, inLobby:[들어온 친구]} */
+/* min: 그 시각의 분(0~59). 대기실 판단에 써요 */
+SK.coopEvent=function(students,today,hour,min){const C=SK.COOP;if(!C||!C.events)return null;const E=C.events.find(e=>today>=SK.addDays(e.day,-1)&&today<=(e.showUntil||e.day));if(!E)return null;
   if(today<E.day||(today===E.day&&hour<E.from))return {ev:E,soon:true};
+  min=min||0;if(E.lobby&&today===E.day&&hour===E.from&&min<E.lobby){const kids=students.filter(s=>s.daily);
+    return {ev:E,lobby:true,sec:(E.lobby-min)*60,inLobby:kids.filter(s=>s.lobby===E.day),kids:kids.length}}
   const kids=students.filter(s=>s.daily);const n=Math.max(C.minKids,kids.length);const dmOf=s=>Object.keys(s.daily).reduce((a,k)=>a+(k>=(E.since||E.day)&&k<=E.day?Math.max(0,s.daily[k].dm||0):0),0);
   const per=kids.map(s=>({id:s.id,name:s.name,dm:dmOf(s)})).sort((a,b)=>b.dm-a.dm);const dmg=per.reduce((a,p)=>a+p.dm,0);
   let cum=0,lv=0,base=0;const L=E.levels.map((l,i)=>{const hp=n*l.perKid;const r={...l,lv:i+1,hp,start:cum};cum+=hp;return r});

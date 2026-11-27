@@ -13,7 +13,7 @@
  *   오류  : 학생 폰에서 난 오류가 실시간으로 쌓이는 곳
  */
 
-var SERVER_VERSION = '2026.11.26-k1';
+var SERVER_VERSION = '2026.11.27-k1';
 var TZ = 'Asia/Seoul';
 var CHUNK = 45000;            // 시트 한 칸 최대 50,000자라 45,000자씩 나눠 저장
 var MAX_CHUNKS = 40;          // 학생 한 명 최대 약 1.8MB
@@ -210,7 +210,7 @@ function roster_(b) {
     if (!sum || !sum.char) return;
     var daily = {};
     Object.keys(sum.daily || {}).forEach(function (k) { if (k >= since) daily[k] = { r: sum.daily[k].r || 0, dm: sum.daily[k].dm || 0 }; });  // dm: 반 협동 레이드 합산용
-    out[id] = { char: { name: sum.char.name, color: sum.char.color, kingdom: sum.char.kingdom, job: sum.char.job, animal: sum.char.animal || '' }, daily: daily, board: sum.board || null };
+    out[id] = { char: { name: sum.char.name, color: sum.char.color, kingdom: sum.char.kingdom, job: sum.char.job, animal: sum.char.animal || '' }, daily: daily, board: sum.board || null, lobby: sum.lobby || null };  // lobby: 깜짝 협동 이벤트 대기실에 들어온 날
   });
   try { cache.put('roster', JSON.stringify(out), 30); } catch (x) {}
   return { students: out, approved: mine, adj: myAdj };
@@ -269,7 +269,7 @@ function adminOverview_(b) {
     students.push({
       id: r[A.id], name: r[A.name], role: r[A.role], active: isActive_(r), parentCode: r[A.code],
       created: iso_(r[A.created]), lastLogin: iso_(r[A.last]), savedAt: s.savedAt || '', memo: r[A.memo] || '',
-      char: sum.char || null, daily: daily, bless: sum.bless || null, monthPts: sum.monthPts || 0,
+      char: sum.char || null, daily: daily, bless: sum.bless || null, monthPts: sum.monthPts || 0, lobby: sum.lobby || null,
       consent: iso_(r[A.consent]), alerts: alerts
     });
   });
@@ -540,7 +540,7 @@ function summary_(st) {
   Object.keys(st.logs || {}).forEach(function (k) { var L = st.logs[k]; if (L && k.slice(0, 7) === mk && L.hidden) memOk++; });
   return {
     char: c ? { name: c.name, color: c.color, kingdom: c.kingdom, job: c.job, animal: c.animal || '' } : null,
-    daily: daily, bless: st.bless || null, monthPts: pts, hiddenReq: hiddenReq,
+    daily: daily, bless: st.bless || null, monthPts: pts, hiddenReq: hiddenReq, lobby: st.lobby || null,
     board: { mk: mk, boss: boss, season: season, items: (st.items || []).length, memOk: memOk }
   };
 }

@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Press+Start+2P&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=2026.11.27-0307">
-<script src="../game-data.js?v=2026.11.27-0307"></script>
+<link rel="stylesheet" href="style.css?v=2026.11.27-0545">
+<script src="../game-data.js?v=2026.11.27-0545"></script>
 </head>
 <body data-page="news">
 <div class="page-hero"><div class="wrap"><div class="txt">
@@ -26,8 +26,10 @@
 <script>
 /* 새 글을 쓸 때: 아래 목록 맨 위에 {type:'event'|'notice', date:'YYYY-MM-DD', end:'YYYY-MM-DD'(이벤트만), title, body(HTML)} 하나 추가 */
 var NEWS=[
+ {type:'notice',date:'2026-11-27',title:'🚪 11/28 밤 10시 협동 이벤트 대기실 · 다 같이 입장',
+  body:'<p>내일 밤 10시에 앱을 열면 <b>[입장하기]</b> 버튼이 나와요. 누르면 대기실에 들어가 먼저 온 친구들을 볼 수 있어요. <b>10시 5분</b>이 되면 모두 한꺼번에 입장해서 그림자 군단과 싸워요!</p><ul><li>대기실에 있는 동안 체크해도 데미지는 입장할 때 같이 들어가요.</li><li>10시 5분이 지나서 들어와도 괜찮아요. 바로 싸움에 함께해요.</li></ul>'},
  {type:'event',date:'2026-11-26',start:'2026-11-26',end:'2026-11-28',title:'🌙 11/28(토) 밤 10시 깜짝 협동 이벤트: 그림자 군단 3단계',
-  body:'<p>우리 반 모두가 한 팀! <b>11월 28일 토요일 밤 10시</b>에 그림자 군단이 나타나요.</p><ul><li><b>Lv.1</b> 그림자 졸개 대장 → <b>Lv.2</b> 그림자 얼음 기사 → <b>Lv.3</b> 개국 전야 그림자 대왕</li><li><b>11/26(목)부터 28일 밤 10시까지</b> 한 체크 데미지가 문이 열리는 순간 한꺼번에 들어가요. 밤 12시 마감까지 더 체크하면 더 들어가요.</li><li>한 사람당 3일 동안 <b>체크 3번 정도</b>면 반 전체가 3단계까지 잡을 수 있어요.</li><li>한 단계를 쓰러뜨리면 넘친 데미지는 다음 단계로 이어져요.</li><li>보상(참여한 친구 모두 알 부화 가속): Lv.1 +10 · Lv.2 +15 · Lv.3 +25 → <b>다 잡으면 +50점</b> (알 하나 부화에 30점!)</li><li>데미지는 과목 보스·레이드·히든보스에서 빠지지 않고 똑같이 같이 들어가요. 왕국이 달라도 모두 같은 팀!</li></ul><p class="small">[레이드] 탭 맨 위에서 실시간으로 볼 수 있어요.</p>'},
+  body:'<p>우리 반 모두가 한 팀! <b>11월 28일 토요일 밤 10시</b>에 그림자 군단이 나타나요.</p><ul><li><b>Lv.1</b> 그림자 졸개 대장 → <b>Lv.2</b> 그림자 얼음 기사 → <b>Lv.3</b> 개국 전야 그림자 대왕</li><li><b>밤 10시에 앱을 열면 안내창과 [입장하기] 버튼</b>이 나와요. 누르면 대기실에서 들어온 친구들이 보이고, <b>10시 5분에 다 같이 입장</b>해서 싸워요.</li><li><b>11/26(목)부터</b> 한 체크 데미지가 다 같이 입장하는 순간 한꺼번에 들어가요. 밤 12시 마감까지 더 체크하면 더 들어가요.</li><li>한 사람당 3일 동안 <b>체크 3번 정도</b>면 반 전체가 3단계까지 잡을 수 있어요.</li><li>한 단계를 쓰러뜨리면 넘친 데미지는 다음 단계로 이어져요.</li><li>보상(참여한 친구 모두 알 부화 가속): Lv.1 +10 · Lv.2 +15 · Lv.3 +25 → <b>다 잡으면 +50점</b> (알 하나 부화에 30점!)</li><li>데미지는 과목 보스·레이드·히든보스에서 빠지지 않고 똑같이 같이 들어가요. 왕국이 달라도 모두 같은 팀!</li></ul><p class="small">[레이드] 탭 맨 위에서 실시간으로 볼 수 있어요.</p>'},
  {type:'event',date:'2026-11-26',start:'2026-12-01',end:'2026-12-31',title:'🛡 12월 1일부터 반 협동 주간 레이드 시작',
   body:'<p>매주 월요일 새 협동 보스가 나와요. 반 친구들 데미지를 모두 더해 일요일까지 쓰러뜨려요.</p><ul><li>체력 = 캐릭터가 있는 친구 수 × 800</li><li>처치하면 그 주에 체크한 친구 모두 알 부화 가속 +10점</li><li>🏆 최다 딜러 · 📅 매일 출석상 · ⚔ 결정적 막타</li></ul><p class="small">12월 뒤에도 매주 계속돼요.</p>'},
  {type:'event',date:'2026-11-26',start:'2026-11-26',end:'2026-12-25',title:'❄ 겨울 이벤트: 크리스마스까지 보스를 쓰러뜨려 보자',
@@ -54,6 +56,6 @@ var NEWS=[
    return '<details class="card news"'+(i===0||(n.type==='event'&&today<=n.end)?' open':'')+'><summary><span class="ndate">'+n.date.replace(/-/g,'.')+'</span>'+st+'<b>'+n.title+'</b>'+(n.type==='event'?'<span class="tiny muted"> · '+fmt(n.start)+'~'+fmt(n.end)+'</span>':'')+'</summary><div class="nbody">'+n.body+'</div></details>'}).join('')||'<p class="muted">아직 글이 없어요.</p>'}
  document.querySelectorAll('[data-nt]').forEach(function(b){b.onclick=function(){tab=b.dataset.nt;history.replaceState(null,'','#'+tab);draw()}});draw()})();
 </script>
-<script src="site.js?v=2026.11.27-0307"></script>
+<script src="site.js?v=2026.11.27-0545"></script>
 </body>
 </html>

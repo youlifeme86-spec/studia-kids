@@ -7,10 +7,10 @@
 <title>스터디아 키즈 선생님</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap">
-<script>window.PAGE_VERSION='2026.11.27-0307';/* 옛 화면이 캐시에 남아 있으면 새 버전으로 한 번 다시 불러와요 */
+<script>window.PAGE_VERSION='2026.11.27-0545';/* 옛 화면이 캐시에 남아 있으면 새 버전으로 한 번 다시 불러와요 */
 (function(){fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(v){if(!v||!v.version||v.version===window.PAGE_VERSION)return;var k='sk-reload-'+v.version;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1')}catch(e){return}var u=new URL(location.href);u.searchParams.set('v',v.version);location.replace(u.toString())}).catch(function(){})})();</script>
-<script src="config.js?v=2026.11.27-0307"></script>
-<script src="game-data.js?v=2026.11.27-0307"></script>
+<script src="config.js?v=2026.11.27-0545"></script>
+<script src="game-data.js?v=2026.11.27-0545"></script>
 <style>
 :root{--bg:#FBF4E6;--paper:#FFFDF8;--ink:#3A2C22;--muted:#8A7766;--line:#EADFCB;--accent:#F08A4B;--soft:#FDE6D3;--good:#3E9B6B;--bad:#D2504A;--purple:#7A4FD0;
   --f-display:'Jua',system-ui,sans-serif;--f-body:'Noto Sans KR',system-ui,-apple-system,sans-serif;--shadow:0 2px 0 rgba(90,60,30,.06),0 8px 24px rgba(90,60,30,.05)}
@@ -146,8 +146,9 @@ function render(){
         <td class="r">${pt(s)}</td><td class="r">${dn(s)}<span class="tiny muted">/${PR.days.length}</span></td><td class="r">${dmg(s).toLocaleString()}</td><td class="r">${s.monthPts||sumRange(s.daily,ms,today,'raw')} <span class="tiny muted">/300</span></td><td>${top?`<span class="pill ${['불안','무관심','걱정'].includes(top)?'bad':''}">${top}${PR.one?'':' '+cc[top]+'일'}</span>`:'-'}</td>
         <td>${s.bless&&today<=s.bless.until?'<span class="pill p">~'+fmt(s.bless.until)+'</span>':'-'}</td><td>${s.consent?'<span class="tiny">'+esc(String(s.consent).slice(0,10))+'</span>':'<span class="pill bad">없음</span>'}</td><td class="tiny">${ago(s.savedAt)}</td></tr>`}).join('')||'<tr><td colspan="10" class="muted">아직 학생 계정이 없어요. [계정 만들기]에서 만들어 주세요.</td></tr>'}
     </tbody></table></div><p class="tiny muted">[분석 ↗]을 누르면 보호자가 보는 분석 리포트가 새 창으로 열려요. 점수는 랭킹 점수(하루 30점 상한, 연속 보너스·추가 포인트는 따로). 이번 달은 기준치 300점 대비 원점수. 30초마다 자동으로 새로 고침돼요.</p></div>
-    ${(()=>{const ST=stu.filter(x=>x.active&&x.char).map(x=>({id:x.id,name:x.name,daily:x.daily||{}}));const R=SK.coopEvent&&SK.coopEvent(ST,today,SK.seoulHour());if(!R)return '';const E=R.ev;const n=Math.max(SK.COOP.minKids,ST.length);
-      if(R.soon)return `<div class="card"><h2>🌙 깜짝 협동 이벤트 (그림자 군단 ${E.levels.length}단계)</h2><p class="small">${fmt(E.day)} 밤 ${E.from-12}시에 열려요 (밤 12시 마감까지). ${fmt(E.since||E.day)}부터 반 전체 데미지로 Lv.1부터 차례로 처치, 넘친 데미지는 다음 단계로. 지금 학생 ${ST.length}명 기준 체력: ${E.levels.map((l,i)=>'Lv.'+(i+1)+' '+(n*l.perKid).toLocaleString()).join(' → ')}</p></div>`;
+    ${(()=>{const ST=stu.filter(x=>x.active&&x.char).map(x=>({id:x.id,name:x.name,lobby:x.lobby||null,daily:x.daily||{}}));const TM=SK.seoulMin?SK.seoulMin():{m:0};const R=SK.coopEvent&&SK.coopEvent(ST,today,SK.seoulHour(),TM.m);if(!R)return '';const E=R.ev;const n=Math.max(SK.COOP.minKids,ST.length);
+      if(R.lobby){const out=ST.filter(x=>x.lobby!==E.day);return `<div class="card"><h2>🌙 깜짝 협동 이벤트 · 대기실 (${E.from-12}시 ${E.lobby}분 다 같이 입장)</h2><p class="small">대기실에 들어온 학생 <b>${R.inLobby.length}</b>/${ST.length}명: ${R.inLobby.map(x=>esc(x.name)).join(', ')||'-'}</p>${out.length?`<p class="small muted">아직 안 들어온 학생: ${out.map(x=>esc(x.name)).join(', ')}</p>`:''}<p class="tiny muted">대기실 목록은 서버(Code.gs)를 최신으로 배포해야 보여요. 1분마다 새로고침돼요.</p></div>`}
+      if(R.soon)return `<div class="card"><h2>🌙 깜짝 협동 이벤트 (그림자 군단 ${E.levels.length}단계)</h2><p class="small">${fmt(E.day)} 밤 ${E.from-12}시에 대기실이 열리고 ${E.from-12}시 ${E.lobby||0}분에 다 같이 입장해요 (밤 12시 마감까지). 학생 앱에 안내창과 [입장하기] 버튼이 떠요. ${fmt(E.since||E.day)}부터 반 전체 데미지로 Lv.1부터 차례로 처치, 넘친 데미지는 다음 단계로. 지금 학생 ${ST.length}명 기준 체력: ${E.levels.map((l,i)=>'Lv.'+(i+1)+' '+(n*l.perKid).toLocaleString()).join(' → ')}</p></div>`;
       return `<div class="card"><h2>🌙 깜짝 협동 이벤트 · Lv.${R.cur.lv} ${esc(R.cur.n)}</h2><div class="bar"><i style="width:${Math.round((R.cur.hp-R.left)*100/R.cur.hp)}%;background:var(--purple)"></i></div>
       <p class="small">${R.all?'<b>3단계 모두 처치!</b>':R.cleared+'단계 처치 · 지금 HP '+R.left.toLocaleString()+' / '+R.cur.hp.toLocaleString()} · 반 전체 ${R.dmg.toLocaleString()} 데미지 · 참여 ${R.per.filter(p=>p.dm>0).length}/${R.kids}명 · 🏆 ${R.top?esc(R.top.name)+' ('+R.top.dm.toLocaleString()+')':'-'}</p>
       <p class="tiny muted">아직 데미지 없는 학생: ${R.per.filter(p=>!p.dm).map(p=>esc(p.name)).join(', ')||'없음'}</p></div>`})()}
@@ -162,6 +163,7 @@ function render(){
       <li>체크할 때 감정 태그 [쉬웠어][조금 힘들어][해냈다!]를 골라요</li>
       <li>스트릭 방패: 5일 연속마다 1개(최대 2개), 빠진 날 자동으로 연속 기록과 보스 반격을 막아요. 힘든 날엔 "문제 1개만" 최소 시동 퀘스트(5 데미지, 출석 인정)</li>
       <li>알 부화: 공부 점수 30점 부화 → 150점 성장 → 300점 각성. 파트너는 1마리 장착, 도감에서 바꿔 끼기. 공격할 때 파트너도 같이 공격(12/1부터 +3/+4/+5 데미지)</li>
+      <li>11/28(토) 깜짝 협동 이벤트: 밤 10시 대기실(학생 앱에 [입장하기]) → 10시 5분 다 같이 입장 → 밤 12시까지 그림자 군단 3단계</li>
       <li>반 협동 주간 레이드(12/1부터): 매주 월요일 새 보스, 반 전체 데미지로 처치하면 참여자 알 가속 +10점. 최다 딜러·매일 출석상·결정적 막타</li>
       <li>겨울 이벤트: 11월 연습 보스(12/7까지), 눈사람 왕 체력 줄임, 크리스마스 꿈의 문 수문장</li></ul>
       <p class="tiny muted"><a href="support/rules.html" target="_blank" rel="noopener">규칙 도감 전체 보기 ↗</a> · <a href="support/news.html" target="_blank" rel="noopener">공지·이벤트 게시판 ↗</a> · <a href="support/admin.html" target="_blank" rel="noopener">선생님 안내 ↗</a></p></details>
