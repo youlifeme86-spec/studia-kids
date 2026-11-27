@@ -15,11 +15,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="스터디아 키즈">
-<script src="config.js?v=2026.11.27-1120"></script>
-<script src="game-data.js?v=2026.11.27-1120"></script>
-<script src="sound.js?v=2026.11.27-1120"></script>
+<script src="config.js?v=2026.11.27-1346"></script>
+<script src="game-data.js?v=2026.11.27-1346"></script>
+<script src="sound.js?v=2026.11.27-1346"></script>
 <script>
-window.RR_VERSION='2026.11.27-1120';
+window.RR_VERSION='2026.11.27-1346';
 /* 실시간 오류 기록: 학생 폰에서 난 오류를 구글 시트 [오류] 탭으로 보냄 */
 (function(){var n=0;window.RR_REPORT=function(msg,stack,extra){try{var C=window.RR_CONFIG||{};if(!C.API_URL||n>=8)return;n++;var a=null;try{a=JSON.parse(localStorage.getItem('sk-auth-v1')||'null')}catch(e){}
 fetch(C.API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},keepalive:true,body:JSON.stringify({action:'logError',token:a&&a.token||'',msg:String(msg||'').slice(0,1000),stack:String(stack||'').slice(0,3000),page:location.pathname+(location.hash.indexOf('#parent')===0?' (학부모)':''),tab:(window.RR_TAB||'')+(extra?' '+extra:''),ver:window.RR_VERSION||'',ua:navigator.userAgent.slice(0,300)})}).catch(function(){})}catch(e){}};
@@ -452,12 +452,12 @@ function esc(t){return String(t??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt
 const hydrate=root=>SK.hydrate(root);
 
 /* ---------- 점수 ---------- */
-function weekCount(a,k,st){st=st||S;const w=weekKey(k);let n=0;for(let i=0;i<7;i++){const d=addDays(w,i);const L=(st.logs||{})[d];if(!L)continue;if(a==='clean'?L.life&&L.life.clean:L.q.some(q=>q.a===a&&q.done))n++}return n}
+function weekCount(a,k,st){st=st||S;const w=weekKey(k);let n=0;for(let i=0;i<7;i++){const d=addDays(w,i);const L=(st.logs||{})[d];if(!L)continue;if(ACT[a]&&ACT[a].life?L.life&&L.life[a]:L.q.some(q=>q.a===a&&q.done))n++}return n}
 function weekFull(a,k,st){const A=ACT[a];if(!A.wk)return false;const L=(st||S).logs[k];const doneToday=L&&L.q.some(q=>q.a===a&&q.done);return !doneToday&&weekCount(a,k,st)>=A.wk}
 function qPts(q){return q.pts||ACT[q.a].pt}
 function allClear(st,k){const L=(st.logs||{})[k];if(!L)return false;
-  const need=ORDER.filter(a=>a!=='m1'&&a!=='school'&&!weekFull(a,k,st)&&(a!=='ebs'||st!==S||ebsOK(k)));
-  return need.length>0&&need.every(a=>a==='clean'?L.life&&L.life.clean:L.q.some(q=>q.a===a&&q.done))}
+  const need=ORDER.filter(a=>a!=='m1'&&a!=='school'&&a!=='bag'&&!weekFull(a,k,st)&&(a!=='ebs'||st!==S||ebsOK(k)));
+  return need.length>0&&need.every(a=>ACT[a].life?L.life&&L.life[a]:L.q.some(q=>q.a===a&&q.done))}
 /* EBS 권한 (선생님이 학생마다 열고 닫음) */
 let SRV_EBS='';
 function ebsMode(){if(!MODE_DB)return 'on';return SRV_EBS||(SK.EBS_DEFAULT||{})[UID]||'off'}
@@ -467,14 +467,15 @@ function dayScoreOf(st,k){const L=(st.logs||{})[k];if(!L)return {raw:0,rank:0,mi
   let chk=0,min=0;const subs=new Set();
   L.q.forEach(q=>{if(q.done){chk+=qPts(q);min+=ACT[q.a].min||0;subs.add(ACT[q.a].s)}});
   if(L.life&&L.life.clean)chk+=ACT.clean.pt;
+  if(L.life&&L.life.bag)chk+=ACT.bag.pt;
   adjOf(L,'check').forEach(x=>{chk+=+x.pts||0;min+=(ACT[x.a]&&ACT[x.a].min)||0;if(ACT[x.a]&&ACT[x.a].s)subs.add(ACT[x.a].s)});
   const ac=allClear(st,k)?SK.ALLCLEAR:0;const sb=L.sb||0;
   const bonus=adjOf(L,'bonus').reduce((a,x)=>a+(+x.pts||0),0),pen=adjOf(L,'penalty').reduce((a,x)=>a+(+x.pts||0),0);
   const capped=Math.min(chk+ac,DAILY_CAP);
   return {raw:Math.max(0,chk+ac+sb+bonus-pen),rank:Math.max(0,capped+sb+bonus-pen),min,subjects:subs.size,chk,ac,sb,bonus,pen}}
 function dayScore(k){return dayScoreOf(S,k)}
-function hasDone(L){return !!L&&(L.q.some(q=>q.done)||(L.life&&(L.life.clean||L.life.mini))||adjOf(L,'check').length>0)}
-function hasStudy(L){return !!L&&(L.q.some(q=>q.done)||(L.life&&L.life.clean)||adjOf(L,'check').length>0)}
+function hasDone(L){return !!L&&(L.q.some(q=>q.done)||(L.life&&(L.life.clean||L.life.bag||L.life.mini))||adjOf(L,'check').length>0)}
+function hasStudy(L){return !!L&&(L.q.some(q=>q.done)||(L.life&&(L.life.clean||L.life.bag))||adjOf(L,'check').length>0)}
 /* 연속 출석: 오뚝이 공화국은 끊긴 날 1번을 막아 줌 */
 /* 스트릭 방패: 가입일부터 하루씩 따라가며 계산 (오뚝이 공화국은 방패 1개 들고 시작) */
 function shieldState(st){st=st||S;const t=TODAY(),SH=SK.SHIELD||{every:0,max:0};const days=Object.keys(st.logs||{}).sort();let J=joinDay(st)||days[0];if(days[0]&&days[0]<J)J=days[0];
@@ -501,7 +502,7 @@ function qDmg(q){return q.dmg!=null?q.dmg:qPts(q)*10}
 function dayExtraDmg(st,k){const L=st.logs[k];if(!L)return 0;const d=dayScoreOf(st,k);let x=(d.ac+d.sb)*10;if(L.life&&L.life.mini)x+=(SK.MINI&&SK.MINI.dmg)||0;
   adjOf(L,'bonus').forEach(a=>{x+=(+a.pts||0)*10*(a.crit||1)});x-=d.pen*10;
   adjOf(L,'check').forEach(a=>{x+=(+a.pts||0)*10});
-  if(L.life&&L.life.clean)x+=ACT.clean.pt*10;return x}
+  if(L.life&&L.life.clean)x+=ACT.clean.pt*10;if(L.life&&L.life.bag)x+=ACT.bag.pt*10;return x}
 function dayBossDmg(st,k,s){const L=st.logs[k];if(!L)return 0;let t=0;L.q.forEach(q=>{if(q.done&&ACT[q.a].s===s)t+=qDmg(q)});
   adjOf(L,'bonus').forEach(a=>{if(a.s===s)t+=(+a.pts||0)*10*(a.crit||1)});adjOf(L,'check').forEach(a=>{if(ACT[a.a]&&ACT[a.a].s===s)t+=(+a.pts||0)*10});return t}
 function dmgIn(from,to,st){st=st||S;let t=0;Object.keys(st.logs||{}).forEach(k=>{if(k<from||k>to)return;st.logs[k].q.forEach(q=>{if(q.done)t+=qDmg(q)});t+=dayExtraDmg(st,k)});return Math.max(0,t)}
@@ -711,7 +712,7 @@ function damageFor(q,L,k){
   const pot=S.potion[k];if(pot&&pot.until>Date.now()){bonus+=15;why.push('힘내기 물약 +15%')}
   if(blessActive()){bonus+=BLESS_PCT;why.push('마스터의 가호 +'+BLESS_PCT+'%')}
   if(SK.EARLY.pct&&SK.seoulHour()<SK.EARLY.hour){bonus+=SK.EARLY.pct;why.push('밤 '+(SK.EARLY.hour-12)+'시 전 +'+SK.EARLY.pct+'%')}
-  const nth=L.q.filter(x=>x.done&&x!==q).length+(L.life&&L.life.clean?1:0)+1,cb=SK.COMBO[Math.min(nth,SK.COMBO.length-1)]||0;let combo=0;
+  const nth=L.q.filter(x=>x.done&&x!==q).length+(L.life&&L.life.clean?1:0)+(L.life&&L.life.bag?1:0)+1,cb=SK.COMBO[Math.min(nth,SK.COMBO.length-1)]||0;let combo=0;
   if(cb){bonus+=cb;combo=nth;why.push(nth+' COMBO +'+cb+'%');const P=partner();if(P&&P.id==='leaf'&&P.stage>=2){bonus+=5;why.push('숲 파트너 콤보 +5%')}}
   {const P=partner();if(P&&P.id==='sea'&&P.weak&&ACT[q.a].s===P.weak){const v=petBuf('sea');bonus+=v;why.push(petName(P)+' 약점 과목 +'+v+'%')}}
   const hr=SK.seoulHour(),G=SK.GOLDEN;let golden=false;if(G&&G.pct&&hr>=G.from&&hr<G.to){bonus+=G.pct;golden=true;why.push('골든타임 +'+G.pct+'%');const v=petBuf('star');if(v){bonus+=v;why.push('별 파트너 +'+v+'%')}}
@@ -910,7 +911,7 @@ function renderToday(){
   const k=TODAY(),L=log(k),sc=dayScore(k);const closed=SK.closed();
   const mk=monthKeyOf(k);const firstOpen=L.q.find(q=>!q.done&&!ACT[q.a].teacher&&!weekFull(q.a,k)&&(q.a!=='ebs'||ebsOK(k)));const bossS=firstOpen?ACT[firstOpen.a].s:SUBJ_KEYS.sort((a,b)=>bossLeft(b,mk)/bossHp(b,mk)-bossLeft(a,mk)/bossHp(a,mk))[0];
   const left=pctOf(bossLeft(bossS,mk),bossHp(bossS,mk));const ms=monthScoreRaw();const stg=SK.stage(ms);
-  const done=L.q.filter(q=>q.done).length+(L.life.clean?1:0);
+  const done=L.q.filter(q=>q.done).length+(L.life.clean?1:0)+(L.life.bag?1:0);
   let h=sceneHTML(`<div class="hud"><div class="nm">${esc(S.char.name)}<small>${esc(KINGDOMS[S.char.kingdom].n)} · ${esc(ANIMALS[S.char.animal]?ANIMALS[S.char.animal].n:'')} ${esc(S.char.job)}</small></div><div class="tagr">${Number(k.slice(5,7))}월 ${ms}/${BASE}<br>${esc(stg[1])}</div></div>${heroHTML()}<div class="boss sleep" style="right:20px;transform:scale(.8);transform-origin:bottom right"><span data-spr="${bossS}" data-sc="6"></span></div>`)+
    `<div><p class="tiny muted">${fmt(k)} · 밤 ${SK.DEADLINE_HOUR-12}시 마감${(()=>{const G=SK.GOLDEN,h=SK.seoulHour();return G&&G.pct?(h>=G.from&&h<G.to?`<span class="goldb">골든타임 진행 중 +${G.pct}%</span>`:h<G.from?` · 골든타임 ${G.from-12}~${G.to-12}시`:''):''})()}</p><h1>오늘의 퀘스트</h1></div>
     <div class="bubble">${closed?'"밤 12시가 지나서 오늘 체크는 끝났어. 빠뜨린 게 있으면 내일 선생님께 말해 줘!"':`"${done}개 했어! ${esc(SUBJ[bossS].boss)} 체력 ${left}% 남았어"`}</div>`;
@@ -922,7 +923,8 @@ function renderToday(){
   if(blessActive())h+=`<div class="banner" style="background:#5B3B8C"><span data-spr="star" data-sc="5"></span><div><b>마스터의 가호</b><p class="small" style="opacity:.9">숙제검사 통과! ${fmt(S.bless.until)}까지 모든 공격 +${BLESS_PCT}%</p></div></div>`;
   h+=`<div class="card" style="gap:8px"><div class="row between"><h3>공부 체크</h3><span class="num small"><b style="font-size:20px">${sc.rank}</b> / ${DAILY_CAP}점</span></div>`;
   L.q.forEach((q,i)=>{h+=questRow(q,i,L,k)});
-  h+=`<div class="quest ${L.life.clean?'done':''}"><span class="dot" style="background:var(--gold)"></span><div class="body"><div class="t">${ACT.clean.n}</div><div class="tiny muted">+1점 · 궁극기 게이지 +20%</div></div><button class="check" data-life="clean" ${closed?'disabled':''}>${L.life.clean?'✓':'완료'}</button></div></div>`;
+  h+=`<div class="quest ${L.life.clean?'done':''}"><span class="dot" style="background:var(--gold)"></span><div class="body"><div class="t">${ACT.clean.n}</div><div class="tiny muted">+1점 · 궁극기 게이지 +20%</div></div><button class="check" data-life="clean" ${closed?'disabled':''}>${L.life.clean?'✓':'완료'}</button></div>
+  <div class="quest ${L.life.bag?'done':''}"><span class="dot" style="background:var(--gold)"></span><div class="body"><div class="t">${ACT.bag.n}</div><div class="tiny muted">+1점 · 습관</div></div><button class="check" data-life="bag" ${closed?'disabled':''}>${L.life.bag?'✓':'완료'}</button></div></div>`;
   {const SS=shieldState();const showMini=SK.MINI&&(!hasStudy(L)||L.life.mini);
    {const T=evNow(),ce=SK.coopEvent&&SK.coopEvent([],k,T.h,T.m);if(ce&&!ce.over)h+=`<button class="card evcard" id="coopc" type="button" style="background:#22183A;color:#F6E3B4;border-color:#22183A"><b>${ce.lobby?'🌙 대기실 열림! 지금 입장하기':ce.soon?'🌙 깜짝 협동 이벤트 예고':'🌙 지금 반 협동 이벤트 진행 중!'}</b><div class="tiny">${fmt(ce.ev.day)} 밤 ${ce.ev.from-12}시 대기실 → ${ce.ev.from-12}시 ${ce.ev.lobby||0}분 다 같이 입장 · 그림자 군단 Lv.1~${ce.ev.levels.length} · 눌러서 보기</div></button>`}
    {const E=incubating(),P=partner();h+=`<button class="card evcard" id="eggc" type="button" style="background:linear-gradient(180deg,#FFF3D6,#fff)"><div class="row" style="gap:10px">${E?`<span class="${E.stage?'':'eggwob'}" data-spr="${E.stage?'pet_'+E.id:'egg_'+E.id}" data-sc="3"></span><div style="flex:1"><b>${E.stage?esc(petName(E))+' 키우는 중':esc(SK.EGGS[E.id].egg)+' 품는 중'}</b><div class="tiny">${E.xp}점 · ${SK.EGG_STAGES.find(t=>E.xp<t)-E.xp}점 더 하면 ${['부화','2차 성장','최종 각성'][E.stage]}!</div></div>`:`<span data-spr="egg_fire" data-sc="3"></span><div style="flex:1"><b>${P?'새 알을 품어 볼까?':'알을 골라 품어 봐!'}</b><div class="tiny">공부 점수 30점이면 부화해서 내 옆에 따라다녀요</div></div>`}</div></button>`}
@@ -943,6 +945,7 @@ function renderToday(){
   {const ec=scr.querySelector('#eggc');if(ec)ec.onclick=()=>{if(!incubating())eggPicker();else{UI.tab='me';render();setTimeout(()=>{const x=document.getElementById('eggs');if(x)x.scrollIntoView({block:'start'})},60)}}}
   scr.querySelectorAll('.check[data-life="mini"]').forEach(b=>b.onclick=()=>{if(SK.closed()){toast('밤 12시가 지나서 마감됐어');return}
     confirmSheet('문제 1개 풀었니?','책상에 앉아서 딱 1문제! 그것만 해도 오늘 출석이야.',()=>{L.life.mini=true;afterCheck(k);save();if(window.SKSound){SKSound.play('attack');SKSound.buzz(30)}toast(`시동 걸렸다! ${SK.MINI.dmg} 데미지 · 출석 인정. 내일도 같이 하자!`);render()})});
+  scr.querySelectorAll('.check[data-life="bag"]').forEach(b=>b.onclick=()=>{if(SK.closed()){toast('밤 12시가 지나서 마감됐어');return}L.life.bag=!L.life.bag;if(L.life.bag)toast('가방 정리 완료! 내일 아침이 가벼워져 · +1점');afterCheck(k);save();render()});
   scr.querySelectorAll('.check[data-life="clean"]').forEach(b=>b.onclick=()=>{if(SK.closed()){toast('밤 12시가 지나서 마감됐어');return}L.life.clean=!L.life.clean;if(L.life.clean){S.gauge=Math.min(100,S.gauge+20);toast(`방이 반짝반짝! +1점 · 궁극기 게이지 ${S.gauge}%`)}else S.gauge=Math.max(0,S.gauge-20);afterCheck(k);save();render()});
   const m1=scr.querySelector('[data-m1]');if(m1)m1.onclick=()=>confirmSheet('숙제검사 받았니?','선생님께 확인 요청을 보내요. 선생님이 누르면 5점과 마스터의 가호가 켜져요.',()=>{L.hiddenReq=true;save();toast('선생님께 알렸어요');render()});
   $('#finish').onclick=()=>{UI.tab='emo';UI.emo={i:0,a:{}};render();scr.scrollTop=0};
@@ -1362,7 +1365,7 @@ function renderMe(){
 }
 
 /* ---------- 보호자 리포트 ---------- */
-function doneList(L){const out=L?L.q.filter(q=>q.done).map(q=>ACT[q.a]):[];if(L&&L.life&&L.life.clean)out.push(ACT.clean);adjOf(L,'check').forEach(x=>{if(ACT[x.a])out.push(ACT[x.a])});return out}
+function doneList(L){const out=L?L.q.filter(q=>q.done).map(q=>ACT[q.a]):[];if(L&&L.life&&L.life.clean)out.push(ACT.clean);if(L&&L.life&&L.life.bag)out.push(ACT.bag);adjOf(L,'check').forEach(x=>{if(ACT[x.a])out.push(ACT[x.a])});return out}
 function parentSentences(k){
   const sc=dayScore(k),e=S.emo[k],L=S.logs[k];if(!L||!hasDone(L))return null;
   const items=doneList(L);

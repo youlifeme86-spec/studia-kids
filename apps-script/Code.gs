@@ -13,7 +13,7 @@
  *   오류  : 학생 폰에서 난 오류가 실시간으로 쌓이는 곳
  */
 
-var SERVER_VERSION = '2026.11.27-k2';
+var SERVER_VERSION = '2026.11.27-k3';
 var TZ = 'Asia/Seoul';
 var CHUNK = 45000;            // 시트 한 칸 최대 50,000자라 45,000자씩 나눠 저장
 var MAX_CHUNKS = 40;          // 학생 한 명 최대 약 1.8MB
@@ -30,7 +30,7 @@ var SHEETS = {
 };
 var A = { id: 0, name: 1, role: 2, salt: 3, hash: 4, code: 5, active: 6, created: 7, last: 8, tv: 9, memo: 10, consent: 11, ebs: 12 };  // ebs: on 매일 / wd 평일만 / off 안 보임 / 빈칸 = 앱 기본값
 /* 초등판 점수표 (game-data.js 와 같게 유지) */
-var ACT = { math: { pt: 5, s: 'm' }, eng: { pt: 5, s: 'e' }, kor: { pt: 3, s: 'k' }, ebs: { pt: 3, s: 'b' }, m1: { pt: 5, s: 'w' }, m2: { pt: 1, s: 'w' }, school: { pt: 1, s: 'w' }, book: { pt: 1, s: 'r' }, clean: { pt: 1, s: '' } };
+var ACT = { math: { pt: 5, s: 'm' }, eng: { pt: 5, s: 'e' }, kor: { pt: 3, s: 'k' }, ebs: { pt: 3, s: 'b' }, m1: { pt: 5, s: 'w' }, m2: { pt: 1, s: 'w' }, school: { pt: 1, s: 'w' }, book: { pt: 1, s: 'r' }, clean: { pt: 1, s: '' }, bag: { pt: 1, s: '' } };
 var SUBJ_KEYS = ['m', 'e', 'k', 'b', 'r', 'w'];
 
 /* ===================== 시트 메뉴 ===================== */
