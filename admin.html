@@ -7,10 +7,10 @@
 <title>스터디아 키즈 선생님</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap">
-<script>window.PAGE_VERSION='2026.11.27-0601';/* 옛 화면이 캐시에 남아 있으면 새 버전으로 한 번 다시 불러와요 */
+<script>window.PAGE_VERSION='2026.11.27-0604';/* 옛 화면이 캐시에 남아 있으면 새 버전으로 한 번 다시 불러와요 */
 (function(){fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(v){if(!v||!v.version||v.version===window.PAGE_VERSION)return;var k='sk-reload-'+v.version;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1')}catch(e){return}var u=new URL(location.href);u.searchParams.set('v',v.version);location.replace(u.toString())}).catch(function(){})})();</script>
-<script src="config.js?v=2026.11.27-0601"></script>
-<script src="game-data.js?v=2026.11.27-0601"></script>
+<script src="config.js?v=2026.11.27-0604"></script>
+<script src="game-data.js?v=2026.11.27-0604"></script>
 <style>
 :root{--bg:#FBF4E6;--paper:#FFFDF8;--ink:#3A2C22;--muted:#8A7766;--line:#EADFCB;--accent:#F08A4B;--soft:#FDE6D3;--good:#3E9B6B;--bad:#D2504A;--purple:#7A4FD0;
   --f-display:'Jua',system-ui,sans-serif;--f-body:'Noto Sans KR',system-ui,-apple-system,sans-serif;--shadow:0 2px 0 rgba(90,60,30,.06),0 8px 24px rgba(90,60,30,.05)}
@@ -209,6 +209,7 @@ function render(){
         <div>${esc(e.msg)}</div>${e.stack?`<pre>${esc(e.stack)}</pre>`:''}<div class="tiny muted">${esc(e.ua)}</div></div>`).join(''):'<p class="small muted">오류가 없어요.</p>'}</div>`;
     LAST_ERR_SEEN=Date.now();localStorage.setItem(KEY+':errseen',LAST_ERR_SEEN);
   }
+  {const need='2026.11.27-k2',sv=D.serverVersion||'';h+=`<p class="tiny muted" style="text-align:center;margin-top:8px">서버(Code.gs) 버전 ${esc(sv||'알 수 없음')} ${sv>=need?'✓ 최신':`<span class="pill bad">새 Code.gs 배포 필요 (${need})</span>`}</p>`}
   app.innerHTML=h;bind();
 }
 function showOut(html){const o=$('#out');if(o){o.innerHTML=html;o.scrollIntoView({behavior:'smooth',block:'nearest'});o.querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>copy(decodeURIComponent(b.dataset.copy)))}}
