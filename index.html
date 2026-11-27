@@ -15,11 +15,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="스터디아 키즈">
-<script src="config.js?v=2026.11.27-1424"></script>
-<script src="game-data.js?v=2026.11.27-1424"></script>
-<script src="sound.js?v=2026.11.27-1424"></script>
+<script src="config.js?v=2026.11.27-1427"></script>
+<script src="game-data.js?v=2026.11.27-1427"></script>
+<script src="sound.js?v=2026.11.27-1427"></script>
 <script>
-window.RR_VERSION='2026.11.27-1424';
+window.RR_VERSION='2026.11.27-1427';
 /* 실시간 오류 기록: 학생 폰에서 난 오류를 구글 시트 [오류] 탭으로 보냄 */
 (function(){var n=0;window.RR_REPORT=function(msg,stack,extra){try{var C=window.RR_CONFIG||{};if(!C.API_URL||n>=8)return;n++;var a=null;try{a=JSON.parse(localStorage.getItem('sk-auth-v1')||'null')}catch(e){}
 fetch(C.API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},keepalive:true,body:JSON.stringify({action:'logError',token:a&&a.token||'',msg:String(msg||'').slice(0,1000),stack:String(stack||'').slice(0,3000),page:location.pathname+(location.hash.indexOf('#parent')===0?' (학부모)':''),tab:(window.RR_TAB||'')+(extra?' '+extra:''),ver:window.RR_VERSION||'',ua:navigator.userAgent.slice(0,300)})}).catch(function(){})}catch(e){}};
@@ -460,12 +460,12 @@ const hydrate=root=>SK.hydrate(root);
 /* ---------- 점수 ---------- */
 function weekCount(a,k,st){st=st||S;const w=weekKey(k);let n=0;for(let i=0;i<7;i++){const d=addDays(w,i);const L=(st.logs||{})[d];if(!L)continue;if(ACT[a]&&ACT[a].life?L.life&&L.life[a]:L.q.some(q=>q.a===a&&q.done))n++}return n}
 function weekFull(a,k,st){const A=ACT[a];if(!A.wk)return false;const L=(st||S).logs[k];const doneToday=L&&L.q.some(q=>q.a===a&&q.done);return !doneToday&&weekCount(a,k,st)>=A.wk}
-function qPts(q){return q.pts||ACT[q.a].pt}
+function qPts(q){return q.pts||(q.a==='m1'&&SRV_M1?SRV_M1:ACT[q.a].pt)}
 function allClear(st,k){const L=(st.logs||{})[k];if(!L)return false;
   const need=ORDER.filter(a=>a!=='m1'&&a!=='school'&&a!=='bag'&&!weekFull(a,k,st)&&(a!=='ebs'||st!==S||ebsOK(k)));
   return need.length>0&&need.every(a=>ACT[a].life?L.life&&L.life[a]:L.q.some(q=>q.a===a&&q.done))}
 /* EBS 권한 (선생님이 학생마다 열고 닫음) */
-let SRV_EBS='';
+let SRV_EBS='',SRV_M1=0;
 function ebsMode(){if(!MODE_DB)return 'on';return SRV_EBS||(SK.EBS_DEFAULT||{})[UID]||'off'}
 function ebsOK(k){const m=ebsMode();if(m==='off')return false;if(m==='wd'){const d=parseDay(k||TODAY()).getDay();return d!==0&&d!==6}return true}
 function adjOf(L,t){return (L&&L.adj||[]).filter(x=>x.t===t)}
@@ -492,7 +492,8 @@ function streak(st){return shieldState(st).n}
 /* ---------- 알 부화 ---------- */
 function eggXp(e,st){st=st||S;const cw=Object.entries(st.coopWins||{}).filter(([w])=>SK.addDays(w.slice(0,10),6)>=e.start).reduce((a,[w,v])=>a+(v===1?((SK.COOP&&SK.COOP.egg)||0):(+v||0)),0);/* '알 부화 포함' 선생님 추가 포인트는 알을 나중에 골라도 첫 번째 알에 들어가요 */
   const f=(st.eggs||[])[0],gift=f&&f.id===e.id&&f.start===e.start?Object.keys(st.logs||{}).filter(k=>k<e.start).reduce((a,k)=>a+adjOf(st.logs[k],'bonus').filter(x=>/알 부화/.test(x.why||'')).reduce((b,x)=>b+(+x.pts||0),0),0):0;
-  return cw+gift+Object.keys(st.logs||{}).filter(k=>k>=e.start).reduce((a,k)=>a+dayScoreOf(st,k).raw,0)}
+  const emoP=(SK.EMO_EGG||0)*Object.keys(st.emo||{}).filter(d=>d>=e.start&&!st.emo[d].demo).length;
+  return cw+gift+emoP+Object.keys(st.logs||{}).filter(k=>k>=e.start).reduce((a,k)=>a+dayScoreOf(st,k).raw,0)}
 function eggStage(xp){let n=0;SK.EGG_STAGES.forEach(t=>{if(xp>=t)n++});return n}
 function eggList(st){st=st||S;return (st.eggs||[]).map(e=>{const xp=eggXp(e,st);return {...e,xp,stage:eggStage(xp)}})}
 function incubating(st){return eggList(st).find(e=>e.stage<SK.EGG_STAGES.length)||null}
@@ -650,6 +651,7 @@ async function flush(){
 /* 선생님이 승인한 미션1, 선생님이 넣은 체크·추가 포인트·감점을 내 기록에 합침 */
 function mergeServer(j){let ch=false,m1=false;
   if(typeof j.ebs==='string'&&j.ebs!==SRV_EBS){SRV_EBS=j.ebs;ch=true}
+  if(typeof j.m1==='number'&&j.m1!==SRV_M1&&(j.m1===0||j.m1===5||j.m1===10)){SRV_M1=j.m1;ch=true}
   (j.approved||[]).forEach(d=>{if(!S.char||d>TODAY()||d<addDays(TODAY(),-14))return;const L=log(d);const q=L.q.find(x=>x.a==='m1');
     if(!L.hidden||(q&&!q.done)){L.hidden=1;if(q&&!q.done){q.done=true;q.at=Date.now();let mult=1+(blessActive()?BLESS_PCT/100:0);if(S.char&&S.char.kingdom==='hc')mult*=2;q.dmg=Math.round(qPts(q)*10*mult)}
       S.bless={from:d,until:addDays(d,6)};ch=true;m1=true}});
@@ -907,7 +909,7 @@ function makeDemo(){
 function questRow(q,i,L,k){const A=ACT[q.a];if(q.a==='ebs'&&!q.done&&ebsMode()==='off')return '';const ebsShut=q.a==='ebs'&&!q.done&&!ebsOK(k);const wf=weekFull(q.a,k)||ebsShut;const closed=SK.closed()&&k===TODAY();
   const wkTxt=A.wk?`이번 주 ${weekCount(q.a,k)}/${A.wk}`:'하루 1번';
   if(A.teacher){const st=L.hidden?'done':L.hiddenReq?'wait':'';
-    return `<div class="quest ${st}"><span class="dot" style="background:${subjDot(A.s)}"></span><div class="body"><div class="t">${esc(A.n)}</div><div class="tiny muted">${A.pt}점 · ${wkTxt} · <span class="pill purple">가호 +${BLESS_PCT}%</span><br>${L.hidden?'선생님이 확인했어요!':L.hiddenReq?'선생님 확인 기다리는 중':'숙제검사를 받으면 선생님이 눌러 줘요'}</div></div>
+    return `<div class="quest ${st}"><span class="dot" style="background:${subjDot(A.s)}"></span><div class="body"><div class="t">${esc(A.n)}</div><div class="tiny muted">${qPts(q)}점 · ${wkTxt} · <span class="pill purple">가호 +${BLESS_PCT}%</span><br>${L.hidden?'선생님이 확인했어요!':L.hiddenReq?'선생님 확인 기다리는 중':'숙제검사를 받으면 선생님이 눌러 줘요'}</div></div>
     <button class="check" data-m1="1" ${L.hidden||L.hiddenReq||wf||closed?'disabled':''}>${L.hidden?'✓':L.hiddenReq?'대기':wf?'끝':'알리기'}</button></div>`}
   return `<div class="quest ${q.done?'done':''} ${(wf||closed)&&!q.done?'locked':''}"><span class="dot" style="background:${subjDot(A.s)}"></span>
     <div class="body"><div class="t">${esc(A.n)}</div><div class="tiny muted">${A.pt}점 · ${ebsShut?'토·일은 EBS 쉬는 날이에요':wf&&!q.done?'이번 주는 다 채웠어!':wkTxt}${A.s?' · '+esc(SUBJ[A.s].boss):''}</div></div>
@@ -925,6 +927,7 @@ function renderToday(){
     h+=`<button class="card evcard" id="evc" type="button"><div class="row between"><b>❄ 겨울 이벤트</b><span class="tiny">크리스마스까지</span></div>
      <div class="tiny">${k<=WIN.novEnd?`· 11월 연습 보스 ${nl}/6 처치 (${fmt(WIN.novEnd)}까지)<br>`:''}${RI.open?`· 눈사람 왕 HP ${fmtN(RI.left)} 남음<br>`:`· 12/1 눈사람 왕 레이드 열림 (체력 최대 ${fmtN(WIN.raidMax)})<br>`}${WH?(WH.open?(WH.dead?'· 꿈의 문 수문장 처치 완료!':`· 꿈의 문 수문장 HP ${fmtN(WH.left)} 남음`):`· 꿈의 문 열쇠 ${pctOf(Math.min(WH.D,WIN.hidGate),WIN.hidGate)}% 모음`):'· 12/1부터 꿈의 문 열쇠 모으기'}</div></button>`}
   h+=attHTML();
+  if(S.emo&&!(S.emo[k]&&!S.emo[k].demo))h+=`<button class="card evcard" id="emoNudge" type="button" style="background:linear-gradient(180deg,#FFE3EC,#fff)"><div class="row" style="gap:10px"><span style="font-size:30px">💗</span><div style="flex:1"><b>오늘 마음 체크 아직이야!</b><div class="tiny">오늘 어땠는지 톡톡 골라 주면 1분이면 끝. 하면 <b>알 부화 +${SK.EMO_EGG||1}점</b>!</div></div><span class="pill">하러 가기</span></div></button>`;
   if(giftReady())h+=`<button class="giftcard" id="gift" type="button"><span class="giftbox" data-spr="chest" data-sc="5"></span><div><b>신규 용사 선물이 도착했어!</b><p class="small">눌러서 열어 봐</p></div></button>`;
   if(blessActive())h+=`<div class="banner" style="background:#5B3B8C"><span data-spr="star" data-sc="5"></span><div><b>마스터의 가호</b><p class="small" style="opacity:.9">숙제검사 통과! ${fmt(S.bless.until)}까지 모든 공격 +${BLESS_PCT}%</p></div></div>`;
   h+=`<div class="card" style="gap:8px"><div class="row between"><h3>공부 체크</h3><span class="num small"><b style="font-size:20px">${sc.rank}</b> / ${DAILY_CAP}점</span></div>`;
@@ -954,6 +957,7 @@ function renderToday(){
   scr.querySelectorAll('.check[data-life="bag"]').forEach(b=>b.onclick=()=>{if(SK.closed()){toast('밤 12시가 지나서 마감됐어');return}L.life.bag=!L.life.bag;if(L.life.bag)toast('가방 정리 완료! 내일 아침이 가벼워져 · +1점');afterCheck(k);save();render()});
   scr.querySelectorAll('.check[data-life="clean"]').forEach(b=>b.onclick=()=>{if(SK.closed()){toast('밤 12시가 지나서 마감됐어');return}L.life.clean=!L.life.clean;if(L.life.clean){S.gauge=Math.min(100,S.gauge+20);toast(`방이 반짝반짝! +1점 · 궁극기 게이지 ${S.gauge}%`)}else S.gauge=Math.max(0,S.gauge-20);afterCheck(k);save();render()});
   const m1=scr.querySelector('[data-m1]');if(m1)m1.onclick=()=>confirmSheet('숙제검사 받았니?','선생님께 확인 요청을 보내요. 선생님이 누르면 5점과 마스터의 가호가 켜져요.',()=>{L.hiddenReq=true;save();toast('선생님께 알렸어요');render()});
+  {const en=scr.querySelector('#emoNudge');if(en)en.onclick=()=>{UI.tab='emo';UI.emo={i:0,a:{}};render();scr.scrollTop=0}}
   $('#finish').onclick=()=>{UI.tab='emo';UI.emo={i:0,a:{}};render();scr.scrollTop=0};
 }
 /* "정말 다 했니?" 확인창 */
@@ -998,7 +1002,7 @@ function attHTML(){const A=SK.ATT;if(!A||!S.char||!SK.newOn())return '';const k=
   return `<div class="card attc" style="gap:6px"><div class="row between"><b>📅 출석 도장</b><span class="small">이번 주 <b>${n}</b>/${A.week}</span></div>
    <div class="attgrid">${W.map(cell).join('')}<div class="atc gift ${gift?'on':''}"><div class="ath">주간 선물</div><div class="atb"><span data-spr="egg_fire" data-sc="3"></span><i>도장 ${A.week}개 · 알 +${A.egg}점</i></div>${gift?stampSVG(an):''}</div></div>
    <p class="tiny muted">${today?(opened?`오늘 도장 쾅! 출석 상자에서 궁극기 게이지 +${A.gauge}%를 받았어요.`:'오늘 도장 쾅!'):`🔒 오늘 상자가 잠겨 있어요. 메인 과목(수학·영어·국어·EBS)을 1개 이상 체크하면 도장이 찍히고 상자가 열려요.`}</p></div>`}
-function afterCheck(k){attAfterCheck(k);const L=log(k);const n=hasDone(L)?streak():0;L.sb=n===3?SK.STREAK3:(n>0&&n%7===0)?SK.STREAK7:0}
+function afterCheck(k){attAfterCheck(k);if(k===TODAY()&&S.char&&!(S.emo&&S.emo[k]&&!S.emo[k].demo)&&UI.emoNag!==k&&hasStudy(S.logs[k])){UI.emoNag=k;setTimeout(()=>toast(`💗 공부 끝나면 마음 체크도 잊지 마! 알 +${SK.EMO_EGG||1}점`),3800)}const L=log(k);const n=hasDone(L)?streak():0;L.sb=n===3?SK.STREAK3:(n>0&&n%7===0)?SK.STREAK7:0}
 function toggleQuest(i,tag){
   const k=TODAY(),L=log(k),q=L.q[i];
   if(!q.done){
@@ -1204,7 +1208,7 @@ function renderEmoResult(qs){
   $('#dn').onclick=()=>{const tx=$('#tx').value.trim();r.share=$('#sh').checked;
     r.alert=SK.dangerWord(tx)?1:0;
     if(r.share){r.text=tx;delete PRIV.text[k]}else{r.text='';if(tx)PRIV.text[k]=tx;else delete PRIV.text[k]}
-    S.emo[k]=r;save();savePrivate();UI.tab='today';toast('오늘 기록 끝! 수고했어');render()};
+    const first=!(S.emo[k]&&!S.emo[k].demo);S.emo[k]=r;save();savePrivate();UI.tab='today';toast(first&&SK.EMO_EGG?`오늘 기록 끝! 수고했어 · 알 부화 +${SK.EMO_EGG}점`:'오늘 기록 끝! 수고했어');render()};
 }
 
 /* ---------- 랭킹: 순위 숫자는 1~3등 메달만, 나머지는 지도 위 위치 ---------- */

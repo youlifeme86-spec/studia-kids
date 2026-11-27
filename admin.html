@@ -7,10 +7,10 @@
 <title>스터디아 키즈 선생님</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap">
-<script>window.PAGE_VERSION='2026.11.27-1424';/* 옛 화면이 캐시에 남아 있으면 새 버전으로 한 번 다시 불러와요 */
+<script>window.PAGE_VERSION='2026.11.27-1427';/* 옛 화면이 캐시에 남아 있으면 새 버전으로 한 번 다시 불러와요 */
 (function(){fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(v){if(!v||!v.version||v.version===window.PAGE_VERSION)return;var k='sk-reload-'+v.version;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1')}catch(e){return}var u=new URL(location.href);u.searchParams.set('v',v.version);location.replace(u.toString())}).catch(function(){})})();</script>
-<script src="config.js?v=2026.11.27-1424"></script>
-<script src="game-data.js?v=2026.11.27-1424"></script>
+<script src="config.js?v=2026.11.27-1427"></script>
+<script src="game-data.js?v=2026.11.27-1427"></script>
 <style>
 :root{--bg:#FBF4E6;--paper:#FFFDF8;--ink:#3A2C22;--muted:#8A7766;--line:#EADFCB;--accent:#F08A4B;--soft:#FDE6D3;--good:#3E9B6B;--bad:#D2504A;--purple:#7A4FD0;
   --f-display:'Jua',system-ui,sans-serif;--f-body:'Noto Sans KR',system-ui,-apple-system,sans-serif;--shadow:0 2px 0 rgba(90,60,30,.06),0 8px 24px rgba(90,60,30,.05)}
@@ -161,6 +161,7 @@ function render(){
       <li>1점 = 10 데미지 (랭킹 점수는 그대로). 크리티컬 15% ×1.5, MEGA HIT 3% ×2, 하루 2·3·4번째 체크 콤보 +10·20·30%, 골든타임 저녁 7~9시 +20%</li>
       <li>보스 체력은 이 보너스만큼 1.3배로 올렸어요. 체력 75·50·25%에서 보스 대사와 표정이 바뀌어요</li>
       <li>체크할 때 감정 태그 [쉬웠어][조금 힘들어][해냈다!]를 골라요</li>
+      <li>미션1 점수: [학생 계정] 미션1 칸에서 학생마다 5점/10점. 마음 체크: 한 날마다 알 부화 +1점.</li>
       <li>미션1 가호: [점수 조정] → 종류 '미션1 가호'로 선생님이 바로 넣을 수 있어요(5점 + 7일 가호 +10%).</li>
       <li>습관: 청소(+1, 게이지 +20%) · 가방 정리(+1, 올클리어 조건 아님)</li>
       <li>출석 도장: 메인 과목(수학·영어·국어·EBS) 1개 이상 체크한 날 도장 + 출석 상자(궁극기 게이지 +20%), 한 주 도장 5개면 알 부화 +5점. 앱만 열면 도장 없음.</li>
@@ -187,9 +188,9 @@ function render(){
   }
   if(TAB==='students'){
     h+=`<div class="card"><h2>학생 계정</h2><p class="small muted"><b>EBS</b> 칸: 닫힘(앱에 EBS가 안 보여요) · 평일만(토·일은 체크 못 해요) · 매일. EBS는 주 4번까지예요. 비밀번호는 시트에 암호화돼 저장되어 선생님도 원래 비밀번호를 볼 수 없어요. 잊었다면 [새 비밀번호]로 다시 발급하세요. [삭제]는 계정과 기록을 모두 지우고 되돌릴 수 없어요. 잠깐 쉬게 하려면 [멈추기]를 쓰세요.</p>
-    <div class="tscroll"><table><thead><tr><th>이름</th><th>아이디</th><th>상태</th><th>캐릭터</th><th>보호자 동의</th><th>마지막 접속</th><th>EBS</th><th>메모</th><th></th></tr></thead><tbody>
+    <div class="tscroll"><table><thead><tr><th>이름</th><th>아이디</th><th>상태</th><th>캐릭터</th><th>보호자 동의</th><th>마지막 접속</th><th>EBS</th><th>미션1</th><th>메모</th><th></th></tr></thead><tbody>
     ${D.students.map(s=>`<tr><td>${esc(s.name)}</td><td>${esc(s.id)}</td><td>${s.role==='admin'?'<span class="pill p">관리자</span>':s.active?'<span class="pill">사용</span>':'<span class="pill off">멈춤</span>'}</td>
-      <td>${s.char?esc(s.char.name):'-'}</td><td class="tiny">${s.role==='student'?(s.consent?esc(String(s.consent).slice(0,10)):'<span class="pill bad">없음</span>')+` <button class="btn ghost sm" data-cs="${esc(s.id)}">고치기</button>`:''}</td><td class="tiny">${ago(s.lastLogin)}</td><td>${s.role==='student'?(()=>{const v=s.ebs||(SK.EBS_DEFAULT||{})[s.id]||'off';return `<select data-ebs="${esc(s.id)}" aria-label="${esc(s.name)} EBS" style="min-width:96px">${[['off','닫힘'],['wd','평일만'],['on','매일']].map(([k,n])=>`<option value="${k}" ${v===k?'selected':''}>${n}</option>`).join('')}</select>`})():''}</td><td class="tiny">${esc(s.memo)}</td>
+      <td>${s.char?esc(s.char.name):'-'}</td><td class="tiny">${s.role==='student'?(s.consent?esc(String(s.consent).slice(0,10)):'<span class="pill bad">없음</span>')+` <button class="btn ghost sm" data-cs="${esc(s.id)}">고치기</button>`:''}</td><td class="tiny">${ago(s.lastLogin)}</td><td>${s.role==='student'?(()=>{const v=s.ebs||(SK.EBS_DEFAULT||{})[s.id]||'off';return `<select data-ebs="${esc(s.id)}" aria-label="${esc(s.name)} EBS" style="min-width:96px">${[['off','닫힘'],['wd','평일만'],['on','매일']].map(([k,n])=>`<option value="${k}" ${v===k?'selected':''}>${n}</option>`).join('')}</select>`})():''}</td><td>${s.role==='student'?`<select data-m1="${esc(s.id)}" aria-label="${esc(s.name)} 미션1 점수">${[5,10].map(v=>`<option value="${v}" ${(s.m1||5)===v?'selected':''}>${v}점</option>`).join('')}</select>`:''}</td><td class="tiny">${esc(s.memo)}</td>
       <td>${s.role==='student'?`<div class="row"><button class="btn ghost sm" data-rs="${esc(s.id)}">새 비밀번호</button><button class="btn ghost sm" data-pl="${esc(s.id)}">보호자 링크</button><a class="btn ghost sm" href="${esc(parentLink(s))}" target="_blank" rel="noopener" style="text-decoration:none">분석 리포트</a><button class="btn ghost sm" data-in="${esc(s.id)}">입장 안내</button><button class="btn ghost sm" data-ac="${esc(s.id)}">${s.active?'멈추기':'다시 사용'}</button><button class="btn ghost sm" data-del="${esc(s.id)}" style="color:var(--bad)">삭제</button></div>`:''}</td></tr>`).join('')}
     </tbody></table></div></div><div id="out"></div>`;
   }
@@ -212,7 +213,7 @@ function render(){
         <div>${esc(e.msg)}</div>${e.stack?`<pre>${esc(e.stack)}</pre>`:''}<div class="tiny muted">${esc(e.ua)}</div></div>`).join(''):'<p class="small muted">오류가 없어요.</p>'}</div>`;
     LAST_ERR_SEEN=Date.now();localStorage.setItem(KEY+':errseen',LAST_ERR_SEEN);
   }
-  {const need='2026.11.27-k3',sv=D.serverVersion||'';h+=`<p class="tiny muted" style="text-align:center;margin-top:8px">서버(Code.gs) 버전 ${esc(sv||'알 수 없음')} ${sv>=need?'✓ 최신':`<span class="pill bad">새 Code.gs 배포 필요 (${need})</span>`}</p>`}
+  {const need='2026.11.27-k4',sv=D.serverVersion||'';h+=`<p class="tiny muted" style="text-align:center;margin-top:8px">서버(Code.gs) 버전 ${esc(sv||'알 수 없음')} ${sv>=need?'✓ 최신':`<span class="pill bad">새 Code.gs 배포 필요 (${need})</span>`}</p>`}
   app.innerHTML=h;bind();
 }
 function showOut(html){const o=$('#out');if(o){o.innerHTML=html;o.scrollIntoView({behavior:'smooth',block:'nearest'});o.querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>copy(decodeURIComponent(b.dataset.copy)))}}
@@ -239,6 +240,7 @@ function bind(){
   app.querySelectorAll('[data-pl]').forEach(b=>b.onclick=()=>{const s=find(b.dataset.pl);const t=`[스터디아 왕국] ${s.name} 보호자 리포트\n${parentLink(s)}\n\n로그인 없이 열리는 읽기 전용 화면이에요. 다른 아이와의 순위는 보이지 않아요.`;showOut(`<div class="card"><h3>${esc(s.name)} 보호자 링크</h3><div class="note">${esc(t)}</div><div class="row"><button class="btn sm" data-copy="${encodeURIComponent(t)}">복사</button><a class="btn ghost sm" href="${esc(parentLink(s))}" target="_blank" rel="noopener">열어 보기</a></div><p class="tiny muted">링크가 새어 나갔다면 시트 [계정] 탭의 학부모코드를 지우고 새로 넣으면 예전 링크는 막혀요.</p></div>`)});
   app.querySelectorAll('[data-in]').forEach(b=>b.onclick=()=>{const s=find(b.dataset.in);const t=studentLinkText(s,'');showOut(`<div class="card"><h3>${esc(s.name)} 입장 안내</h3><div class="note">${esc(t)}</div><button class="btn sm" data-copy="${encodeURIComponent(t)}">복사</button></div>`)});
   app.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{const s=find(b.dataset.del);const t=prompt(`${s.name}(${s.id}) 계정을 완전히 지울까요?\n점수·체크 기록도 모두 지워지고 되돌릴 수 없어요.\n지우려면 아이디 ${s.id} 를 똑같이 입력하세요.`);if(t===null)return;if(t.trim().toLowerCase()!==s.id){toast('아이디가 달라서 지우지 않았어요');return}b.disabled=true;try{await api('adminDelete',{id:s.id,confirm:t.trim()});toast(`${s.id} 계정을 지웠어요`);refresh()}catch(e){toast(e.message);b.disabled=false}});
+  app.querySelectorAll('[data-m1]').forEach(sel=>sel.onchange=async()=>{const s=find(sel.dataset.m1);sel.disabled=true;try{await api('adminSetM1',{id:s.id,m1:+sel.value});s.m1=+sel.value;toast(`${s.name} 미션1: ${sel.value}점. 다음 숙제검사부터, 이미 받은 미션1도 ${sel.value}점으로 계산돼요`)}catch(e){toast(e.code==='bad_action'?'서버(Code.gs)를 최신으로 배포해야 바꿀 수 있어요':e.message);refresh()}finally{sel.disabled=false}});
   app.querySelectorAll('[data-ebs]').forEach(sel=>sel.onchange=async()=>{const s=find(sel.dataset.ebs);sel.disabled=true;try{await api('adminSetEbs',{id:s.id,ebs:sel.value});s.ebs=sel.value;toast(`${s.name} EBS: ${sel.options[sel.selectedIndex].text}. 학생 앱은 1분 안에 바뀌어요`)}catch(e){toast(e.code==='bad_action'?'서버(Code.gs)를 최신으로 배포해야 바꿀 수 있어요':e.message);refresh()}finally{sel.disabled=false}});
   app.querySelectorAll('[data-ac]').forEach(b=>b.onclick=async()=>{const s=find(b.dataset.ac);b.disabled=true;try{await api('adminSetActive',{id:s.id,active:!s.active});toast(s.active?'멈췄어요. 그 학생은 로그인이 풀려요':'다시 쓸 수 있어요');refresh()}catch(e){toast(e.message);b.disabled=false}});
   if($('#nf'))$('#nf').onsubmit=async e=>{e.preventDefault();const b=$('#ngo');b.disabled=true;

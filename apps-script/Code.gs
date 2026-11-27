@@ -13,7 +13,7 @@
  *   오류  : 학생 폰에서 난 오류가 실시간으로 쌓이는 곳
  */
 
-var SERVER_VERSION = '2026.11.27-k3';
+var SERVER_VERSION = '2026.11.27-k4';
 var TZ = 'Asia/Seoul';
 var CHUNK = 45000;            // 시트 한 칸 최대 50,000자라 45,000자씩 나눠 저장
 var MAX_CHUNKS = 40;          // 학생 한 명 최대 약 1.8MB
@@ -22,13 +22,13 @@ var TOKEN_DAYS = 60;
 var ERROR_ROWS_MAX = 5000;
 
 var SHEETS = {
-  acc:  { name: '계정', head: ['아이디', '이름', '역할', 'salt', 'hash', '보호자코드', '사용', '만든날', '마지막접속', '토큰버전', '메모', '보호자동의일', 'EBS'] },
+  acc:  { name: '계정', head: ['아이디', '이름', '역할', 'salt', 'hash', '보호자코드', '사용', '만든날', '마지막접속', '토큰버전', '메모', '보호자동의일', 'EBS', 'M1'] },
   st:   { name: '기록', head: ['아이디', 'rev', '저장시각', '요약', '비공개', '상태1'] },
   ap:   { name: '승인', head: ['아이디', '날짜', '승인시각', '승인자'] },
   adj:  { name: '조정', head: ['아이디', '날짜', '종류', '체크', '과목', '점수', '사유', '시각', '선생님', '번호'] },
   err:  { name: '오류', head: ['시각', '아이디', '버전', '화면', '탭', '내용', '스택', '기기'] }
 };
-var A = { id: 0, name: 1, role: 2, salt: 3, hash: 4, code: 5, active: 6, created: 7, last: 8, tv: 9, memo: 10, consent: 11, ebs: 12 };  // ebs: on 매일 / wd 평일만 / off 안 보임 / 빈칸 = 앱 기본값
+var A = { id: 0, name: 1, role: 2, salt: 3, hash: 4, code: 5, active: 6, created: 7, last: 8, tv: 9, memo: 10, consent: 11, ebs: 12, m1: 13 };  // m1: 미션1 점수 5 또는 10 (빈칸 = 5)  // ebs: on 매일 / wd 평일만 / off 안 보임 / 빈칸 = 앱 기본값
 /* 초등판 점수표 (game-data.js 와 같게 유지) */
 var ACT = { math: { pt: 5, s: 'm' }, eng: { pt: 5, s: 'e' }, kor: { pt: 3, s: 'k' }, ebs: { pt: 3, s: 'b' }, m1: { pt: 5, s: 'w' }, m2: { pt: 1, s: 'w' }, school: { pt: 1, s: 'w' }, book: { pt: 1, s: 'r' }, clean: { pt: 1, s: '' }, bag: { pt: 1, s: '' } };
 var SUBJ_KEYS = ['m', 'e', 'k', 'b', 'r', 'w'];
@@ -124,6 +124,7 @@ var ROUTES = {
   adminAdjustDelete: adminAdjustDelete_,
   adminConsent: adminConsent_,
   adminSetEbs: adminSetEbs_,
+  adminSetM1: adminSetM1_,
   adminClearErrors: function (b) { auth_(b, 'admin'); clearErrorsMenu(); return {}; }
 };
 
@@ -151,7 +152,7 @@ function load_(b) {
   return {
     id: u.id, name: u.row[A.name], parentCode: u.row[A.code],
     state: rec ? rec.state : null, rev: rec ? rec.rev : 0,
-    priv: rec ? rec.priv : null, approved: approvedDates_(u.id), adj: adjList_(u.id), ebs: String(u.row[A.ebs] || '')
+    priv: rec ? rec.priv : null, approved: approvedDates_(u.id), adj: adjList_(u.id), ebs: String(u.row[A.ebs] || ''), m1: Number(u.row[A.m1]) || 0
   };
 }
 
@@ -203,9 +204,9 @@ function roster_(b) {
   var cache = CacheService.getScriptCache();
   var mine = u.role === 'student' ? approvedDates_(u.id) : [];
   var myAdj = u.role === 'student' ? adjList_(u.id) : [];
-  var myEbs = String(u.row[A.ebs] || '');
+  var myEbs = String(u.row[A.ebs] || ''), myM1 = Number(u.row[A.m1]) || 0;
   var hit = cache.get('roster');
-  if (hit) return { students: JSON.parse(hit), approved: mine, adj: myAdj, ebs: myEbs, cached: true };
+  if (hit) return { students: JSON.parse(hit), approved: mine, adj: myAdj, ebs: myEbs, m1: myM1, cached: true };
   var since = dayKey_(-62);
   var out = {};
   eachState_(function (id, sum) {
@@ -215,7 +216,7 @@ function roster_(b) {
     out[id] = { char: { name: sum.char.name, color: sum.char.color, kingdom: sum.char.kingdom, job: sum.char.job, animal: sum.char.animal || '' }, daily: daily, board: sum.board || null, lobby: sum.lobby || null };  // lobby: 깜짝 협동 이벤트 대기실에 들어온 날
   });
   try { cache.put('roster', JSON.stringify(out), 30); } catch (x) {}
-  return { students: out, approved: mine, adj: myAdj, ebs: myEbs };
+  return { students: out, approved: mine, adj: myAdj, ebs: myEbs, m1: myM1 };
 }
 
 /** 보호자 링크: 보호자코드로 그 학생 기록만 읽기 전용 */
@@ -272,7 +273,7 @@ function adminOverview_(b) {
       id: r[A.id], name: r[A.name], role: r[A.role], active: isActive_(r), parentCode: r[A.code],
       created: iso_(r[A.created]), lastLogin: iso_(r[A.last]), savedAt: s.savedAt || '', memo: r[A.memo] || '',
       char: sum.char || null, daily: daily, bless: sum.bless || null, monthPts: sum.monthPts || 0, lobby: sum.lobby || null,
-      consent: iso_(r[A.consent]), ebs: String(r[A.ebs] || ''), alerts: alerts
+      consent: iso_(r[A.consent]), ebs: String(r[A.ebs] || ''), m1: Number(r[A.m1]) || 0, alerts: alerts
     });
   });
   var errSh = sheet_('err');
@@ -444,6 +445,17 @@ function adminSetEbs_(b) {
   var v = String(b.ebs || '');
   if (['on', 'wd', 'off'].indexOf(v) < 0) fail_('EBS 설정이 올바르지 않아요', 'bad_ebs');
   sheet_('acc').getRange(f.rowNo, A.ebs + 1).setValue(v);
+  return {};
+}
+
+/** 미션1 점수: 학생마다 5점 또는 10점 */
+function adminSetM1_(b) {
+  auth_(b, 'admin');
+  var f = findAccount_(normId_(b.id));
+  if (!f) fail_('계정을 찾지 못했어요', 'no_account');
+  var v = Number(b.m1);
+  if (v !== 5 && v !== 10) fail_('미션1 점수는 5 또는 10이에요', 'bad_m1');
+  sheet_('acc').getRange(f.rowNo, A.m1 + 1).setValue(v);
   return {};
 }
 
