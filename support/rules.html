@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Press+Start+2P&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=2026.11.27-0550">
-<script src="../game-data.js?v=2026.11.27-0550"></script>
+<link rel="stylesheet" href="style.css?v=2026.11.27-0601">
+<script src="../game-data.js?v=2026.11.27-0601"></script>
 </head>
 <body data-page="rules">
 
@@ -100,7 +100,7 @@
     </section>
     <section id="bosses"><h2>과목 보스</h2><p class="small muted">매달 1일 새로 나타나요. 한 달 300점을 하면 모두 쓰러뜨릴 수 있게 맞췄어요.</p><div id="bs"></div></section>
     <section id="raids"><h2>레이드와 히든보스</h2><p class="small muted">충전하는 달에 쌓인 데미지가 문이 열리는 달 1일에 한 번에 들어가요. HP = 충전 달 수 × 3,000 + 1,500.</p><div id="rd"></div></section>
-    <section id="checks"><h2>점수표</h2><div id="ck"></div><p class="small">하루 랭킹 상한 30점 · 체크 마감 밤 12시 · 1점 = 10 데미지 · 버프 합은 최대 +100%, 한 번에 최대 4배.</p></section>
+    <section id="checks"><h2>점수표</h2><div id="ck"></div><p class="small">하루 랭킹 상한 30점 · 체크 마감 밤 12시 · 1점 = 10 데미지 · 버프 합은 최대 +100%, 한 번에 최대 4배.</p> <b>EBS</b>는 선생님이 열어 준 학생만 보이고, '평일만' 학생은 토·일에 체크할 수 없어요(주 4번까지). EBS가 닫힌 날은 올클리어 조건에서 빠져요.</p></section>
     <section id="grow"><h2>성장과 보상</h2>
       <div class="tbl"><table><thead><tr><th>무엇</th><th>어떻게</th></tr></thead><tbody>
       <tr><td>월간 성장 단계</td><td>아기(0) → 꼬마(80, 리본) → 씩씩이(180, 망토) → 챔피언(300, 왕관) → 전설(420). 매달 1일 다시 시작</td></tr>
@@ -112,7 +112,7 @@
   </div>
 </div>
 
-<script src="site.js?v=2026.11.27-0550"></script>
+<script src="site.js?v=2026.11.27-0601"></script>
 <script>
 (function(){const e=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 document.getElementById('kd').innerHTML='<div class="tbl"><table><thead><tr><th>권역</th><th>왕국</th><th>힘</th></tr></thead><tbody>'+Object.keys(SK.KINGDOMS).map(k=>{const K=SK.KINGDOMS[k];return '<tr><td>'+e(K.zn)+'</td><td><b style="color:'+K.c+'">'+e(K.n)+'</b></td><td>['+e(K.p)+'] '+e(K.d)+'</td></tr>'}).join('')+'</tbody></table></div>';

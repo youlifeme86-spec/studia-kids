@@ -111,6 +111,8 @@ SK.ACT={
   book:{n:'책읽기',pt:1,s:'r',min:20},
   clean:{n:'청소 (저녁에 방과 책상)',pt:1,s:null,life:true,min:0}
 };
+/* EBS 권한: 'on' 매일 · 'wd' 평일만(토·일 닫힘) · 'off' 안 보임. 선생님 화면 [학생 계정]의 EBS 칸에서 바꾸고, 서버에 값이 없을 때만 아래 기본값을 써요 */
+SK.EBS_DEFAULT={ryu01:'wd',lee1102:'wd',kim1223:'wd',asd10041004:'on'};
 SK.ORDER=['math','eng','kor','ebs','m1','m2','school','book','clean'];
 
 /* ---------- 시즌·점수 규칙 ---------- */

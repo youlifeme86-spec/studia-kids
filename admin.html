@@ -7,10 +7,10 @@
 <title>스터디아 키즈 선생님</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap">
-<script>window.PAGE_VERSION='2026.11.27-0550';/* 옛 화면이 캐시에 남아 있으면 새 버전으로 한 번 다시 불러와요 */
+<script>window.PAGE_VERSION='2026.11.27-0601';/* 옛 화면이 캐시에 남아 있으면 새 버전으로 한 번 다시 불러와요 */
 (function(){fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(v){if(!v||!v.version||v.version===window.PAGE_VERSION)return;var k='sk-reload-'+v.version;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1')}catch(e){return}var u=new URL(location.href);u.searchParams.set('v',v.version);location.replace(u.toString())}).catch(function(){})})();</script>
-<script src="config.js?v=2026.11.27-0550"></script>
-<script src="game-data.js?v=2026.11.27-0550"></script>
+<script src="config.js?v=2026.11.27-0601"></script>
+<script src="game-data.js?v=2026.11.27-0601"></script>
 <style>
 :root{--bg:#FBF4E6;--paper:#FFFDF8;--ink:#3A2C22;--muted:#8A7766;--line:#EADFCB;--accent:#F08A4B;--soft:#FDE6D3;--good:#3E9B6B;--bad:#D2504A;--purple:#7A4FD0;
   --f-display:'Jua',system-ui,sans-serif;--f-body:'Noto Sans KR',system-ui,-apple-system,sans-serif;--shadow:0 2px 0 rgba(90,60,30,.06),0 8px 24px rgba(90,60,30,.05)}
@@ -163,6 +163,7 @@ function render(){
       <li>체크할 때 감정 태그 [쉬웠어][조금 힘들어][해냈다!]를 골라요</li>
       <li>스트릭 방패: 5일 연속마다 1개(최대 2개), 빠진 날 자동으로 연속 기록과 보스 반격을 막아요. 힘든 날엔 "문제 1개만" 최소 시동 퀘스트(5 데미지, 출석 인정)</li>
       <li>알 부화: 공부 점수 30점 부화 → 150점 성장 → 300점 각성. 파트너는 1마리 장착, 도감에서 바꿔 끼기. 공격할 때 파트너도 같이 공격(12/1부터 +3/+4/+5 데미지)</li>
+      <li>EBS: [학생 계정] EBS 칸에서 학생마다 닫힘/평일만/매일 (주 4번까지)</li>
       <li>11/28(토) 깜짝 협동 이벤트: 밤 10시 대기실(학생 앱에 [입장하기]) → 10시 5분 다 같이 입장 → 밤 12시까지 그림자 군단 3단계</li>
       <li>반 협동 주간 레이드(12/1부터): 매주 월요일 새 보스, 반 전체 데미지로 처치하면 참여자 알 가속 +10점. 최다 딜러·매일 출석상·결정적 막타</li>
       <li>겨울 이벤트: 11월 연습 보스(12/7까지), 눈사람 왕 체력 줄임, 크리스마스 꿈의 문 수문장</li></ul>
@@ -182,10 +183,10 @@ function render(){
     <div class="card"><h2>최근 2주 조정 내역</h2>${(D.adj||[]).length?`<div class="tscroll"><table><thead><tr><th>학생</th><th>날짜</th><th>종류</th><th class="r">점수</th><th>사유</th><th></th></tr></thead><tbody>${D.adj.map(a=>{const s=D.students.find(x=>x.id===a.id);return `<tr><td>${esc(s?s.name:a.id)}</td><td>${fmt(a.date)}</td><td>${a.t==='check'?'늦은 체크 · '+esc(SK.ACT[a.a]?SK.ACT[a.a].n:a.a):a.t==='bonus'?'추가 포인트'+(a.s?' · '+esc(SK.SUBJ[a.s].n):''):'<span class="pill bad">감점</span>'}</td><td class="r">${a.t==='penalty'?'-':'+'}${a.pts}</td><td class="tiny">${esc(a.why)}</td><td><button class="btn ghost sm" data-adel="${esc(a.uid)}">지우기</button></td></tr>`}).join('')}</tbody></table></div>`:'<p class="small muted">아직 없어요.</p>'}</div>`;
   }
   if(TAB==='students'){
-    h+=`<div class="card"><h2>학생 계정</h2><p class="small muted">비밀번호는 시트에 암호화돼 저장되어 선생님도 원래 비밀번호를 볼 수 없어요. 잊었다면 [새 비밀번호]로 다시 발급하세요. [삭제]는 계정과 기록을 모두 지우고 되돌릴 수 없어요. 잠깐 쉬게 하려면 [멈추기]를 쓰세요.</p>
-    <div class="tscroll"><table><thead><tr><th>이름</th><th>아이디</th><th>상태</th><th>캐릭터</th><th>보호자 동의</th><th>마지막 접속</th><th>메모</th><th></th></tr></thead><tbody>
+    h+=`<div class="card"><h2>학생 계정</h2><p class="small muted"><b>EBS</b> 칸: 닫힘(앱에 EBS가 안 보여요) · 평일만(토·일은 체크 못 해요) · 매일. EBS는 주 4번까지예요. 비밀번호는 시트에 암호화돼 저장되어 선생님도 원래 비밀번호를 볼 수 없어요. 잊었다면 [새 비밀번호]로 다시 발급하세요. [삭제]는 계정과 기록을 모두 지우고 되돌릴 수 없어요. 잠깐 쉬게 하려면 [멈추기]를 쓰세요.</p>
+    <div class="tscroll"><table><thead><tr><th>이름</th><th>아이디</th><th>상태</th><th>캐릭터</th><th>보호자 동의</th><th>마지막 접속</th><th>EBS</th><th>메모</th><th></th></tr></thead><tbody>
     ${D.students.map(s=>`<tr><td>${esc(s.name)}</td><td>${esc(s.id)}</td><td>${s.role==='admin'?'<span class="pill p">관리자</span>':s.active?'<span class="pill">사용</span>':'<span class="pill off">멈춤</span>'}</td>
-      <td>${s.char?esc(s.char.name):'-'}</td><td class="tiny">${s.role==='student'?(s.consent?esc(String(s.consent).slice(0,10)):'<span class="pill bad">없음</span>')+` <button class="btn ghost sm" data-cs="${esc(s.id)}">고치기</button>`:''}</td><td class="tiny">${ago(s.lastLogin)}</td><td class="tiny">${esc(s.memo)}</td>
+      <td>${s.char?esc(s.char.name):'-'}</td><td class="tiny">${s.role==='student'?(s.consent?esc(String(s.consent).slice(0,10)):'<span class="pill bad">없음</span>')+` <button class="btn ghost sm" data-cs="${esc(s.id)}">고치기</button>`:''}</td><td class="tiny">${ago(s.lastLogin)}</td><td>${s.role==='student'?(()=>{const v=s.ebs||(SK.EBS_DEFAULT||{})[s.id]||'off';return `<select data-ebs="${esc(s.id)}" aria-label="${esc(s.name)} EBS" style="min-width:96px">${[['off','닫힘'],['wd','평일만'],['on','매일']].map(([k,n])=>`<option value="${k}" ${v===k?'selected':''}>${n}</option>`).join('')}</select>`})():''}</td><td class="tiny">${esc(s.memo)}</td>
       <td>${s.role==='student'?`<div class="row"><button class="btn ghost sm" data-rs="${esc(s.id)}">새 비밀번호</button><button class="btn ghost sm" data-pl="${esc(s.id)}">보호자 링크</button><a class="btn ghost sm" href="${esc(parentLink(s))}" target="_blank" rel="noopener" style="text-decoration:none">분석 리포트</a><button class="btn ghost sm" data-in="${esc(s.id)}">입장 안내</button><button class="btn ghost sm" data-ac="${esc(s.id)}">${s.active?'멈추기':'다시 사용'}</button><button class="btn ghost sm" data-del="${esc(s.id)}" style="color:var(--bad)">삭제</button></div>`:''}</td></tr>`).join('')}
     </tbody></table></div></div><div id="out"></div>`;
   }
@@ -233,6 +234,7 @@ function bind(){
   app.querySelectorAll('[data-pl]').forEach(b=>b.onclick=()=>{const s=find(b.dataset.pl);const t=`[스터디아 왕국] ${s.name} 보호자 리포트\n${parentLink(s)}\n\n로그인 없이 열리는 읽기 전용 화면이에요. 다른 아이와의 순위는 보이지 않아요.`;showOut(`<div class="card"><h3>${esc(s.name)} 보호자 링크</h3><div class="note">${esc(t)}</div><div class="row"><button class="btn sm" data-copy="${encodeURIComponent(t)}">복사</button><a class="btn ghost sm" href="${esc(parentLink(s))}" target="_blank" rel="noopener">열어 보기</a></div><p class="tiny muted">링크가 새어 나갔다면 시트 [계정] 탭의 학부모코드를 지우고 새로 넣으면 예전 링크는 막혀요.</p></div>`)});
   app.querySelectorAll('[data-in]').forEach(b=>b.onclick=()=>{const s=find(b.dataset.in);const t=studentLinkText(s,'');showOut(`<div class="card"><h3>${esc(s.name)} 입장 안내</h3><div class="note">${esc(t)}</div><button class="btn sm" data-copy="${encodeURIComponent(t)}">복사</button></div>`)});
   app.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{const s=find(b.dataset.del);const t=prompt(`${s.name}(${s.id}) 계정을 완전히 지울까요?\n점수·체크 기록도 모두 지워지고 되돌릴 수 없어요.\n지우려면 아이디 ${s.id} 를 똑같이 입력하세요.`);if(t===null)return;if(t.trim().toLowerCase()!==s.id){toast('아이디가 달라서 지우지 않았어요');return}b.disabled=true;try{await api('adminDelete',{id:s.id,confirm:t.trim()});toast(`${s.id} 계정을 지웠어요`);refresh()}catch(e){toast(e.message);b.disabled=false}});
+  app.querySelectorAll('[data-ebs]').forEach(sel=>sel.onchange=async()=>{const s=find(sel.dataset.ebs);sel.disabled=true;try{await api('adminSetEbs',{id:s.id,ebs:sel.value});s.ebs=sel.value;toast(`${s.name} EBS: ${sel.options[sel.selectedIndex].text}. 학생 앱은 1분 안에 바뀌어요`)}catch(e){toast(e.code==='bad_action'?'서버(Code.gs)를 최신으로 배포해야 바꿀 수 있어요':e.message);refresh()}finally{sel.disabled=false}});
   app.querySelectorAll('[data-ac]').forEach(b=>b.onclick=async()=>{const s=find(b.dataset.ac);b.disabled=true;try{await api('adminSetActive',{id:s.id,active:!s.active});toast(s.active?'멈췄어요. 그 학생은 로그인이 풀려요':'다시 쓸 수 있어요');refresh()}catch(e){toast(e.message);b.disabled=false}});
   if($('#nf'))$('#nf').onsubmit=async e=>{e.preventDefault();const b=$('#ngo');b.disabled=true;
     try{const j=await api('adminCreate',{id:$('#nid').value,name:$('#nnm').value,pw:$('#npw').value,memo:$('#nmemo').value,consent:$('#ncs').value});const t=studentLinkText(j,j.pw);

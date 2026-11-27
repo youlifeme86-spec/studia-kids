@@ -15,11 +15,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="스터디아 키즈">
-<script src="config.js?v=2026.11.27-0550"></script>
-<script src="game-data.js?v=2026.11.27-0550"></script>
-<script src="sound.js?v=2026.11.27-0550"></script>
+<script src="config.js?v=2026.11.27-0601"></script>
+<script src="game-data.js?v=2026.11.27-0601"></script>
+<script src="sound.js?v=2026.11.27-0601"></script>
 <script>
-window.RR_VERSION='2026.11.27-0550';
+window.RR_VERSION='2026.11.27-0601';
 /* 실시간 오류 기록: 학생 폰에서 난 오류를 구글 시트 [오류] 탭으로 보냄 */
 (function(){var n=0;window.RR_REPORT=function(msg,stack,extra){try{var C=window.RR_CONFIG||{};if(!C.API_URL||n>=8)return;n++;var a=null;try{a=JSON.parse(localStorage.getItem('sk-auth-v1')||'null')}catch(e){}
 fetch(C.API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},keepalive:true,body:JSON.stringify({action:'logError',token:a&&a.token||'',msg:String(msg||'').slice(0,1000),stack:String(stack||'').slice(0,3000),page:location.pathname+(location.hash.indexOf('#parent')===0?' (학부모)':''),tab:(window.RR_TAB||'')+(extra?' '+extra:''),ver:window.RR_VERSION||'',ua:navigator.userAgent.slice(0,300)})}).catch(function(){})}catch(e){}};
@@ -454,8 +454,12 @@ function weekCount(a,k,st){st=st||S;const w=weekKey(k);let n=0;for(let i=0;i<7;i
 function weekFull(a,k,st){const A=ACT[a];if(!A.wk)return false;const L=(st||S).logs[k];const doneToday=L&&L.q.some(q=>q.a===a&&q.done);return !doneToday&&weekCount(a,k,st)>=A.wk}
 function qPts(q){return q.pts||ACT[q.a].pt}
 function allClear(st,k){const L=(st.logs||{})[k];if(!L)return false;
-  const need=ORDER.filter(a=>a!=='m1'&&a!=='school'&&!weekFull(a,k,st));
+  const need=ORDER.filter(a=>a!=='m1'&&a!=='school'&&!weekFull(a,k,st)&&(a!=='ebs'||st!==S||ebsOK(k)));
   return need.length>0&&need.every(a=>a==='clean'?L.life&&L.life.clean:L.q.some(q=>q.a===a&&q.done))}
+/* EBS 권한 (선생님이 학생마다 열고 닫음) */
+let SRV_EBS='';
+function ebsMode(){if(!MODE_DB)return 'on';return SRV_EBS||(SK.EBS_DEFAULT||{})[UID]||'off'}
+function ebsOK(k){const m=ebsMode();if(m==='off')return false;if(m==='wd'){const d=parseDay(k||TODAY()).getDay();return d!==0&&d!==6}return true}
 function adjOf(L,t){return (L&&L.adj||[]).filter(x=>x.t===t)}
 function dayScoreOf(st,k){const L=(st.logs||{})[k];if(!L)return {raw:0,rank:0,min:0,subjects:0,chk:0,ac:0,sb:0,bonus:0,pen:0};
   let chk=0,min=0;const subs=new Set();
@@ -636,6 +640,7 @@ async function flush(){
   finally{flushing=false;if(flushAgain){flushAgain=false;flush()}}}
 /* 선생님이 승인한 미션1, 선생님이 넣은 체크·추가 포인트·감점을 내 기록에 합침 */
 function mergeServer(j){let ch=false,m1=false;
+  if(typeof j.ebs==='string'&&j.ebs!==SRV_EBS){SRV_EBS=j.ebs;ch=true}
   (j.approved||[]).forEach(d=>{const L=S.logs&&S.logs[d];if(!L)return;const q=L.q.find(x=>x.a==='m1');
     if(!L.hidden||(q&&!q.done)){L.hidden=1;if(q&&!q.done){q.done=true;q.at=Date.now();let mult=1+(blessActive()?BLESS_PCT/100:0);if(S.char&&S.char.kingdom==='hc')mult*=2;q.dmg=Math.round(qPts(q)*10*mult)}
       S.bless={from:d,until:addDays(d,6)};ch=true;m1=true}});
@@ -890,17 +895,17 @@ function makeDemo(){
 }
 
 /* ---------- 오늘 ---------- */
-function questRow(q,i,L,k){const A=ACT[q.a];const wf=weekFull(q.a,k);const closed=SK.closed()&&k===TODAY();
+function questRow(q,i,L,k){const A=ACT[q.a];if(q.a==='ebs'&&!q.done&&ebsMode()==='off')return '';const ebsShut=q.a==='ebs'&&!q.done&&!ebsOK(k);const wf=weekFull(q.a,k)||ebsShut;const closed=SK.closed()&&k===TODAY();
   const wkTxt=A.wk?`이번 주 ${weekCount(q.a,k)}/${A.wk}`:'하루 1번';
   if(A.teacher){const st=L.hidden?'done':L.hiddenReq?'wait':'';
     return `<div class="quest ${st}"><span class="dot" style="background:${subjDot(A.s)}"></span><div class="body"><div class="t">${esc(A.n)}</div><div class="tiny muted">${A.pt}점 · ${wkTxt} · <span class="pill purple">가호 +${BLESS_PCT}%</span><br>${L.hidden?'선생님이 확인했어요!':L.hiddenReq?'선생님 확인 기다리는 중':'숙제검사를 받으면 선생님이 눌러 줘요'}</div></div>
     <button class="check" data-m1="1" ${L.hidden||L.hiddenReq||wf||closed?'disabled':''}>${L.hidden?'✓':L.hiddenReq?'대기':wf?'끝':'알리기'}</button></div>`}
   return `<div class="quest ${q.done?'done':''} ${(wf||closed)&&!q.done?'locked':''}"><span class="dot" style="background:${subjDot(A.s)}"></span>
-    <div class="body"><div class="t">${esc(A.n)}</div><div class="tiny muted">${A.pt}점 · ${wf&&!q.done?'이번 주는 다 채웠어!':wkTxt}${A.s?' · '+esc(SUBJ[A.s].boss):''}</div></div>
+    <div class="body"><div class="t">${esc(A.n)}</div><div class="tiny muted">${A.pt}점 · ${ebsShut?'토·일은 EBS 쉬는 날이에요':wf&&!q.done?'이번 주는 다 채웠어!':wkTxt}${A.s?' · '+esc(SUBJ[A.s].boss):''}</div></div>
     <button class="check" data-i="${i}" aria-label="${esc(A.n)} ${q.done?'완료 취소':'완료하고 공격'}" ${(wf||closed)&&!q.done||closed?'disabled':''}>${q.done?'✓':'공격!'}</button></div>`}
 function renderToday(){
   const k=TODAY(),L=log(k),sc=dayScore(k);const closed=SK.closed();
-  const mk=monthKeyOf(k);const firstOpen=L.q.find(q=>!q.done&&!ACT[q.a].teacher&&!weekFull(q.a,k));const bossS=firstOpen?ACT[firstOpen.a].s:SUBJ_KEYS.sort((a,b)=>bossLeft(b,mk)/bossHp(b,mk)-bossLeft(a,mk)/bossHp(a,mk))[0];
+  const mk=monthKeyOf(k);const firstOpen=L.q.find(q=>!q.done&&!ACT[q.a].teacher&&!weekFull(q.a,k)&&(q.a!=='ebs'||ebsOK(k)));const bossS=firstOpen?ACT[firstOpen.a].s:SUBJ_KEYS.sort((a,b)=>bossLeft(b,mk)/bossHp(b,mk)-bossLeft(a,mk)/bossHp(a,mk))[0];
   const left=pctOf(bossLeft(bossS,mk),bossHp(bossS,mk));const ms=monthScoreRaw();const stg=SK.stage(ms);
   const done=L.q.filter(q=>q.done).length+(L.life.clean?1:0);
   let h=sceneHTML(`<div class="hud"><div class="nm">${esc(S.char.name)}<small>${esc(KINGDOMS[S.char.kingdom].n)} · ${esc(ANIMALS[S.char.animal]?ANIMALS[S.char.animal].n:'')} ${esc(S.char.job)}</small></div><div class="tagr">${Number(k.slice(5,7))}월 ${ms}/${BASE}<br>${esc(stg[1])}</div></div>${heroHTML()}<div class="boss sleep" style="right:20px;transform:scale(.8);transform-origin:bottom right"><span data-spr="${bossS}" data-sc="6"></span></div>`)+
@@ -943,6 +948,7 @@ function confirmSheet(title,msg,yes){const sh=document.createElement('div');sh.c
   sh.innerHTML=`<div class="in" role="dialog" aria-label="${esc(title)}"><h2>${esc(title)}</h2><p class="small">${esc(msg)}</p><div class="row"><button class="btn ghost" id="no" style="width:auto;flex:1">아직이야</button><button class="btn green" id="yes" style="flex:1">응, 다 했어!</button></div></div>`;
   phone.appendChild(sh);sh.querySelector('#no').onclick=()=>sh.remove();sh.querySelector('#yes').onclick=()=>{sh.remove();yes()};sh.onclick=e=>{if(e.target===sh)sh.remove()}}
 function askQuest(i){const k=TODAY(),L=log(k),q=L.q[i];if(SK.closed()){toast('밤 12시가 지나서 오늘 체크는 마감됐어');return}
+  if(q&&q.a==='ebs'&&!q.done&&!ebsOK(k)){toast(ebsMode()==='off'?'EBS는 선생님이 열어 줘야 할 수 있어요':'토·일은 EBS 쉬는 날이에요');return}
   if(q.done)return toggleQuest(i);if(weekFull(q.a,k)){toast('이번 주는 다 채웠어!');return}
   tagSheet(ACT[q.a].n,tag=>toggleQuest(i,tag))}
 /* 1초 감정 태그: 고르면 바로 공격 */
