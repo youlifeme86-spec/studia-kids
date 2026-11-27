@@ -13,7 +13,7 @@
  *   오류  : 학생 폰에서 난 오류가 실시간으로 쌓이는 곳
  */
 
-var SERVER_VERSION = '2026.11.27-k5';
+var SERVER_VERSION = '2026.11.27-k6';
 var TZ = 'Asia/Seoul';
 var CHUNK = 45000;            // 시트 한 칸 최대 50,000자라 45,000자씩 나눠 저장
 var MAX_CHUNKS = 40;          // 학생 한 명 최대 약 1.8MB
@@ -28,7 +28,7 @@ var SHEETS = {
   adj:  { name: '조정', head: ['아이디', '날짜', '종류', '체크', '과목', '점수', '사유', '시각', '선생님', '번호'] },
   err:  { name: '오류', head: ['시각', '아이디', '버전', '화면', '탭', '내용', '스택', '기기'] }
 };
-var A = { id: 0, name: 1, role: 2, salt: 3, hash: 4, code: 5, active: 6, created: 7, last: 8, tv: 9, memo: 10, consent: 11, ebs: 12, m1: 13 };  // m1: 히든미션(미션1) 점수 3·5·10 (빈칸 = 3)  // ebs: on 매일 / wd 평일만 / off 안 보임 / 빈칸 = 앱 기본값
+var A = { id: 0, name: 1, role: 2, salt: 3, hash: 4, code: 5, active: 6, created: 7, last: 8, tv: 9, memo: 10, consent: 11, ebs: 12, m1: 13 };  // m1: 히든미션(미션1) '주 횟수x점수' 예: 2x3, 1x6 (빈칸 = 2x3, 예전 숫자 5·10 = 주 2회)  // ebs: on 매일 / wd 평일만 / off 안 보임 / 빈칸 = 앱 기본값
 /* 초등판 점수표 (game-data.js 와 같게 유지) */
 var ACT = { math: { pt: 5, s: 'm' }, eng: { pt: 5, s: 'e' }, kor: { pt: 3, s: 'k' }, ebs: { pt: 3, s: 'b' }, m1: { pt: 3, s: 'w' }, m2: { pt: 1, s: 'w' }, school: { pt: 1, s: 'w' }, book: { pt: 1, s: 'r' }, clean: { pt: 1, s: '' }, bag: { pt: 1, s: '' } };
 var SUBJ_KEYS = ['m', 'e', 'k', 'b', 'r', 'w'];
@@ -152,7 +152,7 @@ function load_(b) {
   return {
     id: u.id, name: u.row[A.name], parentCode: u.row[A.code],
     state: rec ? rec.state : null, rev: rec ? rec.rev : 0,
-    priv: rec ? rec.priv : null, approved: approvedDates_(u.id), adj: adjList_(u.id), ebs: String(u.row[A.ebs] || ''), m1: Number(u.row[A.m1]) || 0
+    priv: rec ? rec.priv : null, approved: approvedDates_(u.id), adj: adjList_(u.id), ebs: String(u.row[A.ebs] || ''), m1: m1Plan_(u.row[A.m1]).p, m1w: m1Plan_(u.row[A.m1]).n
   };
 }
 
@@ -166,7 +166,7 @@ function save_(b) {
     var prev = readState_(u.id, true);
     var approved = approvedDates_(u.id);
     var adj = adjList_(u.id);
-    applyApprovals_(st, approved, Number(u.row[A.m1]) || 0);
+    applyApprovals_(st, approved, m1Plan_(u.row[A.m1]).p);
     applyAdj_(st, adj);
     var rev = Math.max(Number(b.rev) || 0, prev ? prev.rev + 1 : 1);
     st.rev = rev;
@@ -204,9 +204,9 @@ function roster_(b) {
   var cache = CacheService.getScriptCache();
   var mine = u.role === 'student' ? approvedDates_(u.id) : [];
   var myAdj = u.role === 'student' ? adjList_(u.id) : [];
-  var myEbs = String(u.row[A.ebs] || ''), myM1 = Number(u.row[A.m1]) || 0;
+  var myEbs = String(u.row[A.ebs] || ''), myM1 = m1Plan_(u.row[A.m1]);
   var hit = cache.get('roster');
-  if (hit) return { students: JSON.parse(hit), approved: mine, adj: myAdj, ebs: myEbs, m1: myM1, cached: true };
+  if (hit) return { students: JSON.parse(hit), approved: mine, adj: myAdj, ebs: myEbs, m1: myM1.p, m1w: myM1.n, cached: true };
   var since = dayKey_(-62);
   var out = {};
   eachState_(function (id, sum) {
@@ -216,7 +216,7 @@ function roster_(b) {
     out[id] = { char: { name: sum.char.name, color: sum.char.color, kingdom: sum.char.kingdom, job: sum.char.job, animal: sum.char.animal || '' }, daily: daily, board: sum.board || null, lobby: sum.lobby || null };  // lobby: 깜짝 협동 이벤트 대기실에 들어온 날
   });
   try { cache.put('roster', JSON.stringify(out), 30); } catch (x) {}
-  return { students: out, approved: mine, adj: myAdj, ebs: myEbs, m1: myM1 };
+  return { students: out, approved: mine, adj: myAdj, ebs: myEbs, m1: myM1.p, m1w: myM1.n };
 }
 
 /** 보호자 링크: 보호자코드로 그 학생 기록만 읽기 전용 */
@@ -267,7 +267,7 @@ function adminOverview_(b) {
     if ([d0, d1, d2].every(function (k) { return daily[k] && daily[k].cond === 1; })) alerts.push('너무 힘들어 3일 연속');
     Object.keys(daily).forEach(function (k) { if (daily[k].al && k >= dayKey_(-6)) alerts.push(k.slice(5) + ' 한마디 확인 필요'); });
     (sum.hiddenReq || []).forEach(function (d) {
-      if (!approved[r[A.id] + '|' + d] && d >= dayKey_(-14)) pending.push({ kind: 'm1', id: r[A.id], name: r[A.name], char: sum.char ? sum.char.name : '', date: d, pts: Number(r[A.m1]) || ACT.m1.pt });
+      if (!approved[r[A.id] + '|' + d] && d >= dayKey_(-14)) pending.push({ kind: 'm1', id: r[A.id], name: r[A.name], char: sum.char ? sum.char.name : '', date: d, pts: m1Plan_(r[A.m1]).p });
     });
     (sum.miniReq || []).forEach(function (d) {
       if (d >= dayKey_(-1)) pending.push({ kind: 'mini', id: r[A.id], name: r[A.name], char: sum.char ? sum.char.name : '', date: d });
@@ -276,7 +276,7 @@ function adminOverview_(b) {
       id: r[A.id], name: r[A.name], role: r[A.role], active: isActive_(r), parentCode: r[A.code],
       created: iso_(r[A.created]), lastLogin: iso_(r[A.last]), savedAt: s.savedAt || '', memo: r[A.memo] || '',
       char: sum.char || null, daily: daily, bless: sum.bless || null, monthPts: sum.monthPts || 0, lobby: sum.lobby || null,
-      consent: iso_(r[A.consent]), ebs: String(r[A.ebs] || ''), m1: Number(r[A.m1]) || 0, alerts: alerts
+      consent: iso_(r[A.consent]), ebs: String(r[A.ebs] || ''), m1: m1Plan_(r[A.m1]).p, m1w: m1Plan_(r[A.m1]).n, alerts: alerts
     });
   });
   var errSh = sheet_('err');
@@ -379,7 +379,7 @@ function adminApprove_(b) {
     if (rec && rec.state) {
       var st = JSON.parse(rec.state);
       var fa = findAccount_(id);
-      applyApprovals_(st, [d], fa ? Number(fa.row[A.m1]) || 0 : 0);
+      applyApprovals_(st, [d], fa ? m1Plan_(fa.row[A.m1]).p : 0);
       st.rev = rec.rev + 1;
       writeState_(id, st, st.rev, rec.rowNo, rec.privRaw);
     }
@@ -457,13 +457,22 @@ function adminSetEbs_(b) {
   return {};
 }
 
-/** 히든미션(미션1) 점수: 학생마다 3점(기본)·5점·10점 */
+/** 히든미션 설정 읽기: '1x6' → 주 1회 6점. 빈칸 = 주 2회 3점. 예전 숫자(5·10) = 주 2회 */
+var M1_PLANS = ['2x3', '1x6', '1x3', '2x5', '1x10', '2x10'];
+function m1Plan_(v) {
+  var s = String(v == null ? '' : v).trim(), m = /^([12])x(\d+)$/.exec(s);
+  if (m) return { n: Number(m[1]), p: Number(m[2]) };
+  var p = Number(s);
+  return p > 0 ? { n: 2, p: p } : { n: 2, p: ACT.m1.pt };
+}
+
+/** 히든미션(미션1): 학생마다 주 횟수 x 1회 점수 (예: 주 2회 3점, 주 1회 6점) */
 function adminSetM1_(b) {
   auth_(b, 'admin');
   var f = findAccount_(normId_(b.id));
   if (!f) fail_('계정을 찾지 못했어요', 'no_account');
-  var v = Number(b.m1);
-  if ([3, 5, 10].indexOf(v) < 0) fail_('히든미션 점수는 3, 5, 10 중에서 골라요', 'bad_m1');
+  var v = (Number(b.m1w) || 2) + 'x' + Number(b.m1);
+  if (M1_PLANS.indexOf(v) < 0) fail_('히든미션 설정이 올바르지 않아요', 'bad_m1');
   sheet_('acc').getRange(f.rowNo, A.m1 + 1).setValue(v);
   return {};
 }
@@ -589,8 +598,8 @@ function applyApprovals_(st, dates, m1pts) {
     var L = st.logs[d];
     if (!L) return;
     L.hidden = 1;
-    (L.q || []).forEach(function (q) { if (q.a === 'm1' && !q.done) { var p = d < M1_FROM ? Math.max(M1_OLD, m1pts || 0) : (m1pts || ACT.m1.pt); q.done = true; q.at = Date.now(); q.dmg = p * 10; if (d < M1_FROM) q.pts = p; } });
-    (L.q || []).forEach(function (q) { if (q.a === 'm1' && q.done && !q.pts && d < M1_FROM) q.pts = Math.max(M1_OLD, m1pts || 0); });
+    (L.q || []).forEach(function (q) { if (q.a === 'm1' && !q.done) { var p = d < M1_FROM ? M1_OLD : (m1pts || ACT.m1.pt); q.done = true; q.at = Date.now(); q.dmg = p * 10; if (d < M1_FROM) q.pts = p; } });
+    (L.q || []).forEach(function (q) { if (q.a === 'm1' && q.done && !q.pts && d < M1_FROM) q.pts = M1_OLD; });
     if (!st.bless || st.bless.from < d) st.bless = { from: d, until: addDayKey_(d, 6) };
   });
 }

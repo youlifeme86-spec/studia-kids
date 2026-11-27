@@ -15,11 +15,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="스터디아 키즈">
-<script src="config.js?v=2026.11.27-1455"></script>
-<script src="game-data.js?v=2026.11.27-1455"></script>
-<script src="sound.js?v=2026.11.27-1455"></script>
+<script src="config.js?v=2026.11.27-1502"></script>
+<script src="game-data.js?v=2026.11.27-1502"></script>
+<script src="sound.js?v=2026.11.27-1502"></script>
 <script>
-window.RR_VERSION='2026.11.27-1455';
+window.RR_VERSION='2026.11.27-1502';
 /* 실시간 오류 기록: 학생 폰에서 난 오류를 구글 시트 [오류] 탭으로 보냄 */
 (function(){var n=0;window.RR_REPORT=function(msg,stack,extra){try{var C=window.RR_CONFIG||{};if(!C.API_URL||n>=8)return;n++;var a=null;try{a=JSON.parse(localStorage.getItem('sk-auth-v1')||'null')}catch(e){}
 fetch(C.API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},keepalive:true,body:JSON.stringify({action:'logError',token:a&&a.token||'',msg:String(msg||'').slice(0,1000),stack:String(stack||'').slice(0,3000),page:location.pathname+(location.hash.indexOf('#parent')===0?' (학부모)':''),tab:(window.RR_TAB||'')+(extra?' '+extra:''),ver:window.RR_VERSION||'',ua:navigator.userAgent.slice(0,300)})}).catch(function(){})}catch(e){}};
@@ -460,13 +460,14 @@ const hydrate=root=>SK.hydrate(root);
 
 /* ---------- 점수 ---------- */
 function weekCount(a,k,st){st=st||S;const w=weekKey(k);let n=0;for(let i=0;i<7;i++){const d=addDays(w,i);const L=(st.logs||{})[d];if(!L)continue;if(ACT[a]&&ACT[a].life?L.life&&L.life[a]:L.q.some(q=>q.a===a&&q.done))n++}return n}
-function weekFull(a,k,st){const A=ACT[a];if(!A.wk)return false;const L=(st||S).logs[k];const doneToday=L&&L.q.some(q=>q.a===a&&q.done);return !doneToday&&weekCount(a,k,st)>=A.wk}
+function wkOf(a){return a==='m1'&&SRV_M1W?SRV_M1W:ACT[a].wk}
+function weekFull(a,k,st){const A=ACT[a];if(!A.wk)return false;const L=(st||S).logs[k];const doneToday=L&&L.q.some(q=>q.a===a&&q.done);return !doneToday&&weekCount(a,k,st)>=wkOf(a)}
 function qPts(q){return q.pts||(q.a==='m1'&&SRV_M1?SRV_M1:ACT[q.a].pt)}
 function allClear(st,k){const L=(st.logs||{})[k];if(!L)return false;
   const need=SK.STUDY.filter(a=>!weekFull(a,k,st)&&(a!=='ebs'||st!==S||ebsOK(k)));
   return need.length>0&&need.every(a=>ACT[a].life?L.life&&L.life[a]:L.q.some(q=>q.a===a&&q.done))}
 /* EBS 권한 (선생님이 학생마다 열고 닫음) */
-let SRV_EBS='',SRV_M1=0;
+let SRV_EBS='',SRV_M1=0,SRV_M1W=0;
 function ebsMode(){if(!MODE_DB)return 'on';return SRV_EBS||(SK.EBS_DEFAULT||{})[UID]||'off'}
 function ebsOK(k){const m=ebsMode();if(m==='off')return false;if(m==='wd'){const d=parseDay(k||TODAY()).getDay();return d!==0&&d!==6}return true}
 function adjOf(L,t){return (L&&L.adj||[]).filter(x=>x.t===t)}
@@ -474,7 +475,7 @@ function adjOf(L,t){return (L&&L.adj||[]).filter(x=>x.t===t)}
 function miniOn(L){return adjOf(L,'mini').length>0}
 function dayScoreOf(st,k){const L=(st.logs||{})[k];if(!L)return {raw:0,rank:0,min:0,subjects:0,chk:0,ac:0,sb:0,bonus:0,pen:0};
   let chk=0,min=0;const subs=new Set();
-  if(k<SK.M1_FROM)L.q.forEach(q=>{if(q.a==='m1'&&q.done&&!q.pts)q.pts=SRV_M1>SK.M1_OLD?SRV_M1:SK.M1_OLD});
+  if(k<SK.M1_FROM)L.q.forEach(q=>{if(q.a==='m1'&&q.done&&!q.pts)q.pts=SK.M1_OLD});
   L.q.forEach(q=>{if(q.done){chk+=qPts(q);min+=ACT[q.a].min||0;subs.add(ACT[q.a].s)}});
   if(L.life&&L.life.clean)chk+=ACT.clean.pt;
   if(L.life&&L.life.bag)chk+=ACT.bag.pt;
@@ -655,7 +656,8 @@ async function flush(){
 /* 선생님이 승인한 미션1, 선생님이 넣은 체크·추가 포인트·감점을 내 기록에 합침 */
 function mergeServer(j){let ch=false,m1=false;
   if(typeof j.ebs==='string'&&j.ebs!==SRV_EBS){SRV_EBS=j.ebs;ch=true}
-  if(typeof j.m1==='number'&&j.m1!==SRV_M1&&(j.m1===0||SK.M1_OPTS.includes(j.m1))){SRV_M1=j.m1;ch=true}
+  if(typeof j.m1==='number'&&j.m1!==SRV_M1&&j.m1>=0&&j.m1<=10){SRV_M1=j.m1;ch=true}
+  if(typeof j.m1w==='number'&&j.m1w!==SRV_M1W&&(j.m1w===1||j.m1w===2)){SRV_M1W=j.m1w;ch=true}
   (j.approved||[]).forEach(d=>{if(!S.char||d>TODAY()||d<addDays(TODAY(),-14))return;const L=log(d);const q=L.q.find(x=>x.a==='m1');
     if(!L.hidden||(q&&!q.done)){L.hidden=1;if(q&&!q.done){q.done=true;q.at=Date.now();let mult=1+(blessActive()?BLESS_PCT/100:0);if(S.char&&S.char.kingdom==='hc')mult*=2;q.dmg=Math.round(qPts(q)*10*mult)}
       S.bless={from:d,until:addDays(d,6)};ch=true;m1=true}});
@@ -911,7 +913,7 @@ function makeDemo(){
 
 /* ---------- 오늘 ---------- */
 function questRow(q,i,L,k){const A=ACT[q.a];if(q.a==='ebs'&&!q.done&&ebsMode()==='off')return '';const ebsShut=q.a==='ebs'&&!q.done&&!ebsOK(k);const wf=weekFull(q.a,k)||ebsShut;const closed=SK.closed()&&k===TODAY();
-  const wkTxt=A.wk?`이번 주 ${weekCount(q.a,k)}/${A.wk}`:'하루 1번';
+  const wkTxt=A.wk?`이번 주 ${weekCount(q.a,k)}/${wkOf(q.a)}`:'하루 1번';
   if(A.teacher){const st=L.hidden?'done':L.hiddenReq?'wait':'';
     return `<div class="quest hiddenq ${st}"><span class="dot" style="background:#5B3B8C"></span><div class="body"><div class="t">${esc(A.n)}</div><div class="tiny muted">${qPts(q)}점 · ${wkTxt} · <span class="pill purple">가호 +${BLESS_PCT}%</span><br>${L.hidden?'선생님이 확인했어요!':L.hiddenReq?'선생님 확인 기다리는 중':'선생님만 할 수 있어요 · 숙제검사 받으면 [알리기]'}</div></div>
     <button class="check" data-m1="1" ${L.hidden||L.hiddenReq||wf||closed?'disabled':''}>${L.hidden?'✓':L.hiddenReq?'대기':wf?'끝':'알리기'}</button></div>`}
@@ -1431,7 +1433,7 @@ function renderParent(){
       ${[0,.5,1].map(f=>`<line x1="24" x2="${W}" y1="${10+H*(1-f)}" y2="${10+H*(1-f)}" stroke="var(--line)"/><text x="0" y="${14+H*(1-f)}">${Math.round(mx*f)}</text>`).join('')}
       ${vals.map((v,i)=>{const x=34+i*38,hh=H*v.raw/mx;const empty=!hasDone(S.logs[days[i]]);return `<rect x="${x}" y="${10+H-hh}" width="${bw}" height="${hh}" rx="6" fill="${days[i]===k?'var(--accent)':'var(--gold)'}"/>${v.raw?`<text x="${x+bw/2}" y="${6+H-hh}" text-anchor="middle">${v.raw}</text>`:''}<text x="${x+bw/2}" y="${H+24}" text-anchor="middle">${'월화수목금토일'[i]}</text>${empty&&days[i]<k?`<text x="${x+bw/2}" y="${H+38}" text-anchor="middle" style="fill:var(--bad)">빈날</text>`:''}`}).join('')}
     </svg></div></div>
-    <div class="card"><h3>이번 주 체크 횟수</h3>${ORDER.map(a=>{const A=ACT[a];const n=cnt[A.n]||0;const mxn=A.wk||7;return `<div class="row small"><span style="width:120px">${esc(A.n)}</span><div class="bar" style="flex:1;background:var(--bg)"><i style="width:${pctOf(n,mxn)}%;background:${A.s?'var(--'+A.s+')':'var(--gold)'}"></i></div><span class="num" style="width:36px;text-align:right">${n}/${mxn}</span></div>`}).join('')}</div>`;
+    <div class="card"><h3>이번 주 체크 횟수</h3>${ORDER.map(a=>{const A=ACT[a];const n=cnt[A.n]||0;const mxn=wkOf(a)||7;return `<div class="row small"><span style="width:120px">${esc(A.n)}</span><div class="bar" style="flex:1;background:var(--bg)"><i style="width:${pctOf(n,mxn)}%;background:${A.s?'var(--'+A.s+')':'var(--gold)'}"></i></div><span class="num" style="width:36px;text-align:right">${n}/${mxn}</span></div>`}).join('')}</div>`;
   }
   if(t==='month'){
     const m=k.slice(0,7);const ds=Object.keys(S.logs).filter(d=>d.startsWith(m)).sort();const ms=monthScoreRaw();const stg=SK.stage(ms);
