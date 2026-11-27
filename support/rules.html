@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Press+Start+2P&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=2026.11.27-0027">
-<script src="../game-data.js?v=2026.11.27-0027"></script>
+<link rel="stylesheet" href="style.css?v=2026.11.27-0030">
+<script src="../game-data.js?v=2026.11.27-0030"></script>
 </head>
 <body data-page="rules">
 
@@ -82,7 +82,7 @@
       <div class="tip"><b>랭킹 점수와는 따로예요</b> 랭킹의 월간 점수는 매달 1일 0점부터 다시 시작하지만, 누적 레벨·도감·칭호 같은 기록은 그대로 남아요.</div>
     </section>
     <section id="partner"><h2>알 부화 · 파트너 · 방패</h2>
-      <p>알은 고른 날부터 랭킹 원점수로 자라요: 30점 1차 부화 → 150점 2차 성장 → 300점 최종 각성. 파트너는 1마리만 장착하고, 장착한 파트너의 능력만 켜져요(왕국 능력과 같이 적용). 불꽃 크리 +5/8/10%, 비취 방패 4일마다(2차부터 콤보 +5%), 심해 약점 과목 +20/30/40%, 성운 골든타임 +15/25/30%.</p>
+      <p>알은 고른 날부터 랭킹 원점수로 자라요: 30점 1차 부화 → 150점 2차 성장 → 300점 최종 각성. 파트너는 1마리만 장착하고, 장착한 파트너의 능력만 켜져요(왕국 능력과 같이 적용). 불꽃 크리 +5/8/10%, 비취 방패 4일마다(2차부터 콤보 +5%), 심해 약점 과목 +20/30/40%, 성운 골든타임 +15/25/30%. 보스를 공격하면 장착한 파트너도 함께 뛰어들어 공격해요. <b>12월 1일부터</b>는 체크할 때마다 파트너 추가 데미지 +3/+4/+5(1차/2차/최종)가 더해져요(배율과 별개로 마지막에 더함).</p>
       <p>스트릭 방패: 5일 연속 출석마다 1개(최대 2개). 체크 없는 날 자동으로 1개 써서 연속 기록을 지키고 그날 보스 반격(3%)도 막아요. 최소 시동 퀘스트("문제 1개만")는 5 데미지 + 출석 인정, 랭킹 점수는 0점이에요.</p></section>
     <section id="coop"><h2>반 협동 주간 레이드</h2>
       <p>2026년 12월 1일부터 매주 월요일 새 협동 보스가 나와요. 체력 = 캐릭터가 있는 학생 수(최소 3명) × 800. 그 주(월~일) 반 전체 데미지를 더해 깎아요. 처치하면 그 주에 데미지를 넣은 친구 모두 알 부화 가속 +10점. 최다 딜러, 매일 출석상, 결정적 막타(처치한 날 데미지 1등)를 뽑아요. 랭킹 점수와는 따로예요.</p>
@@ -112,7 +112,7 @@
   </div>
 </div>
 
-<script src="site.js?v=2026.11.27-0027"></script>
+<script src="site.js?v=2026.11.27-0030"></script>
 <script>
 (function(){const e=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 document.getElementById('kd').innerHTML='<div class="tbl"><table><thead><tr><th>권역</th><th>왕국</th><th>힘</th></tr></thead><tbody>'+Object.keys(SK.KINGDOMS).map(k=>{const K=SK.KINGDOMS[k];return '<tr><td>'+e(K.zn)+'</td><td><b style="color:'+K.c+'">'+e(K.n)+'</b></td><td>['+e(K.p)+'] '+e(K.d)+'</td></tr>'}).join('')+'</tbody></table></div>';

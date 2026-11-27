@@ -15,11 +15,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="스터디아 키즈">
-<script src="config.js?v=2026.11.27-0027"></script>
-<script src="game-data.js?v=2026.11.27-0027"></script>
-<script src="sound.js?v=2026.11.27-0027"></script>
+<script src="config.js?v=2026.11.27-0030"></script>
+<script src="game-data.js?v=2026.11.27-0030"></script>
+<script src="sound.js?v=2026.11.27-0030"></script>
 <script>
-window.RR_VERSION='2026.11.27-0027';
+window.RR_VERSION='2026.11.27-0030';
 /* 실시간 오류 기록: 학생 폰에서 난 오류를 구글 시트 [오류] 탭으로 보냄 */
 (function(){var n=0;window.RR_REPORT=function(msg,stack,extra){try{var C=window.RR_CONFIG||{};if(!C.API_URL||n>=8)return;n++;var a=null;try{a=JSON.parse(localStorage.getItem('sk-auth-v1')||'null')}catch(e){}
 fetch(C.API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},keepalive:true,body:JSON.stringify({action:'logError',token:a&&a.token||'',msg:String(msg||'').slice(0,1000),stack:String(stack||'').slice(0,3000),page:location.pathname+(location.hash.indexOf('#parent')===0?' (학부모)':''),tab:(window.RR_TAB||'')+(extra?' '+extra:''),ver:window.RR_VERSION||'',ua:navigator.userAgent.slice(0,300)})}).catch(function(){})}catch(e){}};
@@ -707,7 +707,8 @@ function damageFor(q,L,k){
   if(S.gauge>=100){mult*=3;S.gauge=0;hit='ult';why.push('궁극기 MEGA ×3')}
   else{const C=SK.CRIT,r=Math.random()*100;if(r<C.megaPct){mult*=C.megaMult;hit='mega';why.push('MEGA HIT ×'+C.megaMult)}else if(r<C.megaPct+C.pct+petBuf('fire')){mult*=C.mult;hit='crit';why.push('CRITICAL ×'+C.mult)}}
   mult=Math.min(4,mult);
-  return {dmg:Math.round(base*mult),why,hit,combo,golden}}
+  let pet=0;{const P=partner(),H=SK.PET_HIT;if(P&&H&&k>=H.from){pet=H.dmg[P.stage-1]||0;if(pet)why.push(petName(P)+' 같이 공격 +'+pet)}}
+  return {dmg:Math.round(base*mult)+pet,why,hit,combo,golden,pet}}
 
 /* ---------- 렌더 공통 ---------- */
 const $=s=>document.querySelector(s);
@@ -956,7 +957,7 @@ function toggleQuest(i,tag){
     const killed=!!s&&before<hp&&before+r.dmg>=hp;
     if(killed&&mk!==monthKeyOf(k)&&S.seasons&&S.seasons[mk]&&!(S.seasons[mk].killed||[]).includes(s)){S.seasons[mk].killed.push(s);S.seasons[mk].items++;(S.items=S.items||[]).push({kind:'gear',s,name:SUBJ[s].gear,dmg:ITEM_GEAR,from:Number(mk.slice(5))+'월 연습'})}
     save();
-    UI.pendingFx={s,mk,hp,before,dmg:r.dmg,pts:qPts(q),why:r.why,hit:r.hit,combo:r.combo,killed,ac:dayScore(k).ac};
+    UI.pendingFx={s,mk,hp,before,dmg:r.dmg,pts:qPts(q),why:r.why,hit:r.hit,combo:r.combo,pet:r.pet,killed,ac:dayScore(k).ac};
     UI.tab='boss';UI.boss=s;UI.bm=mk;render();scr.scrollTop=0;window.scrollTo(0,0);return;
   } else {
     q.done=false;delete q.dmg;q.cancelled=(q.cancelled||0)+1;afterCheck(k);save();toast('체크를 취소했어요 (취소한 기록은 남아요)');
@@ -1004,7 +1005,7 @@ const PET_FX={fire:{t:'불꽃 브레스!',c:['#FFE066','#F7A531','#E2453C']},lea
 /* 장착한 파트너가 내 캐릭터와 함께 공격하는 연출 (데미지 규칙은 그대로) */
 function petAttack(fx){const pet=$('#pet');if(!pet)return;const F=PET_FX[pet.dataset.pet]||PET_FX.fire;
   setTimeout(()=>{pet.classList.remove('pdash');void pet.offsetWidth;pet.classList.add('pdash')},150);
-  setTimeout(()=>{const sc=$('#scene');const bx=sc?sc.clientWidth-110:280;burst(bx,170,F.c,22);dmgText(F.t,bx-80,165,false);const d=$('#fx')&&$('#fx').lastChild;if(d)d.classList.add('pet');if(window.SKSound)SKSound.play('attack')},470)}
+  setTimeout(()=>{const sc=$('#scene');const bx=sc?sc.clientWidth-110:280;burst(bx,170,F.c,22);dmgText(F.t+(fx.pet?' +'+fx.pet:''),bx-80,165,false);const d=$('#fx')&&$('#fx').lastChild;if(d)d.classList.add('pet');if(window.SKSound)SKSound.play('attack')},470)}
 function playHit(fx,B){
   const hero=$('#hero'),boss=$('#bossSpr');if(hero){hero.classList.remove('dash');void hero.offsetWidth;hero.classList.add('dash')}
   petAttack(fx);
