@@ -15,11 +15,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="스터디아 키즈">
-<script src="config.js?v=2026.11.27-0545"></script>
-<script src="game-data.js?v=2026.11.27-0545"></script>
-<script src="sound.js?v=2026.11.27-0545"></script>
+<script src="config.js?v=2026.11.27-0549"></script>
+<script src="game-data.js?v=2026.11.27-0549"></script>
+<script src="sound.js?v=2026.11.27-0549"></script>
 <script>
-window.RR_VERSION='2026.11.27-0545';
+window.RR_VERSION='2026.11.27-0549';
 /* 실시간 오류 기록: 학생 폰에서 난 오류를 구글 시트 [오류] 탭으로 보냄 */
 (function(){var n=0;window.RR_REPORT=function(msg,stack,extra){try{var C=window.RR_CONFIG||{};if(!C.API_URL||n>=8)return;n++;var a=null;try{a=JSON.parse(localStorage.getItem('sk-auth-v1')||'null')}catch(e){}
 fetch(C.API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},keepalive:true,body:JSON.stringify({action:'logError',token:a&&a.token||'',msg:String(msg||'').slice(0,1000),stack:String(stack||'').slice(0,3000),page:location.pathname+(location.hash.indexOf('#parent')===0?' (학부모)':''),tab:(window.RR_TAB||'')+(extra?' '+extra:''),ver:window.RR_VERSION||'',ua:navigator.userAgent.slice(0,300)})}).catch(function(){})}catch(e){}};
@@ -477,7 +477,9 @@ function shieldState(st){st=st||S;const t=TODAY(),SH=SK.SHIELD||{every:0,max:0};
   return {n,shields:sh,used,got}}
 function streak(st){return shieldState(st).n}
 /* ---------- 알 부화 ---------- */
-function eggXp(e,st){st=st||S;const cw=Object.entries(st.coopWins||{}).filter(([w])=>SK.addDays(w.slice(0,10),6)>=e.start).reduce((a,[w,v])=>a+(v===1?((SK.COOP&&SK.COOP.egg)||0):(+v||0)),0);return cw+Object.keys(st.logs||{}).filter(k=>k>=e.start).reduce((a,k)=>a+dayScoreOf(st,k).raw,0)}
+function eggXp(e,st){st=st||S;const cw=Object.entries(st.coopWins||{}).filter(([w])=>SK.addDays(w.slice(0,10),6)>=e.start).reduce((a,[w,v])=>a+(v===1?((SK.COOP&&SK.COOP.egg)||0):(+v||0)),0);/* '알 부화 포함' 선생님 추가 포인트는 알을 나중에 골라도 첫 번째 알에 들어가요 */
+  const f=(st.eggs||[])[0],gift=f&&f.id===e.id&&f.start===e.start?Object.keys(st.logs||{}).filter(k=>k<e.start).reduce((a,k)=>a+adjOf(st.logs[k],'bonus').filter(x=>/알 부화/.test(x.why||'')).reduce((b,x)=>b+(+x.pts||0),0),0):0;
+  return cw+gift+Object.keys(st.logs||{}).filter(k=>k>=e.start).reduce((a,k)=>a+dayScoreOf(st,k).raw,0)}
 function eggStage(xp){let n=0;SK.EGG_STAGES.forEach(t=>{if(xp>=t)n++});return n}
 function eggList(st){st=st||S;return (st.eggs||[]).map(e=>{const xp=eggXp(e,st);return {...e,xp,stage:eggStage(xp)}})}
 function incubating(st){return eggList(st).find(e=>e.stage<SK.EGG_STAGES.length)||null}

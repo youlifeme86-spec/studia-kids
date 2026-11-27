@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Press+Start+2P&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=2026.11.27-0545">
-<script src="../game-data.js?v=2026.11.27-0545"></script>
+<link rel="stylesheet" href="style.css?v=2026.11.27-0549">
+<script src="../game-data.js?v=2026.11.27-0549"></script>
 </head>
 <body data-page="news">
 <div class="page-hero"><div class="wrap"><div class="txt">
@@ -26,6 +26,8 @@
 <script>
 /* 새 글을 쓸 때: 아래 목록 맨 위에 {type:'event'|'notice', date:'YYYY-MM-DD', end:'YYYY-MM-DD'(이벤트만), title, body(HTML)} 하나 추가 */
 var NEWS=[
+ {type:'notice',date:'2026-11-27',title:'🥚 모든 친구에게 공통 추가 20점',
+  body:'<p>11/27, 반 친구 모두에게 <b>똑같이 20점</b>을 넣었어요. 랭킹 점수와 보스 데미지에 들어가고, <b>알을 언제 골라도 첫 번째 알에 바로 20점</b>이 들어가요. 알은 30점이면 부화하니까 10점만 더 하면 파트너를 만날 수 있어요!</p>'},
  {type:'notice',date:'2026-11-27',title:'🚪 11/28 밤 10시 협동 이벤트 대기실 · 다 같이 입장',
   body:'<p>내일 밤 10시에 앱을 열면 <b>[입장하기]</b> 버튼이 나와요. 누르면 대기실에 들어가 먼저 온 친구들을 볼 수 있어요. <b>10시 5분</b>이 되면 모두 한꺼번에 입장해서 그림자 군단과 싸워요!</p><ul><li>대기실에 있는 동안 체크해도 데미지는 입장할 때 같이 들어가요.</li><li>10시 5분이 지나서 들어와도 괜찮아요. 바로 싸움에 함께해요.</li></ul>'},
  {type:'event',date:'2026-11-26',start:'2026-11-26',end:'2026-11-28',title:'🌙 11/28(토) 밤 10시 깜짝 협동 이벤트: 그림자 군단 3단계',
@@ -56,6 +58,6 @@ var NEWS=[
    return '<details class="card news"'+(i===0||(n.type==='event'&&today<=n.end)?' open':'')+'><summary><span class="ndate">'+n.date.replace(/-/g,'.')+'</span>'+st+'<b>'+n.title+'</b>'+(n.type==='event'?'<span class="tiny muted"> · '+fmt(n.start)+'~'+fmt(n.end)+'</span>':'')+'</summary><div class="nbody">'+n.body+'</div></details>'}).join('')||'<p class="muted">아직 글이 없어요.</p>'}
  document.querySelectorAll('[data-nt]').forEach(function(b){b.onclick=function(){tab=b.dataset.nt;history.replaceState(null,'','#'+tab);draw()}});draw()})();
 </script>
-<script src="site.js?v=2026.11.27-0545"></script>
+<script src="site.js?v=2026.11.27-0549"></script>
 </body>
 </html>
