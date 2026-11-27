@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Press+Start+2P&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=2026.11.27-0604">
-<script src="../game-data.js?v=2026.11.27-0604"></script>
+<link rel="stylesheet" href="style.css?v=2026.11.27-0611">
+<script src="../game-data.js?v=2026.11.27-0611"></script>
 </head>
 <body data-page="news">
 <div class="page-hero"><div class="wrap"><div class="txt">
@@ -26,6 +26,8 @@
 <script>
 /* 새 글을 쓸 때: 아래 목록 맨 위에 {type:'event'|'notice', date:'YYYY-MM-DD', end:'YYYY-MM-DD'(이벤트만), title, body(HTML)} 하나 추가 */
 var NEWS=[
+ {type:'notice',date:'2026-11-27',title:'🏁 레이스를 오늘 · 이번 주 · 이번 달로 볼 수 있어요',
+  body:'<p>랭킹 레이스에 <b>[오늘]</b> 탭이 생겼어요. 오늘 한 공부만으로 누가 성에 가까이 갔는지 볼 수 있어요. [이번 주]는 월~일, [이번 달]은 1일~말일 점수예요. 학생 앱 [랭킹] 탭과 랭킹 사이트 모두 같아요.</p>'},
  {type:'notice',date:'2026-11-27',title:'📺 EBS는 선생님이 열어 준 친구만',
   body:'<p>이제 EBS 체크는 선생님이 열어 준 친구에게만 보여요. 일부 친구는 <b>평일만</b> 할 수 있어서 토·일에는 "토·일은 EBS 쉬는 날이에요"가 나와요. EBS는 일주일에 4번까지예요.</p><p class="small">EBS가 닫힌 날은 올클리어 조건에서 EBS가 빠지니까 걱정하지 마세요.</p>'},
  {type:'notice',date:'2026-11-27',title:'🥚 공통 추가 20점',
@@ -60,6 +62,6 @@ var NEWS=[
    return '<details class="card news"'+(i===0||(n.type==='event'&&today<=n.end)?' open':'')+'><summary><span class="ndate">'+n.date.replace(/-/g,'.')+'</span>'+st+'<b>'+n.title+'</b>'+(n.type==='event'?'<span class="tiny muted"> · '+fmt(n.start)+'~'+fmt(n.end)+'</span>':'')+'</summary><div class="nbody">'+n.body+'</div></details>'}).join('')||'<p class="muted">아직 글이 없어요.</p>'}
  document.querySelectorAll('[data-nt]').forEach(function(b){b.onclick=function(){tab=b.dataset.nt;history.replaceState(null,'','#'+tab);draw()}});draw()})();
 </script>
-<script src="site.js?v=2026.11.27-0604"></script>
+<script src="site.js?v=2026.11.27-0611"></script>
 </body>
 </html>

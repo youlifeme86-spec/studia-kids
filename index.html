@@ -15,11 +15,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="스터디아 키즈">
-<script src="config.js?v=2026.11.27-0604"></script>
-<script src="game-data.js?v=2026.11.27-0604"></script>
-<script src="sound.js?v=2026.11.27-0604"></script>
+<script src="config.js?v=2026.11.27-0611"></script>
+<script src="game-data.js?v=2026.11.27-0611"></script>
+<script src="sound.js?v=2026.11.27-0611"></script>
 <script>
-window.RR_VERSION='2026.11.27-0604';
+window.RR_VERSION='2026.11.27-0611';
 /* 실시간 오류 기록: 학생 폰에서 난 오류를 구글 시트 [오류] 탭으로 보냄 */
 (function(){var n=0;window.RR_REPORT=function(msg,stack,extra){try{var C=window.RR_CONFIG||{};if(!C.API_URL||n>=8)return;n++;var a=null;try{a=JSON.parse(localStorage.getItem('sk-auth-v1')||'null')}catch(e){}
 fetch(C.API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},keepalive:true,body:JSON.stringify({action:'logError',token:a&&a.token||'',msg:String(msg||'').slice(0,1000),stack:String(stack||'').slice(0,3000),page:location.pathname+(location.hash.indexOf('#parent')===0?' (학부모)':''),tab:(window.RR_TAB||'')+(extra?' '+extra:''),ver:window.RR_VERSION||'',ua:navigator.userAgent.slice(0,300)})}).catch(function(){})}catch(e){}};
@@ -1177,6 +1177,7 @@ function roster(){
   return list.map(x=>x.id===UID||x.id==='me'?{id:x.id,d:{...S,daily:computeDaily(S)}}:x)}
 function sumDays(d,keys){const dl=d.daily||{};return keys.reduce((a,k)=>a+(dl[k]?dl[k].r:0),0)}
 function periodKeys(t){const k=TODAY();
+  if(t==='today')return [k];
   if(t==='week'){const w=weekKey(k);return [...Array(7)].map((_,i)=>addDays(w,i))}
   if(t==='lastweek'){const w=addDays(weekKey(k),-7);return [...Array(7)].map((_,i)=>addDays(w,i))}
   const pre=k.slice(0,7);const out=[];let d=pre+'-01';while(d.slice(0,7)===pre){out.push(d);d=addDays(d,1)}return out}
@@ -1185,7 +1186,7 @@ function trackHTML(list,me){if(!document.getElementById('roadcss'))document.head
 function renderRank(){
   const t=UI.rankTab;const me=MODE_DB?UID:'me';const mkeys=periodKeys('month');
   const people=roster().filter(p=>p.id===me||sumDays(p.d,mkeys)>0);
-  let h=`<h1>랭킹</h1>${MODE_DB?'<a class="btn ghost" href="rank.html" style="text-align:center;text-decoration:none">랭킹 크게 보기</a>':''}<div class="tabs">${[['week','주간 단거리'],['month','월간 마라톤'],['zone','권역 대항전']].map(([id,l])=>`<button data-t="${id}" aria-pressed="${t===id}">${l}</button>`).join('')}</div>`;
+  let h=`<h1>랭킹</h1>${MODE_DB?'<a class="btn ghost" href="rank.html" style="text-align:center;text-decoration:none">랭킹 크게 보기</a>':''}<div class="tabs">${[['today','오늘'],['week','이번 주'],['month','이번 달'],['zone','권역 대항전']].map(([id,l])=>`<button data-t="${id}" aria-pressed="${t===id}">${l}</button>`).join('')}</div>`;
   if(t==='zone'){
     const keys=periodKeys('month');
     const rows=SK.ZONES.map(([z,zn])=>{const mem=people.filter(p=>KINGDOMS[p.d.char.kingdom]&&KINGDOMS[p.d.char.kingdom].zone===z);const tot=mem.reduce((a,p)=>a+sumDays(p.d,keys),0);return {z,zn,n:mem.length,avg:mem.length?tot/mem.length:0}}).sort((a,b)=>b.avg-a.avg);
@@ -1196,7 +1197,7 @@ function renderRank(){
   } else {
     const keys=periodKeys(t);const list=people.map(p=>({id:p.id,n:p.d.char.name,c:p.d.char,v:sumDays(p.d,keys),me:p.id===me})).sort((a,b)=>b.v-a.v);
     const prev=t==='week'?periodKeys('lastweek'):null;
-    h+=`<div class="card" style="gap:6px"><span class="small muted">${t==='week'?'월~일 · 이번 주 단거리':'1일~말일 · 이번 달 마라톤'}</span>${trackHTML(list,me)}
+    h+=`<div class="card" style="gap:6px"><span class="small muted">${t==='today'?fmt(TODAY())+' · 오늘 레이스 (밤 12시까지)':t==='week'?'월~일 · 이번 주 레이스':'1일~말일 · 이번 달 레이스'}</span>${trackHTML(list,me)}
       <div class="chips">${list.slice(0,3).filter(x=>x.v>0).map((x,i)=>`<span class="pill">${MEDAL[i]} ${esc(x.n)}</span>`).join('')}</div>
       ${list.length<2?'<p class="small muted">같은 반 친구가 캐릭터를 만들면 여기에 함께 달려요.</p>':''}</div>`;
     const mine=list.find(x=>x.me);

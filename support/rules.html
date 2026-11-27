@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Press+Start+2P&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=2026.11.27-0604">
-<script src="../game-data.js?v=2026.11.27-0604"></script>
+<link rel="stylesheet" href="style.css?v=2026.11.27-0611">
+<script src="../game-data.js?v=2026.11.27-0611"></script>
 </head>
 <body data-page="rules">
 
@@ -79,6 +79,7 @@
       <p>왕국 버프·물약·가호 같은 +% 보너스는 모두 더해서 최대 +100%, 한 번 공격은 최대 4배까지예요. 체크할 때 [쉬웠어] [조금 힘들어] [해냈다!] 중 하나를 고르면 바로 공격해요.</p>
       <h3>보너스와 감점은?</h3>
       <p>올클리어·연속 보너스와 과목을 고르지 않은 선생님 추가 포인트는 레이드와 히든보스에만 들어가요. 거짓 체크 감점은 레이드와 히든보스 데미지에서 빠져요.</p>
+      <p>랭킹 레이스는 <b>오늘</b>(그날 0시~12시) · <b>이번 주</b>(월~일) · <b>이번 달</b>(1일~말일) 세 가지로 볼 수 있어요. 하루 랭킹 점수는 30점까지(연속 보너스·선생님 포인트는 따로).</p>
       <div class="tip"><b>랭킹 점수와는 따로예요</b> 랭킹의 월간 점수는 매달 1일 0점부터 다시 시작하지만, 누적 레벨·도감·칭호 같은 기록은 그대로 남아요.</div>
     </section>
     <section id="partner"><h2>알 부화 · 파트너 · 방패</h2>
@@ -112,7 +113,7 @@
   </div>
 </div>
 
-<script src="site.js?v=2026.11.27-0604"></script>
+<script src="site.js?v=2026.11.27-0611"></script>
 <script>
 (function(){const e=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 document.getElementById('kd').innerHTML='<div class="tbl"><table><thead><tr><th>권역</th><th>왕국</th><th>힘</th></tr></thead><tbody>'+Object.keys(SK.KINGDOMS).map(k=>{const K=SK.KINGDOMS[k];return '<tr><td>'+e(K.zn)+'</td><td><b style="color:'+K.c+'">'+e(K.n)+'</b></td><td>['+e(K.p)+'] '+e(K.d)+'</td></tr>'}).join('')+'</tbody></table></div>';
