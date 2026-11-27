@@ -15,11 +15,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="스터디아 키즈">
-<script src="config.js?v=2026.11.27-1416"></script>
-<script src="game-data.js?v=2026.11.27-1416"></script>
-<script src="sound.js?v=2026.11.27-1416"></script>
+<script src="config.js?v=2026.11.27-1424"></script>
+<script src="game-data.js?v=2026.11.27-1424"></script>
+<script src="sound.js?v=2026.11.27-1424"></script>
 <script>
-window.RR_VERSION='2026.11.27-1416';
+window.RR_VERSION='2026.11.27-1424';
 /* 실시간 오류 기록: 학생 폰에서 난 오류를 구글 시트 [오류] 탭으로 보냄 */
 (function(){var n=0;window.RR_REPORT=function(msg,stack,extra){try{var C=window.RR_CONFIG||{};if(!C.API_URL||n>=8)return;n++;var a=null;try{a=JSON.parse(localStorage.getItem('sk-auth-v1')||'null')}catch(e){}
 fetch(C.API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},keepalive:true,body:JSON.stringify({action:'logError',token:a&&a.token||'',msg:String(msg||'').slice(0,1000),stack:String(stack||'').slice(0,3000),page:location.pathname+(location.hash.indexOf('#parent')===0?' (학부모)':''),tab:(window.RR_TAB||'')+(extra?' '+extra:''),ver:window.RR_VERSION||'',ua:navigator.userAgent.slice(0,300)})}).catch(function(){})}catch(e){}};
@@ -650,7 +650,7 @@ async function flush(){
 /* 선생님이 승인한 미션1, 선생님이 넣은 체크·추가 포인트·감점을 내 기록에 합침 */
 function mergeServer(j){let ch=false,m1=false;
   if(typeof j.ebs==='string'&&j.ebs!==SRV_EBS){SRV_EBS=j.ebs;ch=true}
-  (j.approved||[]).forEach(d=>{const L=S.logs&&S.logs[d];if(!L)return;const q=L.q.find(x=>x.a==='m1');
+  (j.approved||[]).forEach(d=>{if(!S.char||d>TODAY()||d<addDays(TODAY(),-14))return;const L=log(d);const q=L.q.find(x=>x.a==='m1');
     if(!L.hidden||(q&&!q.done)){L.hidden=1;if(q&&!q.done){q.done=true;q.at=Date.now();let mult=1+(blessActive()?BLESS_PCT/100:0);if(S.char&&S.char.kingdom==='hc')mult*=2;q.dmg=Math.round(qPts(q)*10*mult)}
       S.bless={from:d,until:addDays(d,6)};ch=true;m1=true}});
   if(j.adj){const by={};j.adj.forEach(a=>{(by[a.date]=by[a.date]||[]).push(a)});
