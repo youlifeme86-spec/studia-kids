@@ -15,11 +15,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="스터디아 키즈">
-<script src="config.js?v=2026.11.26-1653"></script>
-<script src="game-data.js?v=2026.11.26-1653"></script>
-<script src="sound.js?v=2026.11.26-1653"></script>
+<script src="config.js?v=2026.11.27-0027"></script>
+<script src="game-data.js?v=2026.11.27-0027"></script>
+<script src="sound.js?v=2026.11.27-0027"></script>
 <script>
-window.RR_VERSION='2026.11.26-1653';
+window.RR_VERSION='2026.11.27-0027';
 /* 실시간 오류 기록: 학생 폰에서 난 오류를 구글 시트 [오류] 탭으로 보냄 */
 (function(){var n=0;window.RR_REPORT=function(msg,stack,extra){try{var C=window.RR_CONFIG||{};if(!C.API_URL||n>=8)return;n++;var a=null;try{a=JSON.parse(localStorage.getItem('sk-auth-v1')||'null')}catch(e){}
 fetch(C.API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},keepalive:true,body:JSON.stringify({action:'logError',token:a&&a.token||'',msg:String(msg||'').slice(0,1000),stack:String(stack||'').slice(0,3000),page:location.pathname+(location.hash.indexOf('#parent')===0?' (학부모)':''),tab:(window.RR_TAB||'')+(extra?' '+extra:''),ver:window.RR_VERSION||'',ua:navigator.userAgent.slice(0,300)})}).catch(function(){})}catch(e){}};
@@ -291,6 +291,9 @@ img.px,canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 .eggpick{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.egp{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 6px;border:3px solid #2B1D16;background:#FFF6DC;font:inherit;color:#2B1D16;text-align:center;cursor:pointer}.egp.on{background:#FFE9A8;box-shadow:inset 0 0 0 3px #F26B1D}
 .eggwob{display:inline-block;animation:wobble 1.6s ease-in-out infinite;transform-origin:50% 100%}
 .petbuddy{position:absolute;bottom:58px;left:128px;z-index:2;animation:bob .7s steps(2) infinite}.petbuddy.st3{filter:drop-shadow(0 0 6px #FFE066)}
+.petbuddy.pdash{animation:pdash .62s steps(6) 1}
+@keyframes pdash{40%{transform:translate(118px,-16px)}55%{transform:translate(124px,-10px)}}
+.dmg.pet{font-size:12px;color:#FFF3B0}
 .petbuddy .pcrown{position:absolute;top:-12px;left:50%;transform:translateX(-50%)}
 .eggbuddy{position:absolute;bottom:58px;left:4px;z-index:1;animation:wobble 1.6s ease-in-out infinite;transform-origin:50% 100%}
 .hero{position:absolute;bottom:58px;left:34px;animation:bob .8s steps(2) infinite}
@@ -574,7 +577,7 @@ function sceneHTML(inner,opts){opts=opts||{};
    <div class="fx" id="fx"></div><canvas class="fx" id="pfx" width="420" height="250"></canvas><div class="flash" id="flash"></div></div>`}
 function heroHTML(){const c=S.char||{};const P=S.char?partner():null,E=S.char?incubating():null;
   return `<div class="hero" id="hero"><div class="aura" style="background:${esc(c.color||'#EE7FAE')}"></div>${SK.heroTag(c,6)}</div>
-  ${P?`<div class="petbuddy st${P.stage}" title="${esc(petName(P))}">${P.stage>=3?'<span class="pcrown" data-spr="crown" data-sc="3"></span>':''}<span data-spr="pet_${P.id}" data-sc="${P.stage>=2?4:3}"></span></div>`:''}
+  ${P?`<div class="petbuddy st${P.stage}" id="pet" data-pet="${P.id}" title="${esc(petName(P))}">${P.stage>=3?'<span class="pcrown" data-spr="crown" data-sc="3"></span>':''}<span data-spr="pet_${P.id}" data-sc="${P.stage>=2?4:3}"></span></div>`:''}
   ${E&&(!P||E.id!==P.id)?`<div class="eggbuddy" title="${esc(SK.EGGS[E.id].egg)} 부화 중"><span data-spr="egg_${E.id}" data-sc="${P?2:3}"></span></div>`:''}`}
 const FIRE=['#FFE066','#F7A531','#E2453C','#FFF3B0','#D7263D'];
 function burst(x,y,colors,n){const cv=document.getElementById('pfx');if(!cv||matchMedia('(prefers-reduced-motion: reduce)').matches)return;const g=cv.getContext('2d');const sx=cv.width/(cv.clientWidth||420);
@@ -997,8 +1000,14 @@ function renderBoss(){
 function bossStage(p){return p<=25?'st3':p<=50?'st2':p<=75?'st1':''}
 function bossLine(B,hp,p){return hp<=0?'"내가 졌다! 이번 달 왕국 수호 성공!"':p<=25?'"으악! 조금만 살려줘~ 내일 쉬어!"':p<=50?`"잠깐! ${B.n}까지 하면 반칙이야!"`:p<=75?'"어라? 오늘 좀 열심히 하는데?"':`"[${B.sk[0]}]! 오늘은 공부 안 할걸?"`}
 function critBanner(t,mega){const sc=document.getElementById('scene');if(!sc)return;const b=document.createElement('div');b.className='critb'+(mega?' mega':'');b.textContent=t;sc.appendChild(b);setTimeout(()=>b.remove(),1200)}
+const PET_FX={fire:{t:'불꽃 브레스!',c:['#FFE066','#F7A531','#E2453C']},leaf:{t:'깃털 회오리!',c:['#BDE8B0','#5FBF7A','#FFB020']},sea:{t:'물보라 공격!',c:['#B9ECF8','#3A8FD8','#FFFFFF']},star:{t:'별빛 펀치!',c:['#FFE066','#B59CFF','#6B4FC8']}};
+/* 장착한 파트너가 내 캐릭터와 함께 공격하는 연출 (데미지 규칙은 그대로) */
+function petAttack(fx){const pet=$('#pet');if(!pet)return;const F=PET_FX[pet.dataset.pet]||PET_FX.fire;
+  setTimeout(()=>{pet.classList.remove('pdash');void pet.offsetWidth;pet.classList.add('pdash')},150);
+  setTimeout(()=>{const sc=$('#scene');const bx=sc?sc.clientWidth-110:280;burst(bx,170,F.c,22);dmgText(F.t,bx-80,165,false);const d=$('#fx')&&$('#fx').lastChild;if(d)d.classList.add('pet');if(window.SKSound)SKSound.play('attack')},470)}
 function playHit(fx,B){
   const hero=$('#hero'),boss=$('#bossSpr');if(hero){hero.classList.remove('dash');void hero.offsetWidth;hero.classList.add('dash')}
+  petAttack(fx);
   setTimeout(()=>{
     if(boss){boss.classList.remove('hit');void boss.offsetWidth;boss.classList.add('hit')}
     const sc=$('#scene');const bx=sc?sc.clientWidth-90:300;const big=!!fx.hit||fx.why.some(w=>w.includes('치명타'));if(fx.hit)critBanner(fx.hit==='crit'?'CRITICAL!':'MEGA HIT!',fx.hit!=='crit');if(fx.hit&&fx.hit!=='crit')setTimeout(flashFx,180);burst(bx,150,FIRE,big?60:32);flashFx();
