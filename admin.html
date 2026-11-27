@@ -7,10 +7,10 @@
 <title>스터디아 키즈 선생님</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap">
-<script>window.PAGE_VERSION='2026.11.27-0611';/* 옛 화면이 캐시에 남아 있으면 새 버전으로 한 번 다시 불러와요 */
+<script>window.PAGE_VERSION='2026.11.27-1120';/* 옛 화면이 캐시에 남아 있으면 새 버전으로 한 번 다시 불러와요 */
 (function(){fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(v){if(!v||!v.version||v.version===window.PAGE_VERSION)return;var k='sk-reload-'+v.version;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1')}catch(e){return}var u=new URL(location.href);u.searchParams.set('v',v.version);location.replace(u.toString())}).catch(function(){})})();</script>
-<script src="config.js?v=2026.11.27-0611"></script>
-<script src="game-data.js?v=2026.11.27-0611"></script>
+<script src="config.js?v=2026.11.27-1120"></script>
+<script src="game-data.js?v=2026.11.27-1120"></script>
 <style>
 :root{--bg:#FBF4E6;--paper:#FFFDF8;--ink:#3A2C22;--muted:#8A7766;--line:#EADFCB;--accent:#F08A4B;--soft:#FDE6D3;--good:#3E9B6B;--bad:#D2504A;--purple:#7A4FD0;
   --f-display:'Jua',system-ui,sans-serif;--f-body:'Noto Sans KR',system-ui,-apple-system,sans-serif;--shadow:0 2px 0 rgba(90,60,30,.06),0 8px 24px rgba(90,60,30,.05)}
@@ -161,6 +161,7 @@ function render(){
       <li>1점 = 10 데미지 (랭킹 점수는 그대로). 크리티컬 15% ×1.5, MEGA HIT 3% ×2, 하루 2·3·4번째 체크 콤보 +10·20·30%, 골든타임 저녁 7~9시 +20%</li>
       <li>보스 체력은 이 보너스만큼 1.3배로 올렸어요. 체력 75·50·25%에서 보스 대사와 표정이 바뀌어요</li>
       <li>체크할 때 감정 태그 [쉬웠어][조금 힘들어][해냈다!]를 골라요</li>
+      <li>출석 도장: 메인 과목(수학·영어·국어·EBS) 1개 이상 체크한 날 도장 + 출석 상자(궁극기 게이지 +20%), 한 주 도장 5개면 알 부화 +5점. 앱만 열면 도장 없음.</li>
       <li>스트릭 방패: 5일 연속마다 1개(최대 2개), 빠진 날 자동으로 연속 기록과 보스 반격을 막아요. 힘든 날엔 "문제 1개만" 최소 시동 퀘스트(5 데미지, 출석 인정)</li>
       <li>알 부화: 공부 점수 30점 부화 → 150점 성장 → 300점 각성. 파트너는 1마리 장착, 도감에서 바꿔 끼기. 공격할 때 파트너도 같이 공격(12/1부터 +3/+4/+5 데미지)</li>
       <li>EBS: [학생 계정] EBS 칸에서 학생마다 닫힘/평일만/매일 (주 4번까지)</li>

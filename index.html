@@ -15,11 +15,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="스터디아 키즈">
-<script src="config.js?v=2026.11.27-0611"></script>
-<script src="game-data.js?v=2026.11.27-0611"></script>
-<script src="sound.js?v=2026.11.27-0611"></script>
+<script src="config.js?v=2026.11.27-1120"></script>
+<script src="game-data.js?v=2026.11.27-1120"></script>
+<script src="sound.js?v=2026.11.27-1120"></script>
 <script>
-window.RR_VERSION='2026.11.27-0611';
+window.RR_VERSION='2026.11.27-1120';
 /* 실시간 오류 기록: 학생 폰에서 난 오류를 구글 시트 [오류] 탭으로 보냄 */
 (function(){var n=0;window.RR_REPORT=function(msg,stack,extra){try{var C=window.RR_CONFIG||{};if(!C.API_URL||n>=8)return;n++;var a=null;try{a=JSON.parse(localStorage.getItem('sk-auth-v1')||'null')}catch(e){}
 fetch(C.API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},keepalive:true,body:JSON.stringify({action:'logError',token:a&&a.token||'',msg:String(msg||'').slice(0,1000),stack:String(stack||'').slice(0,3000),page:location.pathname+(location.hash.indexOf('#parent')===0?' (학부모)':''),tab:(window.RR_TAB||'')+(extra?' '+extra:''),ver:window.RR_VERSION||'',ua:navigator.userAgent.slice(0,300)})}).catch(function(){})}catch(e){}};
@@ -289,6 +289,8 @@ img.px,canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 @keyframes lpin{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
 .lobbygo{position:absolute;left:0;right:0;top:38%;z-index:60;display:flex;flex-direction:column;align-items:center;gap:4px;pointer-events:none;animation:ban 2.6s steps(10) forwards}.lobbygo b{font-family:var(--f-title);font-size:38px;color:#F7C531;text-shadow:2px 0 #22183A,-2px 0 #22183A,0 2px #22183A,0 -2px #22183A,0 6px #22183A}.lobbygo span{font-size:16px;background:#22183A;color:#F6E3B4;padding:3px 10px}
 @media (max-width:699px){.lobbygo{position:fixed}}
+.attrow{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.ats{position:relative;aspect-ratio:1;border:2px dashed #C9B48F;display:flex;align-items:center;justify-content:center;font-size:11px;color:#9A8466}.ats i{position:absolute;top:1px;left:3px;font-style:normal;font-size:10px}.ats.td{border-style:solid;border-color:#2B1D16}.ats.on{border:2px solid #C2381F;background:#FFE7D6}.ats.on b{color:#C2381F;font-family:var(--f-display);font-size:18px;transform:rotate(-12deg);display:inline-block;border:2px solid #C2381F;border-radius:50%;width:30px;height:30px;line-height:26px;text-align:center;animation:stamp .35s steps(4) both}
+@keyframes stamp{from{transform:scale(2.2) rotate(-12deg);opacity:0}to{transform:scale(1) rotate(-12deg);opacity:1}}
 .lvrow{display:flex;gap:6px;margin:2px 0 8px}.lvp{flex:1;text-align:center;padding:3px 0;border:2px solid #F6E3B4;font-family:var(--f-display);font-size:13px;opacity:.5}.lvp.now{opacity:1;background:#F6E3B4;color:#22183A}.lvp.done{opacity:1;background:#7A4FD0;border-color:#7A4FD0}
 .dex{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.dexc{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 6px;border:3px solid #2B1D16;background:#FFF6DC;font:inherit;color:#2B1D16;text-align:center;cursor:pointer}
 .dexc.on{background:#FFE9A8;box-shadow:inset 0 0 0 3px #F7C531}.dexc.off{background:#EFE7D6;cursor:default}
@@ -904,6 +906,7 @@ function questRow(q,i,L,k){const A=ACT[q.a];if(q.a==='ebs'&&!q.done&&ebsMode()==
     <div class="body"><div class="t">${esc(A.n)}</div><div class="tiny muted">${A.pt}점 · ${ebsShut?'토·일은 EBS 쉬는 날이에요':wf&&!q.done?'이번 주는 다 채웠어!':wkTxt}${A.s?' · '+esc(SUBJ[A.s].boss):''}</div></div>
     <button class="check" data-i="${i}" aria-label="${esc(A.n)} ${q.done?'완료 취소':'완료하고 공격'}" ${(wf||closed)&&!q.done||closed?'disabled':''}>${q.done?'✓':'공격!'}</button></div>`}
 function renderToday(){
+  if(UI.mode==='student'&&!READONLY&&S.char){attMark();const k0=TODAY();if(attOK(S.logs[k0])&&!(S.attBox||{})[k0]){attAfterCheck(k0);save()}}
   const k=TODAY(),L=log(k),sc=dayScore(k);const closed=SK.closed();
   const mk=monthKeyOf(k);const firstOpen=L.q.find(q=>!q.done&&!ACT[q.a].teacher&&!weekFull(q.a,k)&&(q.a!=='ebs'||ebsOK(k)));const bossS=firstOpen?ACT[firstOpen.a].s:SUBJ_KEYS.sort((a,b)=>bossLeft(b,mk)/bossHp(b,mk)-bossLeft(a,mk)/bossHp(a,mk))[0];
   const left=pctOf(bossLeft(bossS,mk),bossHp(bossS,mk));const ms=monthScoreRaw();const stg=SK.stage(ms);
@@ -914,6 +917,7 @@ function renderToday(){
   if(WIN&&k>=WIN.nov+'-26'&&k<=WIN.hidTo){const nl=SUBJ_KEYS.filter(x=>!bossLeft(x,WIN.nov)).length,WH=winterHid(),RI=raidInst(RAIDS.find(r=>r.id==='winter'));
     h+=`<button class="card evcard" id="evc" type="button"><div class="row between"><b>❄ 겨울 이벤트</b><span class="tiny">크리스마스까지</span></div>
      <div class="tiny">${k<=WIN.novEnd?`· 11월 연습 보스 ${nl}/6 처치 (${fmt(WIN.novEnd)}까지)<br>`:''}${RI.open?`· 눈사람 왕 HP ${fmtN(RI.left)} 남음<br>`:`· 12/1 눈사람 왕 레이드 열림 (체력 최대 ${fmtN(WIN.raidMax)})<br>`}${WH?(WH.open?(WH.dead?'· 꿈의 문 수문장 처치 완료!':`· 꿈의 문 수문장 HP ${fmtN(WH.left)} 남음`):`· 꿈의 문 열쇠 ${pctOf(Math.min(WH.D,WIN.hidGate),WIN.hidGate)}% 모음`):'· 12/1부터 꿈의 문 열쇠 모으기'}</div></button>`}
+  h+=attHTML();
   if(giftReady())h+=`<button class="giftcard" id="gift" type="button"><span class="giftbox" data-spr="chest" data-sc="5"></span><div><b>신규 용사 선물이 도착했어!</b><p class="small">눌러서 열어 봐</p></div></button>`;
   if(blessActive())h+=`<div class="banner" style="background:#5B3B8C"><span data-spr="star" data-sc="5"></span><div><b>마스터의 가호</b><p class="small" style="opacity:.9">숙제검사 통과! ${fmt(S.bless.until)}까지 모든 공격 +${BLESS_PCT}%</p></div></div>`;
   h+=`<div class="card" style="gap:8px"><div class="row between"><h3>공부 체크</h3><span class="num small"><b style="font-size:20px">${sc.rank}</b> / ${DAILY_CAP}점</span></div>`;
@@ -960,7 +964,19 @@ function tagSheet(name,go){const sh=document.createElement('div');sh.className='
   phone.appendChild(sh);sh.querySelector('#no').onclick=()=>sh.remove();sh.onclick=e=>{if(e.target===sh)sh.remove()};
   sh.querySelectorAll('[data-tag]').forEach(b=>b.onclick=()=>{sh.remove();go(b.dataset.tag)})}
 /* 연속 보너스(3일·7일)와 연속 출석 기록 */
-function afterCheck(k){const L=log(k);const n=hasDone(L)?streak():0;L.sb=n===3?SK.STREAK3:(n>0&&n%7===0)?SK.STREAK7:0}
+/* ---------- 출석 도장 · 출석 상자 · 주간 선물 ---------- */
+function attMark(){if(!S.char||READONLY)return;const k=TODAY();S.att=S.att||{};if(!S.att[k]){S.att[k]=1;save();setTimeout(()=>toast('출석 확인! 메인 과목을 1개 체크하면 도장이 찍히고 출석 상자가 열려요'),900)}}
+function attOK(L){const M=(SK.ATT&&SK.ATT.main)||[];return !!L&&((L.q||[]).some(q=>q.done&&M.includes(q.a))||adjOf(L,'check').some(x=>M.includes(x.a)))}
+function attWeek(k){const w=weekKey(k||TODAY());return [...Array(7)].map((_,i)=>addDays(w,i)).map(d=>({d,ok:attOK(S.logs[d])}))}
+function attAfterCheck(k){if(k!==TODAY()||!S.char)return;const A=SK.ATT;if(!A)return;S.attBox=S.attBox||{};
+  if(attOK(S.logs[k])&&!S.attBox[k]){S.attBox[k]=1;S.gauge=Math.min(100,(S.gauge||0)+A.gauge);setTimeout(()=>toast(`🎁 출석 상자 열림! 궁극기 게이지 +${A.gauge}%`),1400)}
+  const ws=weekKey(k),key=ws+'#att';const n=attWeek(k).filter(x=>x.ok).length;
+  if(n>=A.week&&!(S.coopWins||{})[key]){(S.coopWins=S.coopWins||{})[key]=A.egg;setTimeout(()=>toast(`🏅 이번 주 도장 ${A.week}개! 주간 선물: 알 부화 +${A.egg}점`),2600)}}
+function attHTML(){const A=SK.ATT;if(!A||!S.char)return '';const k=TODAY(),W=attWeek(k),n=W.filter(x=>x.ok).length,today=attOK(S.logs[k]),opened=(S.attBox||{})[k],gift=(S.coopWins||{})[weekKey(k)+'#att'];
+  return `<div class="card attc" style="gap:6px"><div class="row between"><b>📅 출석 도장</b><span class="small">이번 주 <b>${n}</b>/${A.week}${gift?' · 🏅 주간 선물 받음':''}</span></div>
+   <div class="attrow">${W.map(x=>`<span class="ats ${x.ok?'on':''} ${x.d===k?'td':''}"><i>${'월화수목금토일'[(parseDay(x.d).getDay()+6)%7]}</i>${x.ok?'<b>참</b>':''}</span>`).join('')}</div>
+   <p class="tiny muted">${today?(opened?`오늘 도장 쾅! 출석 상자에서 궁극기 게이지 +${A.gauge}%를 받았어요.`:'오늘 도장 쾅!'):`🔒 오늘 출석 상자가 잠겨 있어요. 메인 과목(수학·영어·국어·EBS)을 1개 이상 체크하면 도장이 찍히고 상자가 열려요(궁극기 게이지 +${A.gauge}%).`} 한 주에 도장 ${A.week}개면 알 부화 +${A.egg}점!</p></div>`}
+function afterCheck(k){attAfterCheck(k);const L=log(k);const n=hasDone(L)?streak():0;L.sb=n===3?SK.STREAK3:(n>0&&n%7===0)?SK.STREAK7:0}
 function toggleQuest(i,tag){
   const k=TODAY(),L=log(k),q=L.q[i];
   if(!q.done){

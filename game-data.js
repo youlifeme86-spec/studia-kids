@@ -112,6 +112,9 @@ SK.ACT={
   clean:{n:'청소 (저녁에 방과 책상)',pt:1,s:null,life:true,min:0}
 };
 /* EBS 권한: 'on' 매일 · 'wd' 평일만(토·일 닫힘) · 'off' 안 보임. 선생님 화면 [학생 계정]의 EBS 칸에서 바꾸고, 서버에 값이 없을 때만 아래 기본값을 써요 */
+/* 출석: 앱을 처음 열면 도장 준비, 그날 메인 과목(main)을 1개 이상 체크해야 도장이 찍히고 출석 상자(궁극기 게이지 +gauge%)가 열려요.
+ * 한 주(월~일)에 도장 week개를 모으면 주간 선물: 알 부화 +egg점 */
+SK.ATT={gauge:20,week:5,egg:5,main:['math','eng','kor','ebs']};
 SK.EBS_DEFAULT={ryu01:'wd',lee1102:'wd',kim1223:'wd',asd10041004:'on'};
 SK.ORDER=['math','eng','kor','ebs','m1','m2','school','book','clean'];
 
