@@ -15,11 +15,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="스터디아 키즈">
-<script src="config.js?v=2026.11.27-1427"></script>
-<script src="game-data.js?v=2026.11.27-1427"></script>
-<script src="sound.js?v=2026.11.27-1427"></script>
+<script src="config.js?v=2026.11.27-1455"></script>
+<script src="game-data.js?v=2026.11.27-1455"></script>
+<script src="sound.js?v=2026.11.27-1455"></script>
 <script>
-window.RR_VERSION='2026.11.27-1427';
+window.RR_VERSION='2026.11.27-1455';
 /* 실시간 오류 기록: 학생 폰에서 난 오류를 구글 시트 [오류] 탭으로 보냄 */
 (function(){var n=0;window.RR_REPORT=function(msg,stack,extra){try{var C=window.RR_CONFIG||{};if(!C.API_URL||n>=8)return;n++;var a=null;try{a=JSON.parse(localStorage.getItem('sk-auth-v1')||'null')}catch(e){}
 fetch(C.API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},keepalive:true,body:JSON.stringify({action:'logError',token:a&&a.token||'',msg:String(msg||'').slice(0,1000),stack:String(stack||'').slice(0,3000),page:location.pathname+(location.hash.indexOf('#parent')===0?' (학부모)':''),tab:(window.RR_TAB||'')+(extra?' '+extra:''),ver:window.RR_VERSION||'',ua:navigator.userAgent.slice(0,300)})}).catch(function(){})}catch(e){}};
@@ -377,6 +377,7 @@ details summary{cursor:pointer;padding:4px 0}
 .game .btn.ghost{box-shadow:var(--px)}
 .game .check{background:#FF7A2F}
 .game .quest.wait{background:#FFF6E0}
+.quest.hiddenq:not(.done){background:linear-gradient(90deg,#EFE6FA,#fff);border-color:#C9B3E8}
 .game .quest.wait .check{background:#C99A12}
 .game .nav{background:#4A2C17}
 .game .nav button[aria-current="page"]{background:#6B4329;color:#FFC83D;box-shadow:inset 0 3px 0 #FFC83D}
@@ -462,15 +463,18 @@ function weekCount(a,k,st){st=st||S;const w=weekKey(k);let n=0;for(let i=0;i<7;i
 function weekFull(a,k,st){const A=ACT[a];if(!A.wk)return false;const L=(st||S).logs[k];const doneToday=L&&L.q.some(q=>q.a===a&&q.done);return !doneToday&&weekCount(a,k,st)>=A.wk}
 function qPts(q){return q.pts||(q.a==='m1'&&SRV_M1?SRV_M1:ACT[q.a].pt)}
 function allClear(st,k){const L=(st.logs||{})[k];if(!L)return false;
-  const need=ORDER.filter(a=>a!=='m1'&&a!=='school'&&a!=='bag'&&!weekFull(a,k,st)&&(a!=='ebs'||st!==S||ebsOK(k)));
+  const need=SK.STUDY.filter(a=>!weekFull(a,k,st)&&(a!=='ebs'||st!==S||ebsOK(k)));
   return need.length>0&&need.every(a=>ACT[a].life?L.life&&L.life[a]:L.q.some(q=>q.a===a&&q.done))}
 /* EBS 권한 (선생님이 학생마다 열고 닫음) */
 let SRV_EBS='',SRV_M1=0;
 function ebsMode(){if(!MODE_DB)return 'on';return SRV_EBS||(SK.EBS_DEFAULT||{})[UID]||'off'}
 function ebsOK(k){const m=ebsMode();if(m==='off')return false;if(m==='wd'){const d=parseDay(k||TODAY()).getDay();return d!==0&&d!==6}return true}
 function adjOf(L,t){return (L&&L.adj||[]).filter(x=>x.t===t)}
+/* 문제 1개만: 선생님이 허가한 날만 인정 (학생이 혼자 누른 예전 기록은 무시) */
+function miniOn(L){return adjOf(L,'mini').length>0}
 function dayScoreOf(st,k){const L=(st.logs||{})[k];if(!L)return {raw:0,rank:0,min:0,subjects:0,chk:0,ac:0,sb:0,bonus:0,pen:0};
   let chk=0,min=0;const subs=new Set();
+  if(k<SK.M1_FROM)L.q.forEach(q=>{if(q.a==='m1'&&q.done&&!q.pts)q.pts=SRV_M1>SK.M1_OLD?SRV_M1:SK.M1_OLD});
   L.q.forEach(q=>{if(q.done){chk+=qPts(q);min+=ACT[q.a].min||0;subs.add(ACT[q.a].s)}});
   if(L.life&&L.life.clean)chk+=ACT.clean.pt;
   if(L.life&&L.life.bag)chk+=ACT.bag.pt;
@@ -480,7 +484,7 @@ function dayScoreOf(st,k){const L=(st.logs||{})[k];if(!L)return {raw:0,rank:0,mi
   const capped=Math.min(chk+ac,DAILY_CAP);
   return {raw:Math.max(0,chk+ac+sb+bonus-pen),rank:Math.max(0,capped+sb+bonus-pen),min,subjects:subs.size,chk,ac,sb,bonus,pen}}
 function dayScore(k){return dayScoreOf(S,k)}
-function hasDone(L){return !!L&&(L.q.some(q=>q.done)||(L.life&&(L.life.clean||L.life.bag||L.life.mini))||adjOf(L,'check').length>0)}
+function hasDone(L){return !!L&&(L.q.some(q=>q.done)||(L.life&&(L.life.clean||L.life.bag))||miniOn(L)||adjOf(L,'check').length>0)}
 function hasStudy(L){return !!L&&(L.q.some(q=>q.done)||(L.life&&(L.life.clean||L.life.bag))||adjOf(L,'check').length>0)}
 /* 연속 출석: 오뚝이 공화국은 끊긴 날 1번을 막아 줌 */
 /* 스트릭 방패: 가입일부터 하루씩 따라가며 계산 (오뚝이 공화국은 방패 1개 들고 시작) */
@@ -506,7 +510,7 @@ function monthScoreRaw(mk,st){st=st||S;mk=mk||monthKeyOf(TODAY());return Object.
 /* ---------- 데미지 ---------- */
 function qDmg(q){return q.dmg!=null?q.dmg:qPts(q)*10}
 /* 과목 보스 밖에서 레이드·히든보스에만 들어가는 몫: 올클리어·연속 보너스·과목 없는 선생님 포인트 - 감점 */
-function dayExtraDmg(st,k){const L=st.logs[k];if(!L)return 0;const d=dayScoreOf(st,k);let x=(d.ac+d.sb)*10;if(L.life&&L.life.mini)x+=(SK.MINI&&SK.MINI.dmg)||0;
+function dayExtraDmg(st,k){const L=st.logs[k];if(!L)return 0;const d=dayScoreOf(st,k);let x=(d.ac+d.sb)*10;if(miniOn(L))x+=(SK.MINI&&SK.MINI.dmg)||0;
   adjOf(L,'bonus').forEach(a=>{x+=(+a.pts||0)*10*(a.crit||1)});x-=d.pen*10;
   adjOf(L,'check').forEach(a=>{x+=(+a.pts||0)*10});
   if(L.life&&L.life.clean)x+=ACT.clean.pt*10;if(L.life&&L.life.bag)x+=ACT.bag.pt*10;return x}
@@ -622,7 +626,7 @@ let S=freshState();
 let writeTimer=null,retryTimer=null,flushing=false,flushAgain=false,SYNC='idle',failCount=0;
 /* 서버 요약에 쓰는 하루 기록: 랭킹 점수, 데미지, 마음 칸, 알림 */
 function computeDaily(st){const out={};Object.keys(st.logs||{}).forEach(k=>{const d=dayScoreOf(st,k);const e=st.emo&&st.emo[k];const L=st.logs[k];
-  if(d.raw||e||L.hiddenReq||(L.life&&L.life.mini)){const bd={};SUBJ_KEYS.forEach(s=>{const v=dayBossDmg(st,k,s);if(v)bd[s]=v});
+  if(d.raw||e||L.hiddenReq||L.miniReq||miniOn(L)){const bd={};SUBJ_KEYS.forEach(s=>{const v=dayBossDmg(st,k,s);if(v)bd[s]=v});
     let dm=dayExtraDmg(st,k);L.q.forEach(q=>{if(q.done)dm+=qDmg(q)});
     out[k]={r:d.rank,raw:d.raw,min:d.min,n:d.subjects,cell:e?e.cell:null,cond:e?e.cond:null,al:e&&e.alert?1:0,hr:L.hiddenReq&&!L.hidden?1:0,dm:Math.max(0,dm),bd}}});
   if(st.char){const mk=monthKeyOf(TODAY()),f=mk+'-01';const off={};SUBJ_KEYS.forEach(s=>{const v=rankBossDmg(s,mk,st)-rawBossDmg(s,mk,st);if(v)off[s]=v});
@@ -651,7 +655,7 @@ async function flush(){
 /* 선생님이 승인한 미션1, 선생님이 넣은 체크·추가 포인트·감점을 내 기록에 합침 */
 function mergeServer(j){let ch=false,m1=false;
   if(typeof j.ebs==='string'&&j.ebs!==SRV_EBS){SRV_EBS=j.ebs;ch=true}
-  if(typeof j.m1==='number'&&j.m1!==SRV_M1&&(j.m1===0||j.m1===5||j.m1===10)){SRV_M1=j.m1;ch=true}
+  if(typeof j.m1==='number'&&j.m1!==SRV_M1&&(j.m1===0||SK.M1_OPTS.includes(j.m1))){SRV_M1=j.m1;ch=true}
   (j.approved||[]).forEach(d=>{if(!S.char||d>TODAY()||d<addDays(TODAY(),-14))return;const L=log(d);const q=L.q.find(x=>x.a==='m1');
     if(!L.hidden||(q&&!q.done)){L.hidden=1;if(q&&!q.done){q.done=true;q.at=Date.now();let mult=1+(blessActive()?BLESS_PCT/100:0);if(S.char&&S.char.kingdom==='hc')mult*=2;q.dmg=Math.round(qPts(q)*10*mult)}
       S.bless={from:d,until:addDays(d,6)};ch=true;m1=true}});
@@ -659,7 +663,7 @@ function mergeServer(j){let ch=false,m1=false;
     const dates=new Set([...Object.keys(by),...Object.keys(S.logs||{}).filter(d=>S.logs[d].adj&&S.logs[d].adj.length)]);
     dates.forEach(d=>{const L=log(d);const nw=(by[d]||[]).map(a=>({t:a.t,a:a.a||'',s:a.s||'',pts:+a.pts||0,why:a.why||'',uid:a.uid,crit:a.t==='bonus'&&S.char&&S.char.kingdom==='hc'?2:1}));
       if(JSON.stringify(L.adj||[])!==JSON.stringify(nw)){L.adj=nw;ch=true}})}
-  if(ch){S.daily=computeDaily(S);cacheLocal();if(m1)toast('숙제검사 확인 완료! 미션1 5점 + 마스터의 가호');if(canRerender())render()}}
+  if(ch){S.daily=computeDaily(S);cacheLocal();if(m1)toast(`숙제검사 확인 완료! 히든미션 ${qPts({a:'m1'})}점 + 마스터의 가호`);if(canRerender())render()}}
 function savePrivate(){try{localStorage.setItem(KEY()+':priv',JSON.stringify(PRIV))}catch(e){}
   if(!MODE_DB)return;api('savePrivate',{priv:PRIV}).catch(e=>{if(e.code==='auth')forceLogout(e.message)})}
 function newCode(){const a='abcdefghjkmnpqrstuvwxyz23456789';let c='';for(let i=0;i<6;i++)c+=a[Math.floor(Math.random()*a.length)];return c}
@@ -909,7 +913,7 @@ function makeDemo(){
 function questRow(q,i,L,k){const A=ACT[q.a];if(q.a==='ebs'&&!q.done&&ebsMode()==='off')return '';const ebsShut=q.a==='ebs'&&!q.done&&!ebsOK(k);const wf=weekFull(q.a,k)||ebsShut;const closed=SK.closed()&&k===TODAY();
   const wkTxt=A.wk?`이번 주 ${weekCount(q.a,k)}/${A.wk}`:'하루 1번';
   if(A.teacher){const st=L.hidden?'done':L.hiddenReq?'wait':'';
-    return `<div class="quest ${st}"><span class="dot" style="background:${subjDot(A.s)}"></span><div class="body"><div class="t">${esc(A.n)}</div><div class="tiny muted">${qPts(q)}점 · ${wkTxt} · <span class="pill purple">가호 +${BLESS_PCT}%</span><br>${L.hidden?'선생님이 확인했어요!':L.hiddenReq?'선생님 확인 기다리는 중':'숙제검사를 받으면 선생님이 눌러 줘요'}</div></div>
+    return `<div class="quest hiddenq ${st}"><span class="dot" style="background:#5B3B8C"></span><div class="body"><div class="t">${esc(A.n)}</div><div class="tiny muted">${qPts(q)}점 · ${wkTxt} · <span class="pill purple">가호 +${BLESS_PCT}%</span><br>${L.hidden?'선생님이 확인했어요!':L.hiddenReq?'선생님 확인 기다리는 중':'선생님만 할 수 있어요 · 숙제검사 받으면 [알리기]'}</div></div>
     <button class="check" data-m1="1" ${L.hidden||L.hiddenReq||wf||closed?'disabled':''}>${L.hidden?'✓':L.hiddenReq?'대기':wf?'끝':'알리기'}</button></div>`}
   return `<div class="quest ${q.done?'done':''} ${(wf||closed)&&!q.done?'locked':''}"><span class="dot" style="background:${subjDot(A.s)}"></span>
     <div class="body"><div class="t">${esc(A.n)}</div><div class="tiny muted">${A.pt}점 · ${ebsShut?'토·일은 EBS 쉬는 날이에요':wf&&!q.done?'이번 주는 다 채웠어!':wkTxt}${A.s?' · '+esc(SUBJ[A.s].boss):''}</div></div>
@@ -931,17 +935,20 @@ function renderToday(){
   if(giftReady())h+=`<button class="giftcard" id="gift" type="button"><span class="giftbox" data-spr="chest" data-sc="5"></span><div><b>신규 용사 선물이 도착했어!</b><p class="small">눌러서 열어 봐</p></div></button>`;
   if(blessActive())h+=`<div class="banner" style="background:#5B3B8C"><span data-spr="star" data-sc="5"></span><div><b>마스터의 가호</b><p class="small" style="opacity:.9">숙제검사 통과! ${fmt(S.bless.until)}까지 모든 공격 +${BLESS_PCT}%</p></div></div>`;
   h+=`<div class="card" style="gap:8px"><div class="row between"><h3>공부 체크</h3><span class="num small"><b style="font-size:20px">${sc.rank}</b> / ${DAILY_CAP}점</span></div>`;
-  L.q.forEach((q,i)=>{h+=questRow(q,i,L,k)});
+  L.q.forEach((q,i)=>{if(SK.STUDY.includes(q.a))h+=questRow(q,i,L,k)});
+  h+=`<p class="tiny muted">${sc.ac?'올클리어 달성! +'+SK.ALLCLEAR+'점':'공부 체크를 다 하면 올클리어 +'+SK.ALLCLEAR+'점'}</p></div>`;
+  h+=`<div class="card" style="gap:8px"><div class="row between"><h3>공부 지원 체크</h3><span class="tiny muted">올클리어와 상관없어요</span></div>`;
+  L.q.forEach((q,i)=>{if(!SK.STUDY.includes(q.a))h+=questRow(q,i,L,k)});
   h+=`<div class="quest ${L.life.clean?'done':''}"><span class="dot" style="background:var(--gold)"></span><div class="body"><div class="t">${ACT.clean.n}</div><div class="tiny muted">+1점 · 궁극기 게이지 +20%</div></div><button class="check" data-life="clean" ${closed?'disabled':''}>${L.life.clean?'✓':'완료'}</button></div>
   ${SK.newOn()||L.life.bag?'':'<!--'}<div class="quest ${L.life.bag?'done':''}"><span class="dot" style="background:var(--gold)"></span><div class="body"><div class="t">${ACT.bag.n}</div><div class="tiny muted">+1점 · 습관</div></div><button class="check" data-life="bag" ${closed?'disabled':''}>${L.life.bag?'✓':'완료'}</button></div>${SK.newOn()||L.life.bag?'':'-->'}</div>`;
-  {const SS=shieldState();const showMini=SK.MINI&&(!hasStudy(L)||L.life.mini);
+  {const SS=shieldState();const mOn=miniOn(L),mWait=!!L.miniReq&&!mOn;const showMini=SK.MINI&&(!hasStudy(L)||mOn||mWait);
    {const T=evNow(),ce=SK.coopEvent&&SK.coopEvent([],k,T.h,T.m);if(ce&&!ce.over)h+=`<button class="card evcard" id="coopc" type="button" style="background:#22183A;color:#F6E3B4;border-color:#22183A"><b>${ce.lobby?'🌙 대기실 열림! 지금 입장하기':ce.soon?'🌙 깜짝 협동 이벤트 예고':'🌙 지금 반 협동 이벤트 진행 중!'}</b><div class="tiny">${fmt(ce.ev.day)} 밤 ${ce.ev.from-12}시 대기실 → ${ce.ev.from-12}시 ${ce.ev.lobby||0}분 다 같이 입장 · 그림자 군단 Lv.1~${ce.ev.levels.length} · 눌러서 보기</div></button>`}
    {const E=incubating(),P=partner();h+=`<button class="card evcard" id="eggc" type="button" style="background:linear-gradient(180deg,#FFF3D6,#fff)"><div class="row" style="gap:10px">${E?`<span class="${E.stage?'':'eggwob'}" data-spr="${E.stage?'pet_'+E.id:'egg_'+E.id}" data-sc="3"></span><div style="flex:1"><b>${E.stage?esc(petName(E))+' 키우는 중':esc(SK.EGGS[E.id].egg)+' 품는 중'}</b><div class="tiny">${E.xp}점 · ${SK.EGG_STAGES.find(t=>E.xp<t)-E.xp}점 더 하면 ${['부화','2차 성장','최종 각성'][E.stage]}!</div></div>`:`<span data-spr="egg_fire" data-sc="3"></span><div style="flex:1"><b>${P?'새 알을 품어 볼까?':'알을 골라 품어 봐!'}</b><div class="tiny">공부 점수 30점이면 부화해서 내 옆에 따라다녀요</div></div>`}</div></button>`}
    h+=`<div class="card shcard"><div class="row between"><b>🛡 스트릭 방패 ${'🛡'.repeat(SS.shields)}${'<span style="opacity:.25">🛡</span>'.repeat(Math.max(0,SK.SHIELD.max-SS.shields))}</b><span class="small">연속 <b>${SS.n}</b>일</span></div>
      ${(()=>{const ev=petBuf('leaf')||SK.SHIELD.every;return `<p class="tiny muted">${ev}일 연속 출석마다 방패 1개 (최대 ${SK.SHIELD.max}개)${petBuf('leaf')?' · 비취알 파트너 효과':''}. 못 한 날엔 방패가 자동으로 연속 기록을 지키고 보스 반격도 막아 줘요. 다음 방패까지 ${SS.shields>=SK.SHIELD.max?'가득 찼어요!':(ev-SS.n%ev)+'일'}</p>`})()}
-     ${showMini?`<div class="quest ${L.life.mini?'done':''}" style="margin-top:6px"><span class="dot" style="background:#7FC8A9"></span><div class="body"><div class="t">오늘 너무 힘들어? 문제 1개만!</div><div class="tiny muted">최소 시동 퀘스트 · 책상에 앉아 딱 1문제 · ${SK.MINI.dmg} 데미지 + 출석 인정</div></div><button class="check" data-life="mini" ${closed||L.life.mini?'disabled':''}>${L.life.mini?'✓':'했어'}</button></div>`:''}</div>`}
+     ${showMini?`<div class="quest ${mOn?'done':mWait?'wait':''}" style="margin-top:6px"><span class="dot" style="background:#7FC8A9"></span><div class="body"><div class="t">오늘 너무 힘들어? 문제 1개만!</div><div class="tiny muted">최소 시동 퀘스트 · 책상에 앉아 딱 1문제 · 선생님이 허가하면 ${SK.MINI.dmg} 데미지 + 출석 인정<br>${mOn?'선생님이 허가했어요!':mWait?'선생님 허가 기다리는 중':'1문제 풀면 [알리기]'}</div></div><button class="check" data-life="mini" ${closed||mOn||mWait?'disabled':''}>${mOn?'✓':mWait?'대기':'알리기'}</button></div>`:''}</div>`}
   h+=`<div class="card" style="gap:4px"><div class="row between"><b>보너스</b><span class="small">${sc.ac?'<span class="pill">올클리어 +2</span>':''} ${sc.sb?'<span class="pill">연속 +'+sc.sb+'</span>':''} ${sc.bonus?'<span class="pill purple">선생님 +'+sc.bonus+'</span>':''} ${sc.pen?'<span class="pill red">감점 -'+sc.pen+'</span>':''}</span></div>
-    <p class="tiny muted">오늘 할 수 있는 체크를 다 하면 올클리어 +2점, 3일 연속 +2점, 7일 연속 +5점. 보너스는 레이드와 히든보스에 들어가요.</p>
+    <p class="tiny muted">공부 체크(수학·영어·국어${ebsMode()==='off'?'':'·EBS'})를 다 하면 올클리어 +2점, 3일 연속 +2점, 7일 연속 +5점. 보너스는 레이드와 히든보스에 들어가요.</p>
     ${adjOf(L,'penalty').concat(adjOf(L,'bonus'),adjOf(L,'check')).map(a=>`<p class="tiny">${a.t==='penalty'?'감점':a.t==='bonus'?'선생님 포인트':'선생님이 넣은 체크'} ${a.pts}점${a.why?' · '+esc(a.why):''}</p>`).join('')}</div>`;
   if(sc.min>=SK.LOTS_MIN)h+=`<div class="bubble">"오늘은 정말 많이 했어. 이제 쉬어도 돼!"</div>`;
   const emoDone=S.emo[k]&&!S.emo[k].demo;
@@ -953,10 +960,10 @@ function renderToday(){
   {const cc=scr.querySelector('#coopc');if(cc)cc.onclick=()=>{const T=evNow(),ce=SK.coopEvent([],TODAY(),T.h,T.m);if(ce&&ce.lobby&&ce.ev.day!==S.lobby){lobbyModal(ce.ev);return}UI.tab='raid';render()}}
   {const ec=scr.querySelector('#eggc');if(ec)ec.onclick=()=>{if(!incubating())eggPicker();else{UI.tab='me';render();setTimeout(()=>{const x=document.getElementById('eggs');if(x)x.scrollIntoView({block:'start'})},60)}}}
   scr.querySelectorAll('.check[data-life="mini"]').forEach(b=>b.onclick=()=>{if(SK.closed()){toast('밤 12시가 지나서 마감됐어');return}
-    confirmSheet('문제 1개 풀었니?','책상에 앉아서 딱 1문제! 그것만 해도 오늘 출석이야.',()=>{L.life.mini=true;afterCheck(k);save();if(window.SKSound){SKSound.play('attack');SKSound.buzz(30)}toast(`시동 걸렸다! ${SK.MINI.dmg} 데미지 · 출석 인정. 내일도 같이 하자!`);render()})});
+    confirmSheet('문제 1개 풀었니?','선생님께 알려요. 선생님이 허가하면 오늘 출석으로 인정되고 연속 기록이 이어져요.',()=>{L.miniReq=true;if(L.life)delete L.life.mini;save();toast('선생님께 알렸어요. 허가되면 출석 인정!');render()})});
   scr.querySelectorAll('.check[data-life="bag"]').forEach(b=>b.onclick=()=>{if(SK.closed()){toast('밤 12시가 지나서 마감됐어');return}L.life.bag=!L.life.bag;if(L.life.bag)toast('가방 정리 완료! 내일 아침이 가벼워져 · +1점');afterCheck(k);save();render()});
   scr.querySelectorAll('.check[data-life="clean"]').forEach(b=>b.onclick=()=>{if(SK.closed()){toast('밤 12시가 지나서 마감됐어');return}L.life.clean=!L.life.clean;if(L.life.clean){S.gauge=Math.min(100,S.gauge+20);toast(`방이 반짝반짝! +1점 · 궁극기 게이지 ${S.gauge}%`)}else S.gauge=Math.max(0,S.gauge-20);afterCheck(k);save();render()});
-  const m1=scr.querySelector('[data-m1]');if(m1)m1.onclick=()=>confirmSheet('숙제검사 받았니?','선생님께 확인 요청을 보내요. 선생님이 누르면 5점과 마스터의 가호가 켜져요.',()=>{L.hiddenReq=true;save();toast('선생님께 알렸어요');render()});
+  const m1=scr.querySelector('[data-m1]');if(m1)m1.onclick=()=>confirmSheet('숙제검사 받았니?',`선생님께 확인 요청을 보내요. 선생님이 누르면 ${qPts({a:'m1'})}점과 마스터의 가호가 켜져요.`,()=>{L.hiddenReq=true;save();toast('선생님께 알렸어요');render()});
   {const en=scr.querySelector('#emoNudge');if(en)en.onclick=()=>{UI.tab='emo';UI.emo={i:0,a:{}};render();scr.scrollTop=0}}
   $('#finish').onclick=()=>{UI.tab='emo';UI.emo={i:0,a:{}};render();scr.scrollTop=0};
 }
@@ -1411,7 +1418,7 @@ function renderParent(){
       <div><p class="tiny muted">점수</p><p class="num" style="font-size:24px;font-family:var(--f-display)">${sc.raw}</p></div></div></div>
     ${sent?`<div class="card">${sent.map((s,i)=>`<p class="${i===3?'':'small'}" ${i===3?'style="font-weight:700"':''}>${esc(s)}</p>`).join('')}</div>`:`<div class="card"><p class="small muted">아직 오늘 체크한 공부가 없습니다. 체크는 밤 12시까지 할 수 있어요.</p></div>`}
     ${L&&hasDone(L)?`<div class="card"><h3>오늘 한 공부</h3>${doneList(L).map(a=>`<div class="row between small"><span><span style="display:inline-block;width:8px;height:8px;background:${a.s?'var(--'+a.s+')':'var(--gold)'};margin-right:6px"></span>${esc(a.n)}</span><span class="num muted">${a.min?a.min+'분 · ':''}${a.pt}점</span></div>`).join('')}
-      ${L.hiddenReq?`<p class="tiny muted">미션1 숙제검사: ${L.hidden?'선생님 확인 완료':'선생님 확인 기다리는 중'}</p>`:''}${adjOf(L,'penalty').length?`<p class="tiny" style="color:var(--bad)">감점 ${adjOf(L,'penalty').reduce((a,x)=>a+x.pts,0)}점</p>`:''}</div>`:''}
+      ${L.hiddenReq?`<p class="tiny muted">히든미션 숙제검사: ${L.hidden?'선생님 확인 완료':'선생님 확인 기다리는 중'}</p>`:''}${adjOf(L,'penalty').length?`<p class="tiny" style="color:var(--bad)">감점 ${adjOf(L,'penalty').reduce((a,x)=>a+x.pts,0)}점</p>`:''}</div>`:''}
     ${e?`<div class="card"><h3>마음 8칸</h3>${flowGrid(e.cell)}${e.share&&e.text?`<p class="small">아이의 한마디: "${esc(e.text)}"</p>`:'<p class="tiny muted">아이가 남긴 말은 아이가 공개를 켰을 때만 보입니다.</p>'}</div>`:''}
     <div class="card"><h3>점수 변화</h3><p class="small">이번 주 ${weekScore()}점 · 지난주보다 ${weekScore()-weekScore(addDays(k,-7))>=0?'+':''}${weekScore()-weekScore(addDays(k,-7))}점</p><p class="tiny muted">다른 아이와의 순위는 보호자 화면에 보이지 않습니다.</p></div>`;
   }
