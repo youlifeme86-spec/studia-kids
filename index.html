@@ -15,11 +15,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="스터디아 키즈">
-<script src="config.js?v=2026.11.27-0036"></script>
-<script src="game-data.js?v=2026.11.27-0036"></script>
-<script src="sound.js?v=2026.11.27-0036"></script>
+<script src="config.js?v=2026.11.27-0229"></script>
+<script src="game-data.js?v=2026.11.27-0229"></script>
+<script src="sound.js?v=2026.11.27-0229"></script>
 <script>
-window.RR_VERSION='2026.11.27-0036';
+window.RR_VERSION='2026.11.27-0229';
 /* 실시간 오류 기록: 학생 폰에서 난 오류를 구글 시트 [오류] 탭으로 보냄 */
 (function(){var n=0;window.RR_REPORT=function(msg,stack,extra){try{var C=window.RR_CONFIG||{};if(!C.API_URL||n>=8)return;n++;var a=null;try{a=JSON.parse(localStorage.getItem('sk-auth-v1')||'null')}catch(e){}
 fetch(C.API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},keepalive:true,body:JSON.stringify({action:'logError',token:a&&a.token||'',msg:String(msg||'').slice(0,1000),stack:String(stack||'').slice(0,3000),page:location.pathname+(location.hash.indexOf('#parent')===0?' (학부모)':''),tab:(window.RR_TAB||'')+(extra?' '+extra:''),ver:window.RR_VERSION||'',ua:navigator.userAgent.slice(0,300)})}).catch(function(){})}catch(e){}};
@@ -1169,8 +1169,7 @@ function periodKeys(t){const k=TODAY();
   if(t==='lastweek'){const w=addDays(weekKey(k),-7);return [...Array(7)].map((_,i)=>addDays(w,i))}
   const pre=k.slice(0,7);const out=[];let d=pre+'-01';while(d.slice(0,7)===pre){out.push(d);d=addDays(d,1)}return out}
 const MEDAL=['🥇','🥈','🥉'];
-function trackHTML(list,me){const max=Math.max(1,...list.map(x=>x.v));
-  return `<div class="track">${list.map((x,i)=>{const pos=(x.v/max).toFixed(3);const lane=i%5;return `<div class="runner ${x.me?'me':''}" style="left:calc((100% - 150px) * ${pos});top:${10+lane*36}px" title="${esc(x.n)}">${SK.heroTag(x.c,2)}<span class="tag">${i<3&&x.v>0?MEDAL[i]+' ':''}${esc(x.n)}</span></div>`}).join('')}<div class="goal">🏁</div></div>`}
+function trackHTML(list,me){if(!document.getElementById('roadcss'))document.head.insertAdjacentHTML('beforeend','<style id="roadcss">'+SK.ROAD_CSS+'</style>');return SK.raceRoad(list,{h:240,medal:MEDAL})}
 function renderRank(){
   const t=UI.rankTab;const me=MODE_DB?UID:'me';const mkeys=periodKeys('month');
   const people=roster().filter(p=>p.id===me||sumDays(p.d,mkeys)>0);

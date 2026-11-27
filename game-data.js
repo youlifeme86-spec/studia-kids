@@ -263,6 +263,7 @@ SK.SPR={
  fish:{pal:{t:'#B5762E',T:'#F2B35E',k:'#2B1D16'},rows:["..tttttt..",".tTTTTTTt.","tTkTTTTTTt","tTTTTTTTTt",".tTTTTTTt.","..tttttt.t",".........t"]},
  cloud:{pal:{w:'#FFFFFF',b:'#BDEBFF'},rows:[".....wwww.......","...wwwwwwww.....",".wwwwwwwwwwwww..","wwwwwwwwwwwwwwww","bwwwwwwwwwwwwwwb",".bbbbbbbbbbbbbb."]},
  mush:{pal:{R:'#D7263D',w:'#FFFFFF',x:'#F3E3C3'},rows:[".RRRR.","RwRRwR","RRRRRR","..xx..","..xx.."]},
+ castle:{pal:{o:'#2B1D16',s:'#E8DCC8',S:'#B9A893',r:'#9B4DFF',f:'#F7C531',d:'#7A4A2B',w:'#FFE066'},rows:["..........ff........", "..........of........", ".........oo.........", "........orro........", "o.o.o..orrrro..o.o.o", "ooooooorrrrrrooooooo", "ossssorrrrrrrrosssso", "ossssoossssssoosssso", "oswssoossssssooswsso", "ossssoosswwssoosssso", "oSsssooSsssssooSssso", "oSsssooSsssssooSssso", "oSsssooSddddsooSssso", "oSsssooSddddsooSssso", "oSsssooSddddsooSssso", "oSsssooSddddsooSssso", "oooooooooooooooooooo"]},
  tree:{pal:{D:'#6CC24A',d:'#3E8E3A',t:'#7A4A2B'},rows:["....DDDD....","..DDDDDDDD..",".DDDdDDDDDD.","DDDDDDDdDDDD","DDdDDDDDDDDD",".DDDDDDdDDD.","..DDDDDDDD..",".....tt.....",".....tt.....","....tttt...."]},
  sword:{pal:{w:'#FFFFFF',y:'#F7C531',t:'#7A4A2B'},rows:["......w",".....ww","....ww.","y..ww..",".yww...",".ty....","t.y...."]}
 };
@@ -272,6 +273,34 @@ SK.hydrate=function(root){(root||document).querySelectorAll('[data-spr],[data-he
   el.appendChild(el.hasAttribute('data-hero')?SK.heroCanvas(el.dataset.a,el.dataset.c,el.dataset.j,sc):SK.sprCanvas(el.dataset.spr,sc))})};
 SK.heroTag=function(c,sc,extra){c=c||{};const e=s=>String(s??'').replace(/[&<>"]/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[x]));
   return `<span data-hero data-a="${e(c.animal||'rabbit')}" data-c="${e(c.color||'#EE7FAE')}" data-j="${e(c.job||'')}" data-sc="${sc||3}" ${extra||''}></span>`};
+
+/* ---------- 레이스: 길을 따라 스터디아 성으로 ----------
+ * list: [{c:캐릭터, n:이름, v:점수, me:true?}] (점수 높은 순). opt: {h:높이px, medal:['🥇',...]}
+ * 길은 viewBox 1000×300 좌표의 꺾은선. 1등이 성 바로 앞, 나머지는 점수 비율만큼 길 위에. */
+SK.ROAD=[[30,262],[170,262],[250,226],[200,188],[300,160],[450,182],[560,140],[500,100],[620,78],[760,96],[880,84]];
+SK.roadAt=function(t){const P=SK.ROAD;const seg=[];let L=0;for(let i=1;i<P.length;i++){const d=Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]);seg.push(d);L+=d}
+  let r=Math.max(0,Math.min(1,t))*L;for(let i=0;i<seg.length;i++){if(r<=seg[i]||i===seg.length-1){const f=seg[i]?Math.min(1,r/seg[i]):0;return [P[i][0]+(P[i+1][0]-P[i][0])*f,P[i][1]+(P[i+1][1]-P[i][1])*f]}r-=seg[i]}return P[P.length-1]};
+SK.raceRoad=function(list,opt){opt=opt||{};const e=s=>String(s??'').replace(/[&<>"]/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[x]));
+  const max=Math.max(1,...list.map(x=>x.v)),M=opt.medal||[];const pts=SK.ROAD.map(p=>p.join(',')).join(' ');
+  const deco=[['tree',8,40,3],['tree',90,62,2],['mush',36,74,3],['tree',33,30,2],['mush',67,58,2],['tree',70,22,2],['cloud',14,6,3],['cloud',55,3,2],['tree',96,92,2],['mush',5,60,2]];
+  const used={};
+  const run=list.map((x,i)=>{const t=x.v>0?0.03+0.86*(x.v/max):0;const [px,py]=SK.roadAt(t);const k=Math.round(t*40);const lane=used[k]=(used[k]||0)+1;const dy=((lane-1)%3)*14-((lane-1)%3===2?28:0);
+    return `<div class="rr${x.me?' me':''}" style="left:${(px/10).toFixed(2)}%;top:${(py/3).toFixed(2)}%;z-index:${10+Math.round(py)};margin-top:${dy}px" title="${e(x.n)} · ${x.v}점">${SK.heroTag(x.c,2)}<span class="rt">${i<3&&x.v>0&&M[i]?M[i]+' ':''}${e(x.n)}</span></div>`}).join('');
+  return `<div class="road" style="height:${opt.h||300}px">
+  <svg class="rsvg" viewBox="0 0 1000 300" preserveAspectRatio="none" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="#9C7A45" stroke-width="34" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/><polyline points="${pts}" fill="none" stroke="#F1DBA6" stroke-width="26" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/><polyline points="${pts}" fill="none" stroke="#FFF4D6" stroke-width="3" stroke-dasharray="10 12" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>
+  ${deco.map(([k,x,y,sc])=>`<span class="rdeco" style="left:${x}%;top:${y}%" data-spr="${k}" data-sc="${sc}"></span>`).join('')}
+  <div class="rstart" style="left:3%;top:${(262/3).toFixed(1)}%">출발</div>
+  <div class="rcastle" style="left:${SK.ROAD[SK.ROAD.length-1][0]/10}%;top:${SK.ROAD[SK.ROAD.length-1][1]/3}%"><span data-spr="castle" data-sc="${opt.h&&opt.h<260?3:4}"></span><b>스터디아 성</b></div>
+  ${run}</div>`};
+SK.ROAD_CSS=`.road{position:relative;overflow:hidden;background:linear-gradient(#BDEBFF 0,#DDF4FF 16%,#8BD15A 17%,#7CC242 60%,#6CB43C 100%);box-shadow:0 0 0 3px #2B1D16;margin:3px}
+.road .rsvg{position:absolute;inset:0;width:100%;height:100%}
+.road .rdeco{position:absolute;transform:translate(-50%,-100%);pointer-events:none;z-index:1}
+.road .rstart{position:absolute;transform:translate(-10%,-150%);font-size:11px;font-weight:700;background:#2B1D16;color:#FFF4D6;padding:1px 6px;z-index:5}
+.road .rcastle{position:absolute;transform:translate(-50%,-90%);display:flex;flex-direction:column;align-items:center;z-index:4}
+.road .rcastle b{font-size:11px;background:#FFF4D6;box-shadow:0 0 0 2px #2B1D16;padding:0 5px;margin-top:2px;white-space:nowrap}
+.road .rr{position:absolute;transform:translate(-50%,-92%);display:flex;flex-direction:column;align-items:center;gap:1px}
+.road .rr .rt{font-size:11px;line-height:1.3;background:#FFFBF2;box-shadow:0 0 0 2px #2B1D16;padding:0 4px;white-space:nowrap;max-width:96px;overflow:hidden;text-overflow:ellipsis}
+.road .rr.me .rt{background:#F7C531;font-weight:700}`;
 
 /* ---------- 날짜 (그날 0시~24시가 하루, 체크는 밤 12시 마감) ---------- */
 SK.key=function(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};

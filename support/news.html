@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Press+Start+2P&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=2026.11.27-0036">
-<script src="../game-data.js?v=2026.11.27-0036"></script>
+<link rel="stylesheet" href="style.css?v=2026.11.27-0229">
+<script src="../game-data.js?v=2026.11.27-0229"></script>
 </head>
 <body data-page="news">
 <div class="page-hero"><div class="wrap"><div class="txt">
@@ -32,6 +32,8 @@ var NEWS=[
   body:'<p>매주 월요일 새 협동 보스가 나와요. 반 친구들 데미지를 모두 더해 일요일까지 쓰러뜨려요.</p><ul><li>체력 = 캐릭터가 있는 친구 수 × 800</li><li>처치하면 그 주에 체크한 친구 모두 알 부화 가속 +10점</li><li>🏆 최다 딜러 · 📅 매일 출석상 · ⚔ 결정적 막타</li></ul><p class="small">12월 뒤에도 매주 계속돼요.</p>'},
  {type:'event',date:'2026-11-26',start:'2026-11-26',end:'2026-12-25',title:'❄ 겨울 이벤트: 크리스마스까지 보스를 쓰러뜨려 보자',
   body:'<ul><li><b>11월 과목 보스 = 연습 보스</b>: 체력이 작고(수학·영어 200, 국어·EBS 120, 숙제 90, 독서 40) <b>12월 7일까지</b> 싸울 수 있어요. 12/1~7 체크는 11월·12월 보스에 같이 들어가요.</li><li><b>눈사람 왕 프로스트(12월 레이드)</b>: 체력 9,750 → 3,900으로! 선물상자를 받은 친구는 더 적게 남아요.</li><li><b>꿈의 문 수문장 겨울판</b>: 12/1부터 열쇠 게이지 1,300을 채우면 문이 열리고, 체력 1,950을 <b>12월 25일</b>까지 깎으면 칭호 [크리스마스 꿈의 용사]!</li></ul><p class="small">1월부터는 원래 규칙으로 새로 시작해요. 자세한 건 <a href="rules.html#winter">규칙 도감</a>.</p>'},
+ {type:'notice',date:'2026-11-27',title:'랭킹 레이스가 스터디아 성으로 가는 길이 됐어요',
+  body:'<p>주간 단거리·월간 마라톤 레이스가 직선 트랙 대신 구불구불한 길로 바뀌었어요. 공부 점수만큼 길을 따라 걸어가고, 1등은 스터디아 성 바로 앞까지 가요. 내 캐릭터는 노란 이름표로 표시돼요.</p>'},
  {type:'notice',date:'2026-11-27',title:'파트너가 같이 공격해요! (12월부터 추가 데미지)',
   body:'<p>알에서 부화해 장착한 파트너가 이제 내 캐릭터와 함께 보스에게 뛰어들어 공격해요. 불꽃 브레스, 깃털 회오리, 물보라 공격, 별빛 펀치!</p><p><b>12월 1일부터</b>는 파트너 공격이 체크마다 데미지 +3(2차 +4, 최종 +5)을 더해 줘요. 11월 28일 이벤트까지는 모션만 나와요.</p>'},
  {type:'notice',date:'2026-11-26',title:'스터디아 왕국 키즈 업데이트 안내 (손맛·방패·알 부화)',
@@ -50,6 +52,6 @@ var NEWS=[
    return '<details class="card news"'+(i===0||(n.type==='event'&&today<=n.end)?' open':'')+'><summary><span class="ndate">'+n.date.replace(/-/g,'.')+'</span>'+st+'<b>'+n.title+'</b>'+(n.type==='event'?'<span class="tiny muted"> · '+fmt(n.start)+'~'+fmt(n.end)+'</span>':'')+'</summary><div class="nbody">'+n.body+'</div></details>'}).join('')||'<p class="muted">아직 글이 없어요.</p>'}
  document.querySelectorAll('[data-nt]').forEach(function(b){b.onclick=function(){tab=b.dataset.nt;history.replaceState(null,'','#'+tab);draw()}});draw()})();
 </script>
-<script src="site.js?v=2026.11.27-0036"></script>
+<script src="site.js?v=2026.11.27-0229"></script>
 </body>
 </html>
