@@ -15,11 +15,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="스터디아 키즈">
-<script src="config.js?v=2026.11.27-1351"></script>
-<script src="game-data.js?v=2026.11.27-1351"></script>
-<script src="sound.js?v=2026.11.27-1351"></script>
+<script src="config.js?v=2026.11.27-1416"></script>
+<script src="game-data.js?v=2026.11.27-1416"></script>
+<script src="sound.js?v=2026.11.27-1416"></script>
 <script>
-window.RR_VERSION='2026.11.27-1351';
+window.RR_VERSION='2026.11.27-1416';
 /* 실시간 오류 기록: 학생 폰에서 난 오류를 구글 시트 [오류] 탭으로 보냄 */
 (function(){var n=0;window.RR_REPORT=function(msg,stack,extra){try{var C=window.RR_CONFIG||{};if(!C.API_URL||n>=8)return;n++;var a=null;try{a=JSON.parse(localStorage.getItem('sk-auth-v1')||'null')}catch(e){}
 fetch(C.API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},keepalive:true,body:JSON.stringify({action:'logError',token:a&&a.token||'',msg:String(msg||'').slice(0,1000),stack:String(stack||'').slice(0,3000),page:location.pathname+(location.hash.indexOf('#parent')===0?' (학부모)':''),tab:(window.RR_TAB||'')+(extra?' '+extra:''),ver:window.RR_VERSION||'',ua:navigator.userAgent.slice(0,300)})}).catch(function(){})}catch(e){}};
@@ -930,7 +930,7 @@ function renderToday(){
   h+=`<div class="card" style="gap:8px"><div class="row between"><h3>공부 체크</h3><span class="num small"><b style="font-size:20px">${sc.rank}</b> / ${DAILY_CAP}점</span></div>`;
   L.q.forEach((q,i)=>{h+=questRow(q,i,L,k)});
   h+=`<div class="quest ${L.life.clean?'done':''}"><span class="dot" style="background:var(--gold)"></span><div class="body"><div class="t">${ACT.clean.n}</div><div class="tiny muted">+1점 · 궁극기 게이지 +20%</div></div><button class="check" data-life="clean" ${closed?'disabled':''}>${L.life.clean?'✓':'완료'}</button></div>
-  <div class="quest ${L.life.bag?'done':''}"><span class="dot" style="background:var(--gold)"></span><div class="body"><div class="t">${ACT.bag.n}</div><div class="tiny muted">+1점 · 습관</div></div><button class="check" data-life="bag" ${closed?'disabled':''}>${L.life.bag?'✓':'완료'}</button></div></div>`;
+  ${SK.newOn()||L.life.bag?'':'<!--'}<div class="quest ${L.life.bag?'done':''}"><span class="dot" style="background:var(--gold)"></span><div class="body"><div class="t">${ACT.bag.n}</div><div class="tiny muted">+1점 · 습관</div></div><button class="check" data-life="bag" ${closed?'disabled':''}>${L.life.bag?'✓':'완료'}</button></div>${SK.newOn()||L.life.bag?'':'-->'}</div>`;
   {const SS=shieldState();const showMini=SK.MINI&&(!hasStudy(L)||L.life.mini);
    {const T=evNow(),ce=SK.coopEvent&&SK.coopEvent([],k,T.h,T.m);if(ce&&!ce.over)h+=`<button class="card evcard" id="coopc" type="button" style="background:#22183A;color:#F6E3B4;border-color:#22183A"><b>${ce.lobby?'🌙 대기실 열림! 지금 입장하기':ce.soon?'🌙 깜짝 협동 이벤트 예고':'🌙 지금 반 협동 이벤트 진행 중!'}</b><div class="tiny">${fmt(ce.ev.day)} 밤 ${ce.ev.from-12}시 대기실 → ${ce.ev.from-12}시 ${ce.ev.lobby||0}분 다 같이 입장 · 그림자 군단 Lv.1~${ce.ev.levels.length} · 눌러서 보기</div></button>`}
    {const E=incubating(),P=partner();h+=`<button class="card evcard" id="eggc" type="button" style="background:linear-gradient(180deg,#FFF3D6,#fff)"><div class="row" style="gap:10px">${E?`<span class="${E.stage?'':'eggwob'}" data-spr="${E.stage?'pet_'+E.id:'egg_'+E.id}" data-sc="3"></span><div style="flex:1"><b>${E.stage?esc(petName(E))+' 키우는 중':esc(SK.EGGS[E.id].egg)+' 품는 중'}</b><div class="tiny">${E.xp}점 · ${SK.EGG_STAGES.find(t=>E.xp<t)-E.xp}점 더 하면 ${['부화','2차 성장','최종 각성'][E.stage]}!</div></div>`:`<span data-spr="egg_fire" data-sc="3"></span><div style="flex:1"><b>${P?'새 알을 품어 볼까?':'알을 골라 품어 봐!'}</b><div class="tiny">공부 점수 30점이면 부화해서 내 옆에 따라다녀요</div></div>`}</div></button>`}
@@ -974,10 +974,10 @@ function tagSheet(name,go){const sh=document.createElement('div');sh.className='
   sh.querySelectorAll('[data-tag]').forEach(b=>b.onclick=()=>{sh.remove();go(b.dataset.tag)})}
 /* 연속 보너스(3일·7일)와 연속 출석 기록 */
 /* ---------- 출석 도장 · 출석 상자 · 주간 선물 ---------- */
-function attMark(){if(!S.char||READONLY)return;const k=TODAY();S.att=S.att||{};if(!S.att[k]){S.att[k]=1;save();setTimeout(()=>toast('출석 확인! 메인 과목을 1개 체크하면 도장이 찍히고 출석 상자가 열려요'),900)}}
+function attMark(){if(!S.char||READONLY||!SK.newOn())return;const k=TODAY();S.att=S.att||{};if(!S.att[k]){S.att[k]=1;save();setTimeout(()=>toast('출석 확인! 메인 과목을 1개 체크하면 도장이 찍히고 출석 상자가 열려요'),900)}}
 function attOK(L){const M=(SK.ATT&&SK.ATT.main)||[];return !!L&&((L.q||[]).some(q=>q.done&&M.includes(q.a))||adjOf(L,'check').some(x=>M.includes(x.a)))}
-function attWeek(k){const w=weekKey(k||TODAY());return [...Array(7)].map((_,i)=>addDays(w,i)).map(d=>({d,ok:attOK(S.logs[d])}))}
-function attAfterCheck(k){if(k!==TODAY()||!S.char)return;const A=SK.ATT;if(!A)return;S.attBox=S.attBox||{};
+function attWeek(k){const w=weekKey(k||TODAY());return [...Array(7)].map((_,i)=>addDays(w,i)).map(d=>({d,ok:d>=(SK.ATT.from||'')&&attOK(S.logs[d])}))}
+function attAfterCheck(k){if(k!==TODAY()||!S.char||!SK.newOn())return;const A=SK.ATT;if(!A)return;S.attBox=S.attBox||{};
   if(attOK(S.logs[k])&&!S.attBox[k]){S.attBox[k]=1;S.gauge=Math.min(100,(S.gauge||0)+A.gauge);setTimeout(()=>toast(`🎁 출석 상자 열림! 궁극기 게이지 +${A.gauge}%`),1400)}
   const ws=weekKey(k),key=ws+'#att';const n=attWeek(k).filter(x=>x.ok).length;
   if(n>=A.week&&!(S.coopWins||{})[key]){(S.coopWins=S.coopWins||{})[key]=A.egg;setTimeout(()=>toast(`🏅 이번 주 도장 ${A.week}개! 주간 선물: 알 부화 +${A.egg}점`),2600)}}
@@ -993,7 +993,7 @@ function stampSVG(an){const C='#D8342A';const ears={rabbit:`<path d="M37 30 C33 
    <ellipse cx="38" cy="53" rx="3.2" ry="2" fill="${C}" opacity=".45"/><ellipse cx="62" cy="53" rx="3.2" ry="2" fill="${C}" opacity=".45"/>
    <path id="starc" d="M22 72 Q50 90 78 72" fill="none"/><text font-size="10" font-weight="700" fill="${C}" letter-spacing="1"><textPath href="#starc" startOffset="50%" text-anchor="middle">참 잘했어요</textPath></text>
    <path d="M18 30 l2 -5 l2 5 l5 1 l-4 3 l1 5 l-4 -3 l-4 3 l1 -5 l-4 -3z" fill="${C}" opacity=".8"/></svg>`}
-function attHTML(){const A=SK.ATT;if(!A||!S.char)return '';const k=TODAY(),W=attWeek(k),n=W.filter(x=>x.ok).length,today=attOK(S.logs[k]),opened=(S.attBox||{})[k],gift=(S.coopWins||{})[weekKey(k)+'#att'];const an=S.char.animal;
+function attHTML(){const A=SK.ATT;if(!A||!S.char||!SK.newOn())return '';const k=TODAY(),W=attWeek(k),n=W.filter(x=>x.ok).length,today=attOK(S.logs[k]),opened=(S.attBox||{})[k],gift=(S.coopWins||{})[weekKey(k)+'#att'];const an=S.char.animal;
   const cell=(x,i)=>`<div class="atc ${x.ok?'on':''} ${x.d===k?'td':''} ${x.d>k?'fut':''}"><div class="ath">${'월화수목금토일'[i]}요일</div><div class="atb"><span data-spr="chest" data-sc="3" style="${x.ok||x.d>=k?'':'filter:grayscale(1);opacity:.35'}"></span><i>게이지 +${A.gauge}%</i></div>${x.ok?stampSVG(an):''}</div>`;
   return `<div class="card attc" style="gap:6px"><div class="row between"><b>📅 출석 도장</b><span class="small">이번 주 <b>${n}</b>/${A.week}</span></div>
    <div class="attgrid">${W.map(cell).join('')}<div class="atc gift ${gift?'on':''}"><div class="ath">주간 선물</div><div class="atb"><span data-spr="egg_fire" data-sc="3"></span><i>도장 ${A.week}개 · 알 +${A.egg}점</i></div>${gift?stampSVG(an):''}</div></div>
