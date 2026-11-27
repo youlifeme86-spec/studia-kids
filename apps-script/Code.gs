@@ -13,7 +13,7 @@
  *   오류  : 학생 폰에서 난 오류가 실시간으로 쌓이는 곳
  */
 
-var SERVER_VERSION = '2026.11.27-k6';
+var SERVER_VERSION = '2026.11.27-k7';
 var TZ = 'Asia/Seoul';
 var CHUNK = 45000;            // 시트 한 칸 최대 50,000자라 45,000자씩 나눠 저장
 var MAX_CHUNKS = 40;          // 학생 한 명 최대 약 1.8MB
@@ -406,7 +406,7 @@ function adminAdjust_(b) {
     if (!ACT[a]) fail_('체크 항목을 골라 주세요', 'bad_act');
     if (d < dayKey_(-1)) fail_('늦은 체크는 다음 날까지만 넣을 수 있어요', 'too_late');
     pts = ACT[a].pt; s = ACT[a].s;
-    if (a === 'm1' && [3, 5, 10].indexOf(Number(b.pts)) >= 0) pts = Number(b.pts);
+    if (a === 'm1' && [3, 5, 6, 10].indexOf(Number(b.pts)) >= 0) pts = Number(b.pts);
   } else if (t === 'bonus') {
     pts = Math.round(Number(b.pts) || 0);
     if (pts < 1 || pts > 30) fail_('추가 포인트는 1~30점으로 넣어 주세요', 'bad_pts');

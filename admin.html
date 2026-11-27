@@ -7,10 +7,10 @@
 <title>스터디아 키즈 선생님</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap">
-<script>window.PAGE_VERSION='2026.11.27-1507';/* 옛 화면이 캐시에 남아 있으면 새 버전으로 한 번 다시 불러와요 */
+<script>window.PAGE_VERSION='2026.11.27-1510';/* 옛 화면이 캐시에 남아 있으면 새 버전으로 한 번 다시 불러와요 */
 (function(){fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(v){if(!v||!v.version||v.version===window.PAGE_VERSION)return;var k='sk-reload-'+v.version;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1')}catch(e){return}var u=new URL(location.href);u.searchParams.set('v',v.version);location.replace(u.toString())}).catch(function(){})})();</script>
-<script src="config.js?v=2026.11.27-1507"></script>
-<script src="game-data.js?v=2026.11.27-1507"></script>
+<script src="config.js?v=2026.11.27-1510"></script>
+<script src="game-data.js?v=2026.11.27-1510"></script>
 <style>
 :root{--bg:#FBF4E6;--paper:#FFFDF8;--ink:#3A2C22;--muted:#8A7766;--line:#EADFCB;--accent:#F08A4B;--soft:#FDE6D3;--good:#3E9B6B;--bad:#D2504A;--purple:#7A4FD0;
   --f-display:'Jua',system-ui,sans-serif;--f-body:'Noto Sans KR',system-ui,-apple-system,sans-serif;--shadow:0 2px 0 rgba(90,60,30,.06),0 8px 24px rgba(90,60,30,.05)}
@@ -183,7 +183,7 @@ function render(){
       <form class="form" id="af"><label>학생<select id="aid"><option value="">고르기</option>${stu.map(s=>`<option value="${esc(s.id)}" ${ADJ.id===s.id?'selected':''}>${esc(s.name)} (${esc(s.char?s.char.name:s.id)})</option>`).join('')}</select></label>
       <label>날짜<select id="adate">${[0,1].map(i=>{const d=add(today,-i);return `<option value="${d}" ${ADJ.date===d?'selected':''}>${fmt(d)}${i?' 어제':' 오늘'}</option>`}).join('')}${[2,3,4,5,6].map(i=>{const d=add(today,-i);return `<option value="${d}" ${ADJ.date===d?'selected':''}>${fmt(d)} (포인트·감점만)</option>`}).join('')}</select></label>
       <label>종류<select id="at"><option value="check" ${ADJ.t==='check'?'selected':''}>늦게 알린 체크</option><option value="bonus" ${ADJ.t==='bonus'?'selected':''}>선생님 추가 포인트</option><option value="penalty" ${ADJ.t==='penalty'?'selected':''}>거짓 체크 감점</option><option value="bless" ${ADJ.t==='bless'?'selected':''}>히든미션 가호 (숙제검사 통과)</option><option value="mini" ${ADJ.t==='mini'?'selected':''}>스트릭 방패 · 문제 1개만 허가</option></select></label>
-      ${ADJ.t==='mini'?`<p class="small">✓ 넣으면 그날이 출석으로 인정되고(연속 기록 유지) ${SK.MINI.dmg} 데미지가 들어가요. 점수는 없어요. 오늘·어제만 돼요.</p>`:ADJ.t==='bless'?`${(()=>{const st=D.students.find(x=>x.id===ADJ.id);if(!st)return '<p class="small muted">학생을 고르면 그 학생의 히든미션 횟수·점수가 나와요.</p>';const n=st.m1w||2,p=st.m1||SK.ACT.m1.pt;return `<label>${esc(st.name)} 히든미션 설정<select data-m1="${esc(st.id)}">${SK.M1_PLANS.map(([a,b])=>`<option value="${a}x${b}" ${a===n&&b===p?'selected':''}>주 ${a}회 × ${b}점</option>`).join('')}</select></label>`})()}<p class="small">✓ 넣기를 누르면 그날 히든미션이 완료(위 설정 점수)되고 <b>마스터의 가호</b>(7일 동안 모든 공격 +${SK.BLESS_PCT}%)가 켜져요. 학생이 알리지 않았어도 넣을 수 있어요.</p>`:ADJ.t==='check'?`<label>체크<select id="aa">${act.map(([a,l])=>`<option value="${a}" ${ADJ.a===a?'selected':''}>${esc(l)}</option>`).join('')}<option value="m1x10" ${ADJ.a==='m1x10'?'selected':''}>히든미션 숙제검사 10점</option></select></label>`:
+      ${ADJ.t==='mini'?`<p class="small">✓ 넣으면 그날이 출석으로 인정되고(연속 기록 유지) ${SK.MINI.dmg} 데미지가 들어가요. 점수는 없어요. 오늘·어제만 돼요.</p>`:ADJ.t==='bless'?`${(()=>{const st=D.students.find(x=>x.id===ADJ.id);if(!st)return '<p class="small muted">학생을 고르면 그 학생의 히든미션 횟수·점수가 나와요.</p>';const n=st.m1w||2,p=st.m1||SK.ACT.m1.pt;return `<label>${esc(st.name)} 히든미션 설정<select data-m1="${esc(st.id)}">${SK.M1_PLANS.map(([a,b])=>`<option value="${a}x${b}" ${a===n&&b===p?'selected':''}>주 ${a}회 × ${b}점</option>`).join('')}</select></label>`})()}<p class="small">✓ 넣기를 누르면 그날 히든미션이 완료(위 설정 점수)되고 <b>마스터의 가호</b>(7일 동안 모든 공격 +${SK.BLESS_PCT}%)가 켜져요. 학생이 알리지 않았어도 넣을 수 있어요.</p>`:ADJ.t==='check'?`<label>체크<select id="aa">${act.map(([a,l])=>`<option value="${a}" ${ADJ.a===a?'selected':''}>${esc(l)}</option>`).join('')}<option value="m1x6" ${ADJ.a==='m1x6'?'selected':''}>히든미션 숙제검사 6점</option></select></label>`:
         `<label>점수 (${ADJ.t==='bonus'?'1~30':'1~5'})<input id="apts" type="number" min="1" max="${ADJ.t==='bonus'?30:5}" value="${esc(ADJ.pts)}"></label>${ADJ.t==='bonus'?`<label>과목 (선택)<select id="as"><option value="">과목 없음 (레이드·히든보스)</option>${SK.SUBJ_KEYS.map(x=>`<option value="${x}" ${ADJ.s===x?'selected':''}>${SK.SUBJ[x].n}</option>`).join('')}</select></label>`:''}`}
       <label>사유<input id="awhy" maxlength="60" placeholder="${ADJ.t==='bonus'?'예: 어려운 숙제 끝까지 함':ADJ.t==='penalty'?'예: 하지 않은 수학 체크':'예: 전화로 알려 줌'}" value="${esc(ADJ.why)}"></label>
       <button class="btn" id="ago">넣기</button></form></div>
@@ -216,7 +216,7 @@ function render(){
         <div>${esc(e.msg)}</div>${e.stack?`<pre>${esc(e.stack)}</pre>`:''}<div class="tiny muted">${esc(e.ua)}</div></div>`).join(''):'<p class="small muted">오류가 없어요.</p>'}</div>`;
     LAST_ERR_SEEN=Date.now();localStorage.setItem(KEY+':errseen',LAST_ERR_SEEN);
   }
-  {const need='2026.11.27-k6',sv=D.serverVersion||'';h+=`<p class="tiny muted" style="text-align:center;margin-top:8px">서버(Code.gs) 버전 ${esc(sv||'알 수 없음')} ${sv>=need?'✓ 최신':`<span class="pill bad">새 Code.gs 배포 필요 (${need})</span>`}</p>`}
+  {const need='2026.11.27-k7',sv=D.serverVersion||'';h+=`<p class="tiny muted" style="text-align:center;margin-top:8px">서버(Code.gs) 버전 ${esc(sv||'알 수 없음')} ${sv>=need?'✓ 최신':`<span class="pill bad">새 Code.gs 배포 필요 (${need})</span>`}</p>`}
   app.innerHTML=h;bind();
 }
 function showOut(html){const o=$('#out');if(o){o.innerHTML=html;o.scrollIntoView({behavior:'smooth',block:'nearest'});o.querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>copy(decodeURIComponent(b.dataset.copy)))}}
@@ -233,7 +233,7 @@ function bind(){
   if($('#aid'))$('#aid').onchange=()=>{syncAdj();if(ADJ.t==='bless')render()};
   if($('#af'))$('#af').onsubmit=async e=>{e.preventDefault();syncAdj();if(!ADJ.id){toast('학생을 골라 주세요');return}const b=$('#ago');b.disabled=true;
     if(ADJ.t==='bless'){try{await api('adminApprove',{id:ADJ.id,date:ADJ.date});toast('히든미션 가호를 넣었어요');refresh(true)}catch(x){toast(x.message);b.disabled=false}return}
-    const body={id:ADJ.id,date:ADJ.date,t:ADJ.t,why:ADJ.why};if(ADJ.t==='check'){body.a=ADJ.a==='m1x10'?'m1':ADJ.a;if(ADJ.a==='m1x10')body.pts=10}else{body.pts=+ADJ.pts;body.s=ADJ.s}
+    const body={id:ADJ.id,date:ADJ.date,t:ADJ.t,why:ADJ.why};if(ADJ.t==='check'){body.a=ADJ.a==='m1x6'?'m1':ADJ.a;if(ADJ.a==='m1x6')body.pts=6}else{body.pts=+ADJ.pts;body.s=ADJ.s}
     try{await api('adminAdjust',body);toast('넣었어요');ADJ.pts='';ADJ.why='';refresh(true)}catch(x){toast(x.message);b.disabled=false}};
   app.querySelectorAll('[data-adel]').forEach(b=>b.onclick=async()=>{if(!b.dataset.c){b.dataset.c=1;b.textContent='한 번 더';return}b.disabled=true;try{await api('adminAdjustDelete',{uid:b.dataset.adel});toast('지웠어요');refresh(true)}catch(x){toast(x.message);b.disabled=false}});
   app.querySelectorAll('[data-cs]').forEach(b=>b.onclick=async()=>{const s=D.students.find(x=>x.id===b.dataset.cs);const v=prompt(s.name+' 보호자 동의일 (예: 2026-11-26, 비우면 지움)',s.consent?String(s.consent).slice(0,10):today);if(v==null)return;
