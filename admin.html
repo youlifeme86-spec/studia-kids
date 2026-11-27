@@ -7,10 +7,10 @@
 <title>스터디아 키즈 선생님</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap">
-<script>window.PAGE_VERSION='2026.11.27-0229';/* 옛 화면이 캐시에 남아 있으면 새 버전으로 한 번 다시 불러와요 */
+<script>window.PAGE_VERSION='2026.11.27-0307';/* 옛 화면이 캐시에 남아 있으면 새 버전으로 한 번 다시 불러와요 */
 (function(){fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(v){if(!v||!v.version||v.version===window.PAGE_VERSION)return;var k='sk-reload-'+v.version;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1')}catch(e){return}var u=new URL(location.href);u.searchParams.set('v',v.version);location.replace(u.toString())}).catch(function(){})})();</script>
-<script src="config.js?v=2026.11.27-0229"></script>
-<script src="game-data.js?v=2026.11.27-0229"></script>
+<script src="config.js?v=2026.11.27-0307"></script>
+<script src="game-data.js?v=2026.11.27-0307"></script>
 <style>
 :root{--bg:#FBF4E6;--paper:#FFFDF8;--ink:#3A2C22;--muted:#8A7766;--line:#EADFCB;--accent:#F08A4B;--soft:#FDE6D3;--good:#3E9B6B;--bad:#D2504A;--purple:#7A4FD0;
   --f-display:'Jua',system-ui,sans-serif;--f-body:'Noto Sans KR',system-ui,-apple-system,sans-serif;--shadow:0 2px 0 rgba(90,60,30,.06),0 8px 24px rgba(90,60,30,.05)}
@@ -73,7 +73,7 @@ const KEY='sk-admin-v1';
 const KINGDOM={};Object.keys(SK.KINGDOMS).forEach(k=>KINGDOM[k]=[SK.KINGDOMS[k].n,SK.KINGDOMS[k].c]);
 let ADJ={id:'',date:'',t:'check',a:'math',pts:'',s:'',why:''};
 let AUTH=null;try{AUTH=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}
-let D=null,TAB='home',LAST_ERR_SEEN=+(localStorage.getItem(KEY+':errseen')||0),timer=null,busy=false;
+let D=null,TAB='home',PER={t:'today'},LAST_ERR_SEEN=+(localStorage.getItem(KEY+':errseen')||0),timer=null,busy=false;
 const app=document.getElementById('app');
 const esc=t=>String(t??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const $=s=>app.querySelector(s);
@@ -93,6 +93,16 @@ function add(k,n){const d=parse(k);d.setDate(d.getDate()+n);return key(d)}
 function weekStart(k){const d=parse(k);return add(k,-((d.getDay()+6)%7))}
 function fmt(k){const d=parse(k);return (d.getMonth()+1)+'/'+d.getDate()+'('+'일월화수목금토'[d.getDay()]+')'}
 function ago(iso){if(!iso)return '-';const t=new Date(iso);if(isNaN(t))return '-';const m=Math.round((Date.now()-t)/60000);if(m<1)return '방금';if(m<60)return m+'분 전';if(m<1440)return Math.round(m/60)+'시간 전';return Math.round(m/1440)+'일 전'}
+/* 기간 보기: 오늘·어제·주·달. 선생님 화면 기록(최근 2주)에 없는 날은 랭킹 기록(최근 약 2달, 점수·데미지만)으로 채워요 */
+function dayOf(s,k){const e=s.daily&&s.daily[k];if(e)return e;const R=D&&D.roster&&D.roster[s.id];return R&&R.daily&&R.daily[k]?Object.assign({fromRoster:1},R.daily[k]):null}
+function monthEnd(m){const d=parse(m+'-01');d.setMonth(d.getMonth()+1);d.setDate(0);return key(d)}
+function perRange(today){const t=PER.t;let from,to,label;
+  let short;
+  if(t==='yday'){from=to=add(today,-1);short='어제';label='어제 '+fmt(from)}
+  else if(t==='week'){from=PER.w||weekStart(today);to=add(from,6);if(to>today)to=today;short=from===weekStart(today)?'이번 주':from===add(weekStart(today),-7)?'지난주':'그 주';label=short+' '+fmt(from)+'~'+fmt(add(from,6))}
+  else if(t==='month'){const m=PER.m||today.slice(0,7);from=m+'-01';to=monthEnd(m);if(to>today)to=today;short=label=Number(m.slice(5))+'월'}
+  else{from=to=today;short=label='오늘'}
+  const days=[];for(let k=from;k<=to;k=add(k,1))days.push(k);return {from,to,label,short,days,one:from===to}}
 function sumRange(daily,from,to,f){let s=0;Object.keys(daily||{}).forEach(k=>{if(k>=from&&k<=to)s+=(daily[k][f||'r']||0)});return s}
 
 function studentLinkText(s,pw){return `[스터디아 왕국] 입장 안내\n\n접속 주소: ${BASE}\n이름: ${s.name||''}\n아이디: ${s.id}\n비밀번호: ${pw||'(선생님께 받은 비밀번호)'}\n사용 안내(지원센터): ${BASE}support/\n보호자 리포트(우리 아이 기록): ${s.parentCode?BASE+'#parent-'+s.parentCode:''}\n\n처음 들어가면 성향 테스트로 왕국을 정하고 동물 캐릭터를 만들어요. 홈 화면에 추가해 두면 앱처럼 쓸 수 있어요.\n공부 체크는 매일 밤 12시까지예요.`}
@@ -114,18 +124,27 @@ function render(){
   const newErr=D.errors.filter(e=>new Date(e.time).getTime()>LAST_ERR_SEEN).length;
   let h=`<div class="top"><h1>스터디아 선생님</h1><span class="pill">${fmt(today)}</span><span class="sp"></span>
     <span class="tiny muted" id="upd">방금 새로 고침</span><a class="btn ghost sm" href="support/" target="_blank" rel="noopener" style="text-decoration:none">지원센터</a><a class="btn ghost sm" href="rank.html" target="_blank" rel="noopener" style="text-decoration:none">랭킹 사이트</a><button class="btn ghost sm" id="rf">새로 고침</button><button class="btn ghost sm" id="lo">로그아웃</button></div>
-  <div class="tabs">${[['home','오늘'],['adjust','점수 조정'],['students','학생 계정'],['new','계정 만들기'],['errors','오류 기록'+(newErr?' ('+newErr+')':'')]].map(([k,l])=>`<button data-t="${k}" aria-pressed="${TAB===k}">${l}</button>`).join('')}</div>`;
+  <div class="tabs">${[['home','현황'],['adjust','점수 조정'],['students','학생 계정'],['new','계정 만들기'],['errors','오류 기록'+(newErr?' ('+newErr+')':'')]].map(([k,l])=>`<button data-t="${k}" aria-pressed="${TAB===k}">${l}</button>`).join('')}</div>`;
   if(TAB==='home'){
-    const cells={};stu.forEach(s=>{const e=s.daily[today];if(e&&e.cell)cells[e.cell]=(cells[e.cell]||0)+1});
-    h+=`<div class="grid"><div class="stat"><b>${stu.filter(s=>s.active).length}</b><span>사용 중인 학생</span></div><div class="stat"><b>${doneToday}</b><span>오늘 공부 체크한 학생</span></div>
+    const PR=perRange(today);const act=stu.filter(s=>s.active);
+    const cells={};stu.forEach(s=>PR.days.forEach(k=>{const e=dayOf(s,k);if(e&&e.cell)cells[e.cell]=(cells[e.cell]||0)+1}));
+    const pt=s=>PR.days.reduce((a,k)=>{const e=dayOf(s,k);return a+(e?e.r||0:0)},0),dmg=s=>PR.days.reduce((a,k)=>{const e=dayOf(s,k);return a+(e?e.dm||0:0)},0),dn=s=>PR.days.filter(k=>{const e=dayOf(s,k);return e&&((e.raw||e.r||0)>0)}).length;
+    const doneP=act.filter(s=>dn(s)>0).length;const avg=act.length?Math.round(act.reduce((a,s)=>a+pt(s),0)/act.length):0;
+    const lastW=add(weekStart(today),-7),weeks=[...Array(9)].map((_,i)=>add(weekStart(today),-7*i)),months=[today.slice(0,7),add(today.slice(0,8)+'01',-1).slice(0,7)];
+    const old=PR.days.some(k=>stu.some(x=>{const e=dayOf(x,k);return e&&e.fromRoster}));
+    h+=`<div class="card" style="gap:8px"><div class="row" style="align-items:center">${[['today','오늘'],['yday','어제'],['week','이번 주',weekStart(today)],['week','지난주',lastW],['month','이번 달',today.slice(0,7)]].map(([t,l,v])=>`<button class="btn ${PER.t===t&&(t!=='week'||(PER.w||weekStart(today))===v)&&(t!=='month'||(PER.m||today.slice(0,7))===v)?'':'ghost'} sm" data-per="${t}" data-v="${v||''}">${l}</button>`).join('')}
+      <select id="pw" aria-label="주 고르기" style="width:auto;padding:6px 10px;font-size:14px;margin:0"><option value="">주 고르기</option>${weeks.map(w=>`<option value="${w}" ${PER.t==='week'&&PER.w===w?'selected':''}>${fmt(w)}~${fmt(add(w,6))}</option>`).join('')}</select>
+      <select id="pm" aria-label="달 고르기" style="width:auto;padding:6px 10px;font-size:14px;margin:0"><option value="">달 고르기</option>${months.map(m=>`<option value="${m}" ${PER.t==='month'&&PER.m===m?'selected':''}>${Number(m.slice(5))}월</option>`).join('')}</select></div>
+      <p class="tiny muted">지금 보는 기간: <b>${esc(PR.label)}</b> (${fmt(PR.from)}${PR.one?'':'~'+fmt(PR.to)}, ${PR.days.length}일)${old?' · 일부 날짜는 점수·데미지만 보여요(서버 Code.gs를 새로 배포하면 몰입 칸까지 최근 2달이 다 보여요)':''}</p></div>
+    <div class="grid"><div class="stat"><b>${act.length}</b><span>사용 중인 학생</span></div><div class="stat"><b>${doneP}</b><span>${esc(PR.short)} 공부 체크한 학생</span></div><div class="stat"><b>${avg}</b><span>${esc(PR.short)} 1인당 평균 점수</span></div>
       <div class="stat ${D.pending.length?'alert':''}"><b>${D.pending.length}</b><span>숙제검사 확인 대기</span></div><div class="stat ${newErr?'alert':''}"><b>${newErr}</b><span>새 오류 기록</span></div></div>
     ${stu.some(s=>s.alerts&&s.alerts.length)?`<div class="card" style="border-color:var(--bad)"><h2>마음 신호</h2><p class="small muted">보호자께 연락해 주세요. 한마디 내용은 아이가 공개한 경우에만 학생 기록에서 볼 수 있어요. 상담 안내: 청소년상담 1388.</p>${stu.filter(s=>s.alerts&&s.alerts.length).map(s=>`<p class="small"><b>${esc(s.name)}</b> ${s.char?esc(s.char.name):''} · ${s.alerts.map(a=>`<span class="pill bad">${esc(a)}</span>`).join(' ')}</p>`).join('')}</div>`:''}
     <div class="card"><h2>미션1 숙제검사 확인</h2><p class="small muted">학생이 '숙제검사 받았어요'를 누르면 여기에 떠요. 확인하면 그날 미션1 5점과 7일 동안 마스터의 가호(데미지 +10%)가 켜져요. 10점인 학생은 [점수 조정]에서 늦은 체크로 넣어 주세요.</p>${D.pending.length?`<div class="tscroll"><table><thead><tr><th>학생</th><th>캐릭터</th><th>날짜</th><th></th></tr></thead><tbody>${D.pending.sort((a,b)=>a.date<b.date?1:-1).map((p,i)=>`<tr><td>${esc(p.name)} <span class="tiny muted">${esc(p.id)}</span></td><td>${esc(p.char)}</td><td>${fmt(p.date)}</td><td><button class="btn sm" data-ap="${i}">확인 (미션1 5점)</button></td></tr>`).join('')}</tbody></table></div>`:'<p class="small muted">기다리는 요청이 없어요.</p>'}</div>
-    <div class="card"><h2>학생 현황</h2><div class="tscroll"><table><thead><tr><th>학생</th><th>캐릭터 · 왕국</th><th class="r">오늘</th><th class="r">이번 주</th><th class="r">이번 달</th><th>오늘의 칸</th><th>가호</th><th>동의</th><th>마지막 저장</th></tr></thead><tbody>
-      ${stu.filter(s=>s.active).sort((a,b)=>sumRange(b.daily,ws,today)-sumRange(a.daily,ws,today)).map(s=>{const e=s.daily[today]||{};const K=s.char&&KINGDOM[s.char.kingdom];
+    <div class="card"><h2>학생 현황</h2><div class="tscroll"><table><thead><tr><th>학생</th><th>캐릭터 · 왕국</th><th class="r">${esc(PR.short)} 점수</th><th class="r">체크한 날</th><th class="r">데미지</th><th class="r">이번 달</th><th>${PR.one?'그날의 칸':'자주 나온 칸'}</th><th>가호</th><th>동의</th><th>마지막 저장</th></tr></thead><tbody>
+      ${act.slice().sort((a,b)=>pt(b)-pt(a)).map(s=>{const cc={};PR.days.forEach(k=>{const e=dayOf(s,k);if(e&&e.cell)cc[e.cell]=(cc[e.cell]||0)+1});const top=Object.keys(cc).sort((a,b)=>cc[b]-cc[a])[0];const K=s.char&&KINGDOM[s.char.kingdom];
         return `<tr><td>${esc(s.name)} <span class="tiny muted">${esc(s.id)}</span>${s.parentCode?` <a class="tiny" href="${esc(parentLink(s))}" target="_blank" rel="noopener">분석 ↗</a>`:''}</td><td>${s.char?`<span class="dot" style="background:${esc(s.char.color)}"></span>${esc(s.char.name)} <span class="tiny muted">${K?K[0]:''}</span>`:'<span class="pill off">캐릭터 전</span>'}</td>
-        <td class="r">${e.r||0}</td><td class="r">${sumRange(s.daily,ws,today)}</td><td class="r">${s.monthPts||sumRange(s.daily,ms,today,'raw')} <span class="tiny muted">/300</span></td><td>${e.cell?`<span class="pill ${['불안','무관심','걱정'].includes(e.cell)?'bad':''}">${e.cell}</span>`:'-'}</td>
-        <td>${s.bless&&today<=s.bless.until?'<span class="pill p">~'+fmt(s.bless.until)+'</span>':'-'}</td><td>${s.consent?'<span class="tiny">'+esc(String(s.consent).slice(0,10))+'</span>':'<span class="pill bad">없음</span>'}</td><td class="tiny">${ago(s.savedAt)}</td></tr>`}).join('')||'<tr><td colspan="9" class="muted">아직 학생 계정이 없어요. [계정 만들기]에서 만들어 주세요.</td></tr>'}
+        <td class="r">${pt(s)}</td><td class="r">${dn(s)}<span class="tiny muted">/${PR.days.length}</span></td><td class="r">${dmg(s).toLocaleString()}</td><td class="r">${s.monthPts||sumRange(s.daily,ms,today,'raw')} <span class="tiny muted">/300</span></td><td>${top?`<span class="pill ${['불안','무관심','걱정'].includes(top)?'bad':''}">${top}${PR.one?'':' '+cc[top]+'일'}</span>`:'-'}</td>
+        <td>${s.bless&&today<=s.bless.until?'<span class="pill p">~'+fmt(s.bless.until)+'</span>':'-'}</td><td>${s.consent?'<span class="tiny">'+esc(String(s.consent).slice(0,10))+'</span>':'<span class="pill bad">없음</span>'}</td><td class="tiny">${ago(s.savedAt)}</td></tr>`}).join('')||'<tr><td colspan="10" class="muted">아직 학생 계정이 없어요. [계정 만들기]에서 만들어 주세요.</td></tr>'}
     </tbody></table></div><p class="tiny muted">[분석 ↗]을 누르면 보호자가 보는 분석 리포트가 새 창으로 열려요. 점수는 랭킹 점수(하루 30점 상한, 연속 보너스·추가 포인트는 따로). 이번 달은 기준치 300점 대비 원점수. 30초마다 자동으로 새로 고침돼요.</p></div>
     ${(()=>{const ST=stu.filter(x=>x.active&&x.char).map(x=>({id:x.id,name:x.name,daily:x.daily||{}}));const R=SK.coopEvent&&SK.coopEvent(ST,today,SK.seoulHour());if(!R)return '';const E=R.ev;const n=Math.max(SK.COOP.minKids,ST.length);
       if(R.soon)return `<div class="card"><h2>🌙 깜짝 협동 이벤트 (그림자 군단 ${E.levels.length}단계)</h2><p class="small">${fmt(E.day)} 밤 ${E.from-12}시에 열려요 (밤 12시 마감까지). ${fmt(E.since||E.day)}부터 반 전체 데미지로 Lv.1부터 차례로 처치, 넘친 데미지는 다음 단계로. 지금 학생 ${ST.length}명 기준 체력: ${E.levels.map((l,i)=>'Lv.'+(i+1)+' '+(n*l.perKid).toLocaleString()).join(' → ')}</p></div>`;
@@ -146,7 +165,7 @@ function render(){
       <li>반 협동 주간 레이드(12/1부터): 매주 월요일 새 보스, 반 전체 데미지로 처치하면 참여자 알 가속 +10점. 최다 딜러·매일 출석상·결정적 막타</li>
       <li>겨울 이벤트: 11월 연습 보스(12/7까지), 눈사람 왕 체력 줄임, 크리스마스 꿈의 문 수문장</li></ul>
       <p class="tiny muted"><a href="support/rules.html" target="_blank" rel="noopener">규칙 도감 전체 보기 ↗</a> · <a href="support/news.html" target="_blank" rel="noopener">공지·이벤트 게시판 ↗</a> · <a href="support/admin.html" target="_blank" rel="noopener">선생님 안내 ↗</a></p></details>
-    <div class="card"><h2>오늘 몰입 분포</h2><div class="row">${['몰입','각성','통제','이완','지루함','무관심','걱정','불안'].map(c=>`<span class="pill ${['불안','무관심','걱정'].includes(c)&&cells[c]?'bad':''}">${c} ${cells[c]||0}명</span>`).join('')}</div></div>`;
+    <div class="card"><h2>${esc(PR.short)} 몰입 분포</h2><div class="row">${['몰입','각성','통제','이완','지루함','무관심','걱정','불안'].map(c=>`<span class="pill ${['불안','무관심','걱정'].includes(c)&&cells[c]?'bad':''}">${c} ${cells[c]||0}${PR.one?'명':'번'}</span>`).join('')}</div></div>`;
   }
   if(TAB==='adjust'){
     const act=SK.ORDER.map(a=>[a,SK.ACT[a].n+' '+SK.ACT[a].pt+'점']);
@@ -192,6 +211,8 @@ function render(){
 function showOut(html){const o=$('#out');if(o){o.innerHTML=html;o.scrollIntoView({behavior:'smooth',block:'nearest'});o.querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>copy(decodeURIComponent(b.dataset.copy)))}}
 function bind(){
   app.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{TAB=b.dataset.t;render()});
+  app.querySelectorAll('[data-per]').forEach(b=>b.onclick=()=>{const t=b.dataset.per,v=b.dataset.v;PER={t};if(t==='week')PER.w=v;if(t==='month')PER.m=v;render()});
+  {const w=$('#pw');if(w)w.onchange=()=>{if(w.value){PER={t:'week',w:w.value};render()}};const m=$('#pm');if(m)m.onchange=()=>{if(m.value){PER={t:'month',m:m.value};render()}}}
   app.querySelectorAll('[data-copy]').forEach(b=>{if(!b.closest('#out'))b.onclick=()=>copy(decodeURIComponent(b.dataset.copy))});
   $('#rf').onclick=()=>refresh(true);$('#lo').onclick=()=>logout('로그아웃했어요');
   app.querySelectorAll('[data-ap]').forEach(b=>b.onclick=async()=>{const p=D.pending[+b.dataset.ap];b.disabled=true;b.textContent='승인 중...';
@@ -224,7 +245,7 @@ function bind(){
 }
 let lastAt=0;
 async function refresh(show){if(busy)return;busy=true;if(show&&!D)render();
-  try{D=await api('adminOverview');lastAt=Date.now();const keep=document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName);const out=$('#out');const outHtml=out?out.innerHTML:'';
+  try{D=await api('adminOverview');try{const R=await api('roster');D.roster=R.students||{}}catch(x){}lastAt=Date.now();const keep=document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName);const out=$('#out');const outHtml=out?out.innerHTML:'';
     if(!keep){render();if(outHtml&&$('#out')){showOut(outHtml)}}}
   catch(e){if(AUTH)toast(e.message)}busy=false;
   clearInterval(timer);timer=setInterval(()=>{if(!document.hidden)refresh()},30000)}

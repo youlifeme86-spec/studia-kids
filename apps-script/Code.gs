@@ -246,7 +246,7 @@ function logError_(b) {
 /* ===================== 관리자 ===================== */
 function adminOverview_(b) {
   auth_(b, 'admin');
-  var today = dayKey_(0), since = dayKey_(-13);
+  var today = dayKey_(0), since = dayKey_(-62);  // 선생님 화면 기간 보기(월간·지난달)용
   var states = {};
   eachState_(function (id, sum, rev, savedAt, rowNo) { states[id] = { sum: sum, rev: rev, savedAt: savedAt }; });
   var approved = {};
