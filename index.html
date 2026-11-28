@@ -15,11 +15,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="스터디아 키즈">
-<script src="config.js?v=2026.11.28-1258"></script>
-<script src="game-data.js?v=2026.11.28-1258"></script>
-<script src="sound.js?v=2026.11.28-1258"></script>
+<script src="config.js?v=2026.11.28-1259"></script>
+<script src="game-data.js?v=2026.11.28-1259"></script>
+<script src="sound.js?v=2026.11.28-1259"></script>
 <script>
-window.RR_VERSION='2026.11.28-1258';
+window.RR_VERSION='2026.11.28-1259';
 /* 실시간 오류 기록: 학생 폰에서 난 오류를 구글 시트 [오류] 탭으로 보냄 */
 (function(){var n=0;window.RR_REPORT=function(msg,stack,extra){try{var C=window.RR_CONFIG||{};if(!C.API_URL||n>=8)return;n++;var a=null;try{a=JSON.parse(localStorage.getItem('sk-auth-v1')||'null')}catch(e){}
 fetch(C.API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},keepalive:true,body:JSON.stringify({action:'logError',token:a&&a.token||'',msg:String(msg||'').slice(0,1000),stack:String(stack||'').slice(0,3000),page:location.pathname+(location.hash.indexOf('#parent')===0?' (학부모)':''),tab:(window.RR_TAB||'')+(extra?' '+extra:''),ver:window.RR_VERSION||'',ua:navigator.userAgent.slice(0,300)})}).catch(function(){})}catch(e){}};
@@ -913,7 +913,9 @@ function makeDemo(){
 
 /* ---------- 오늘 ---------- */
 /* 마음 체크(오늘 끝)를 하면 그날 공부 체크가 끝나요. 이 규칙 전에 한 마음 체크는 end 표시가 없어서 안 잠겨요 */
-function dayEnded(k){const e=S.emo&&S.emo[k];return !!(e&&!e.demo&&e.end)}
+function dayEnded(k){const e=S.emo&&S.emo[k];if(!(e&&!e.demo&&e.end))return false;
+  /* 협동 이벤트 밤(대기실 열린 뒤)에는 마음 체크를 했어도 체크해서 데미지를 넣을 수 있어요 */
+  const ev=SK.COOP&&(SK.COOP.events||[]).find(x=>x.day===k);if(ev&&SK.seoulHour()>=(ev.from||0))return false;return true}
 function goEmo(){const k=TODAY(),e=S.emo&&S.emo[k];const go=()=>{UI.tab='emo';UI.emo={i:0,a:{}};render();scr.scrollTop=0};
   if(e&&!e.demo)return go();confirmSheet('바로 마음 체크로 갈까?','마음 체크를 하면 오늘 공부 체크가 끝나서 더 이상 포인트를 쌓을 수 없어요. 오늘 공부를 다 했으면 바로 가요!',go)}
 function questRow(q,i,L,k){const A=ACT[q.a];if(q.a==='ebs'&&!q.done&&ebsMode()==='off')return '';const ebsShut=q.a==='ebs'&&!q.done&&!ebsOK(k);const wf=weekFull(q.a,k)||ebsShut;const closed=(SK.closed()||dayEnded(k))&&k===TODAY();

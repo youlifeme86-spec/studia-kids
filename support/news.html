@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Press+Start+2P&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=2026.11.28-1258">
-<script src="../game-data.js?v=2026.11.28-1258"></script>
+<link rel="stylesheet" href="style.css?v=2026.11.28-1259">
+<script src="../game-data.js?v=2026.11.28-1259"></script>
 </head>
 <body data-page="news">
 <div class="page-hero"><div class="wrap"><div class="txt">
@@ -76,6 +76,6 @@ var NEWS=[
    return '<details class="card news"'+(i===0||(n.type==='event'&&today<=n.end)?' open':'')+'><summary><span class="ndate">'+n.date.replace(/-/g,'.')+'</span>'+st+'<b>'+n.title+'</b>'+(n.type==='event'?'<span class="tiny muted"> · '+fmt(n.start)+'~'+fmt(n.end)+'</span>':'')+'</summary><div class="nbody">'+n.body+'</div></details>'}).join('')||'<p class="muted">아직 글이 없어요.</p>'}
  document.querySelectorAll('[data-nt]').forEach(function(b){b.onclick=function(){tab=b.dataset.nt;history.replaceState(null,'','#'+tab);draw()}});draw()})();
 </script>
-<script src="site.js?v=2026.11.28-1258"></script>
+<script src="site.js?v=2026.11.28-1259"></script>
 </body>
 </html>
