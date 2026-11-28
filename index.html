@@ -15,11 +15,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="스터디아 키즈">
-<script src="config.js?v=2026.11.27-1510"></script>
-<script src="game-data.js?v=2026.11.27-1510"></script>
-<script src="sound.js?v=2026.11.27-1510"></script>
+<script src="config.js?v=2026.11.28-0104"></script>
+<script src="game-data.js?v=2026.11.28-0104"></script>
+<script src="sound.js?v=2026.11.28-0104"></script>
 <script>
-window.RR_VERSION='2026.11.27-1510';
+window.RR_VERSION='2026.11.28-0104';
 /* 실시간 오류 기록: 학생 폰에서 난 오류를 구글 시트 [오류] 탭으로 보냄 */
 (function(){var n=0;window.RR_REPORT=function(msg,stack,extra){try{var C=window.RR_CONFIG||{};if(!C.API_URL||n>=8)return;n++;var a=null;try{a=JSON.parse(localStorage.getItem('sk-auth-v1')||'null')}catch(e){}
 fetch(C.API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},keepalive:true,body:JSON.stringify({action:'logError',token:a&&a.token||'',msg:String(msg||'').slice(0,1000),stack:String(stack||'').slice(0,3000),page:location.pathname+(location.hash.indexOf('#parent')===0?' (학부모)':''),tab:(window.RR_TAB||'')+(extra?' '+extra:''),ver:window.RR_VERSION||'',ua:navigator.userAgent.slice(0,300)})}).catch(function(){})}catch(e){}};
@@ -912,7 +912,11 @@ function makeDemo(){
 }
 
 /* ---------- 오늘 ---------- */
-function questRow(q,i,L,k){const A=ACT[q.a];if(q.a==='ebs'&&!q.done&&ebsMode()==='off')return '';const ebsShut=q.a==='ebs'&&!q.done&&!ebsOK(k);const wf=weekFull(q.a,k)||ebsShut;const closed=SK.closed()&&k===TODAY();
+/* 마음 체크(오늘 끝)를 하면 그날 공부 체크가 끝나요. 이 규칙 전에 한 마음 체크는 end 표시가 없어서 안 잠겨요 */
+function dayEnded(k){const e=S.emo&&S.emo[k];return !!(e&&!e.demo&&e.end)}
+function goEmo(){const k=TODAY(),e=S.emo&&S.emo[k];const go=()=>{UI.tab='emo';UI.emo={i:0,a:{}};render();scr.scrollTop=0};
+  if(e&&!e.demo)return go();confirmSheet('바로 마음 체크로 갈까?','마음 체크를 하면 오늘 공부 체크가 끝나서 더 이상 포인트를 쌓을 수 없어요. 오늘 공부를 다 했으면 바로 가요!',go)}
+function questRow(q,i,L,k){const A=ACT[q.a];if(q.a==='ebs'&&!q.done&&ebsMode()==='off')return '';const ebsShut=q.a==='ebs'&&!q.done&&!ebsOK(k);const wf=weekFull(q.a,k)||ebsShut;const closed=(SK.closed()||dayEnded(k))&&k===TODAY();
   const wkTxt=A.wk?`이번 주 ${weekCount(q.a,k)}/${wkOf(q.a)}`:'하루 1번';
   if(A.teacher){const st=L.hidden?'done':L.hiddenReq?'wait':'';
     return `<div class="quest hiddenq ${st}"><span class="dot" style="background:#5B3B8C"></span><div class="body"><div class="t">${esc(A.n)}</div><div class="tiny muted">${qPts(q)}점 · ${wkTxt} · <span class="pill purple">가호 +${BLESS_PCT}%</span><br>${L.hidden?'선생님이 확인했어요!':L.hiddenReq?'선생님 확인 기다리는 중':'선생님만 할 수 있어요 · 숙제검사 받으면 [알리기]'}</div></div>
@@ -922,13 +926,13 @@ function questRow(q,i,L,k){const A=ACT[q.a];if(q.a==='ebs'&&!q.done&&ebsMode()==
     <button class="check" data-i="${i}" aria-label="${esc(A.n)} ${q.done?'완료 취소':'완료하고 공격'}" ${(wf||closed)&&!q.done||closed?'disabled':''}>${q.done?'✓':'공격!'}</button></div>`}
 function renderToday(){
   if(UI.mode==='student'&&!READONLY&&S.char){attMark();const k0=TODAY();if(attOK(S.logs[k0])&&!(S.attBox||{})[k0]){attAfterCheck(k0);save()}}
-  const k=TODAY(),L=log(k),sc=dayScore(k);const closed=SK.closed();
+  const k=TODAY(),L=log(k),sc=dayScore(k);const ended=dayEnded(k),closed=SK.closed()||ended;
   const mk=monthKeyOf(k);const firstOpen=L.q.find(q=>!q.done&&!ACT[q.a].teacher&&!weekFull(q.a,k)&&(q.a!=='ebs'||ebsOK(k)));const bossS=firstOpen?ACT[firstOpen.a].s:SUBJ_KEYS.sort((a,b)=>bossLeft(b,mk)/bossHp(b,mk)-bossLeft(a,mk)/bossHp(a,mk))[0];
   const left=pctOf(bossLeft(bossS,mk),bossHp(bossS,mk));const ms=monthScoreRaw();const stg=SK.stage(ms);
   const done=L.q.filter(q=>q.done).length+(L.life.clean?1:0)+(L.life.bag?1:0);
   let h=sceneHTML(`<div class="hud"><div class="nm">${esc(S.char.name)}<small>${esc(KINGDOMS[S.char.kingdom].n)} · ${esc(ANIMALS[S.char.animal]?ANIMALS[S.char.animal].n:'')} ${esc(S.char.job)}</small></div><div class="tagr">${Number(k.slice(5,7))}월 ${ms}/${BASE}<br>${esc(stg[1])}</div></div>${heroHTML()}<div class="boss sleep" style="right:20px;transform:scale(.8);transform-origin:bottom right"><span data-spr="${bossS}" data-sc="6"></span></div>`)+
    `<div><p class="tiny muted">${fmt(k)} · 밤 ${SK.DEADLINE_HOUR-12}시 마감${(()=>{const G=SK.GOLDEN,h=SK.seoulHour();return G&&G.pct?(h>=G.from&&h<G.to?`<span class="goldb">골든타임 진행 중 +${G.pct}%</span>`:h<G.from?` · 골든타임 ${G.from-12}~${G.to-12}시`:''):''})()}</p><h1>오늘의 퀘스트</h1></div>
-    <div class="bubble">${closed?'"밤 12시가 지나서 오늘 체크는 끝났어. 빠뜨린 게 있으면 내일 선생님께 말해 줘!"':`"${done}개 했어! ${esc(SUBJ[bossS].boss)} 체력 ${left}% 남았어"`}</div>`;
+    <div class="bubble">${ended&&!SK.closed()?'"마음 체크까지 끝! 오늘 공부 체크는 마감됐어. 푹 쉬고 내일 또 만나!"':closed?'"밤 12시가 지나서 오늘 체크는 끝났어. 빠뜨린 게 있으면 내일 선생님께 말해 줘!"':`"${done}개 했어! ${esc(SUBJ[bossS].boss)} 체력 ${left}% 남았어"`}</div>`;
   if(WIN&&k>=WIN.nov+'-26'&&k<=WIN.hidTo){const nl=SUBJ_KEYS.filter(x=>!bossLeft(x,WIN.nov)).length,WH=winterHid(),RI=raidInst(RAIDS.find(r=>r.id==='winter'));
     h+=`<button class="card evcard" id="evc" type="button"><div class="row between"><b>❄ 겨울 이벤트</b><span class="tiny">크리스마스까지</span></div>
      <div class="tiny">${k<=WIN.novEnd?`· 11월 연습 보스 ${nl}/6 처치 (${fmt(WIN.novEnd)}까지)<br>`:''}${RI.open?`· 눈사람 왕 HP ${fmtN(RI.left)} 남음<br>`:`· 12/1 눈사람 왕 레이드 열림 (체력 최대 ${fmtN(WIN.raidMax)})<br>`}${WH?(WH.open?(WH.dead?'· 꿈의 문 수문장 처치 완료!':`· 꿈의 문 수문장 HP ${fmtN(WH.left)} 남음`):`· 꿈의 문 열쇠 ${pctOf(Math.min(WH.D,WIN.hidGate),WIN.hidGate)}% 모음`):'· 12/1부터 꿈의 문 열쇠 모으기'}</div></button>`}
@@ -954,26 +958,26 @@ function renderToday(){
     ${adjOf(L,'penalty').concat(adjOf(L,'bonus'),adjOf(L,'check')).map(a=>`<p class="tiny">${a.t==='penalty'?'감점':a.t==='bonus'?'선생님 포인트':'선생님이 넣은 체크'} ${a.pts}점${a.why?' · '+esc(a.why):''}</p>`).join('')}</div>`;
   if(sc.min>=SK.LOTS_MIN)h+=`<div class="bubble">"오늘은 정말 많이 했어. 이제 쉬어도 돼!"</div>`;
   const emoDone=S.emo[k]&&!S.emo[k].demo;
-  h+=`<button class="btn green" id="finish">${emoDone?'마음 체크 다시 하기':'오늘 끝! 마음 체크하기'}</button><p class="tiny muted" style="text-align:center">체크는 하루 1번씩, 정말 한 것만 눌러 줘. 체크 취소는 오늘 밤 12시까지만.</p>`;
+  h+=`<button class="btn green" id="finish">${emoDone?'마음 체크 다시 하기':'오늘 끝! 마음 체크하기'}</button><p class="tiny muted" style="text-align:center">체크는 하루 1번씩, 정말 한 것만 눌러 줘. 체크 취소는 오늘 밤 12시까지만. 마음 체크를 하면 그날 공부 체크는 끝나요.</p>`;
   scr.innerHTML=h;
   if($('#evc'))$('#evc').onclick=()=>{UI.tab=k<=WIN.novEnd?'boss':'raid';if(UI.tab==='boss')UI.bm=WIN.nov;render()};
   if($('#gift'))$('#gift').onclick=giftModal;
   scr.querySelectorAll('.check[data-i]').forEach(b=>b.onclick=()=>askQuest(+b.dataset.i));
   {const cc=scr.querySelector('#coopc');if(cc)cc.onclick=()=>{const T=evNow(),ce=SK.coopEvent([],TODAY(),T.h,T.m);if(ce&&ce.lobby&&ce.ev.day!==S.lobby){lobbyModal(ce.ev);return}UI.tab='raid';render()}}
   {const ec=scr.querySelector('#eggc');if(ec)ec.onclick=()=>{if(!incubating())eggPicker();else{UI.tab='me';render();setTimeout(()=>{const x=document.getElementById('eggs');if(x)x.scrollIntoView({block:'start'})},60)}}}
-  scr.querySelectorAll('.check[data-life="mini"]').forEach(b=>b.onclick=()=>{if(SK.closed()){toast('밤 12시가 지나서 마감됐어');return}
+  scr.querySelectorAll('.check[data-life="mini"]').forEach(b=>b.onclick=()=>{if(SK.closed()){toast('밤 12시가 지나서 마감됐어');return}if(dayEnded(k)){toast('마음 체크를 해서 오늘 체크는 끝났어');return}
     confirmSheet('문제 1개 풀었니?','선생님께 알려요. 선생님이 허가하면 오늘 출석으로 인정되고 연속 기록이 이어져요.',()=>{L.miniReq=true;if(L.life)delete L.life.mini;save();toast('선생님께 알렸어요. 허가되면 출석 인정!');render()})});
-  scr.querySelectorAll('.check[data-life="bag"]').forEach(b=>b.onclick=()=>{if(SK.closed()){toast('밤 12시가 지나서 마감됐어');return}L.life.bag=!L.life.bag;if(L.life.bag)toast('가방 정리 완료! 내일 아침이 가벼워져 · +1점');afterCheck(k);save();render()});
-  scr.querySelectorAll('.check[data-life="clean"]').forEach(b=>b.onclick=()=>{if(SK.closed()){toast('밤 12시가 지나서 마감됐어');return}L.life.clean=!L.life.clean;if(L.life.clean){S.gauge=Math.min(100,S.gauge+20);toast(`방이 반짝반짝! +1점 · 궁극기 게이지 ${S.gauge}%`)}else S.gauge=Math.max(0,S.gauge-20);afterCheck(k);save();render()});
+  scr.querySelectorAll('.check[data-life="bag"]').forEach(b=>b.onclick=()=>{if(SK.closed()){toast('밤 12시가 지나서 마감됐어');return}if(dayEnded(k)){toast('마음 체크를 해서 오늘 체크는 끝났어');return}L.life.bag=!L.life.bag;if(L.life.bag)toast('가방 정리 완료! 내일 아침이 가벼워져 · +1점');afterCheck(k);save();render()});
+  scr.querySelectorAll('.check[data-life="clean"]').forEach(b=>b.onclick=()=>{if(SK.closed()){toast('밤 12시가 지나서 마감됐어');return}if(dayEnded(k)){toast('마음 체크를 해서 오늘 체크는 끝났어');return}L.life.clean=!L.life.clean;if(L.life.clean){S.gauge=Math.min(100,S.gauge+20);toast(`방이 반짝반짝! +1점 · 궁극기 게이지 ${S.gauge}%`)}else S.gauge=Math.max(0,S.gauge-20);afterCheck(k);save();render()});
   const m1=scr.querySelector('[data-m1]');if(m1)m1.onclick=()=>confirmSheet('숙제검사 받았니?',`선생님께 확인 요청을 보내요. 선생님이 누르면 ${qPts({a:'m1'})}점과 마스터의 가호가 켜져요.`,()=>{L.hiddenReq=true;save();toast('선생님께 알렸어요');render()});
-  {const en=scr.querySelector('#emoNudge');if(en)en.onclick=()=>{UI.tab='emo';UI.emo={i:0,a:{}};render();scr.scrollTop=0}}
-  $('#finish').onclick=()=>{UI.tab='emo';UI.emo={i:0,a:{}};render();scr.scrollTop=0};
+  {const en=scr.querySelector('#emoNudge');if(en)en.onclick=goEmo}
+  $('#finish').onclick=goEmo;
 }
 /* "정말 다 했니?" 확인창 */
 function confirmSheet(title,msg,yes){const sh=document.createElement('div');sh.className='sheet';
   sh.innerHTML=`<div class="in" role="dialog" aria-label="${esc(title)}"><h2>${esc(title)}</h2><p class="small">${esc(msg)}</p><div class="row"><button class="btn ghost" id="no" style="width:auto;flex:1">아직이야</button><button class="btn green" id="yes" style="flex:1">응, 다 했어!</button></div></div>`;
   phone.appendChild(sh);sh.querySelector('#no').onclick=()=>sh.remove();sh.querySelector('#yes').onclick=()=>{sh.remove();yes()};sh.onclick=e=>{if(e.target===sh)sh.remove()}}
-function askQuest(i){const k=TODAY(),L=log(k),q=L.q[i];if(SK.closed()){toast('밤 12시가 지나서 오늘 체크는 마감됐어');return}
+function askQuest(i){const k=TODAY(),L=log(k),q=L.q[i];if(SK.closed()){toast('밤 12시가 지나서 오늘 체크는 마감됐어');return}if(dayEnded(k)){toast('마음 체크를 해서 오늘 공부 체크는 끝났어');return}
   if(q&&q.a==='ebs'&&!q.done&&!ebsOK(k)){toast(ebsMode()==='off'?'EBS는 선생님이 열어 줘야 할 수 있어요':'토·일은 EBS 쉬는 날이에요');return}
   if(q.done)return toggleQuest(i);if(weekFull(q.a,k)){toast('이번 주는 다 채웠어!');return}
   tagSheet(ACT[q.a].n,tag=>toggleQuest(i,tag))}
@@ -1217,7 +1221,7 @@ function renderEmoResult(qs){
   $('#dn').onclick=()=>{const tx=$('#tx').value.trim();r.share=$('#sh').checked;
     r.alert=SK.dangerWord(tx)?1:0;
     if(r.share){r.text=tx;delete PRIV.text[k]}else{r.text='';if(tx)PRIV.text[k]=tx;else delete PRIV.text[k]}
-    const first=!(S.emo[k]&&!S.emo[k].demo);S.emo[k]=r;save();savePrivate();UI.tab='today';toast(first&&SK.EMO_EGG?`오늘 기록 끝! 수고했어 · 알 부화 +${SK.EMO_EGG}점`:'오늘 기록 끝! 수고했어');render()};
+    const first=!(S.emo[k]&&!S.emo[k].demo);if(k===TODAY())r.end=1;S.emo[k]=r;save();savePrivate();UI.tab='today';toast(first&&SK.EMO_EGG?`오늘 기록 끝! 수고했어 · 알 부화 +${SK.EMO_EGG}점`:'오늘 기록 끝! 수고했어');render()};
 }
 
 /* ---------- 랭킹: 순위 숫자는 1~3등 메달만, 나머지는 지도 위 위치 ---------- */

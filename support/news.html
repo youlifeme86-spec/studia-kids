@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Press+Start+2P&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=2026.11.27-1510">
-<script src="../game-data.js?v=2026.11.27-1510"></script>
+<link rel="stylesheet" href="style.css?v=2026.11.28-0104">
+<script src="../game-data.js?v=2026.11.28-0104"></script>
 </head>
 <body data-page="news">
 <div class="page-hero"><div class="wrap"><div class="txt">
@@ -26,6 +26,8 @@
 <script>
 /* 새 글을 쓸 때: 아래 목록 맨 위에 {type:'event'|'notice', date:'YYYY-MM-DD', end:'YYYY-MM-DD'(이벤트만), title, body(HTML)} 하나 추가 */
 var NEWS=[
+ {type:'notice',date:'2026-11-28',title:'💗 마음 체크는 공부를 다 하고 나서!',
+  body:'<p>이제 마음 체크를 하면 <b>그날 공부 체크가 끝나요</b>. 그다음에는 포인트를 더 쌓을 수 없어요. 그래서 분홍 카드나 [오늘 끝! 마음 체크하기]를 누르면 "바로 마음 체크로 갈까?" 확인창이 먼저 떠요. 공부를 다 했으면 [응, 다 했어!]를 눌러요.</p>'},
  {type:'notice',date:'2026-11-27',title:'✨ 히든미션은 친구마다 횟수·점수가 달라요',
   body:'<p>히든미션: 마스터의 가호(숙제검사)는 선생님이 친구마다 정해요. 기본은 <b>주 2번 × 3점</b>, 어떤 친구는 <b>주 1번 × 6점</b>이에요. 내 횟수는 [오늘] 화면 히든미션 카드의 "이번 주 0/2" 같은 숫자로 볼 수 있어요.</p>'},
  {type:'notice',date:'2026-11-27',title:'📋 [오늘] 화면이 공부 체크 · 공부 지원 체크로 나뉘었어요',
@@ -72,6 +74,6 @@ var NEWS=[
    return '<details class="card news"'+(i===0||(n.type==='event'&&today<=n.end)?' open':'')+'><summary><span class="ndate">'+n.date.replace(/-/g,'.')+'</span>'+st+'<b>'+n.title+'</b>'+(n.type==='event'?'<span class="tiny muted"> · '+fmt(n.start)+'~'+fmt(n.end)+'</span>':'')+'</summary><div class="nbody">'+n.body+'</div></details>'}).join('')||'<p class="muted">아직 글이 없어요.</p>'}
  document.querySelectorAll('[data-nt]').forEach(function(b){b.onclick=function(){tab=b.dataset.nt;history.replaceState(null,'','#'+tab);draw()}});draw()})();
 </script>
-<script src="site.js?v=2026.11.27-1510"></script>
+<script src="site.js?v=2026.11.28-0104"></script>
 </body>
 </html>
