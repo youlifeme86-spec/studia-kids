@@ -123,7 +123,7 @@ SK.NEW_AT=Date.parse('2026-11-28T01:00:00+09:00');SK.newOn=function(){return Dat
 SK.EBS_DEFAULT={ryu01:'wd',lee1102:'wd',kim1223:'wd',asd10041004:'on'};
 SK.ORDER=['math','eng','kor','ebs','m1','m2','school','book','clean','bag'];
 /* 오늘 탭 칸 나누기: 공부 체크(올클리어는 이것만 다 하면 발동) · 공부 지원 체크 */
-SK.STUDY=['math','eng','kor','ebs'];SK.SUPPORT=['m1','m2','school','book','clean','bag'];
+SK.STUDY=['math','eng','kor'];SK.SUPPORT=['m1','ebs','m2','school','book','clean','bag'];
 /* 미션1 점수: 이 날짜 전에 받은 숙제검사는 예전 점수(5점) 그대로 */
 SK.M1_FROM='2026-11-28';SK.M1_OLD=5;
 /* 히든미션 학생별 설정 [주 횟수, 1회 점수]. 첫 번째가 기본값 (선생님 화면 [학생 계정]에서 고름) */

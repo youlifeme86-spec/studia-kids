@@ -7,10 +7,10 @@
 <title>스터디아 키즈 선생님</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap">
-<script>window.PAGE_VERSION='2026.11.28-1309';/* 옛 화면이 캐시에 남아 있으면 새 버전으로 한 번 다시 불러와요 */
+<script>window.PAGE_VERSION='2026.11.28-1355';/* 옛 화면이 캐시에 남아 있으면 새 버전으로 한 번 다시 불러와요 */
 (function(){fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(v){if(!v||!v.version||v.version===window.PAGE_VERSION)return;var k='sk-reload-'+v.version;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1')}catch(e){return}var u=new URL(location.href);u.searchParams.set('v',v.version);location.replace(u.toString())}).catch(function(){})})();</script>
-<script src="config.js?v=2026.11.28-1309"></script>
-<script src="game-data.js?v=2026.11.28-1309"></script>
+<script src="config.js?v=2026.11.28-1355"></script>
+<script src="game-data.js?v=2026.11.28-1355"></script>
 <style>
 :root{--bg:#FBF4E6;--paper:#FFFDF8;--ink:#3A2C22;--muted:#8A7766;--line:#EADFCB;--accent:#F08A4B;--soft:#FDE6D3;--good:#3E9B6B;--bad:#D2504A;--purple:#7A4FD0;
   --f-display:'Jua',system-ui,sans-serif;--f-body:'Noto Sans KR',system-ui,-apple-system,sans-serif;--shadow:0 2px 0 rgba(90,60,30,.06),0 8px 24px rgba(90,60,30,.05)}
@@ -164,10 +164,11 @@ function render(){
       <li>체크할 때 감정 태그 [쉬웠어][조금 힘들어][해냈다!]를 골라요</li>
       <li>마음 체크 = 오늘 끝: 아이가 마음 체크를 하면 그날 공부 체크가 마감돼요(누르기 전 확인창). 빠뜨린 공부는 [점수 조정] 늦게 알린 체크로.</li>
       <li>히든미션(마스터의 가호 · 숙제검사, 선생님만): 기본 3점, 한 주 2번까지(2번 6점). [학생 계정] 히든미션 칸에서 학생마다 '주 2회 × 3점', '주 1회 × 6점' 처럼 횟수와 점수를 같이 정해요. 11/27까지 받은 건 5점 그대로. 마음 체크: 한 날마다 알 부화 +1점.</li>
-      <li>오늘 탭: <b>공부 체크</b>(수학·영어·국어·EBS)와 <b>공부 지원 체크</b>(히든미션·미션2·학교숙제·책읽기·청소·가방 정리). 올클리어 +2는 공부 체크만 다 하면 돼요.</li>
+      <li>오늘 탭: <b>공부 체크</b>(수학·영어·국어)와 <b>공부 지원 체크</b>(히든미션·EBS·미션2·학교숙제·책읽기·청소·가방 정리). 올클리어 +2는 공부 체크만 다 하면 돼요.</li>
       <li>스트릭 방패 '문제 1개만': 학생은 [알리기]만, 선생님이 [현황]에서 허가해야 출석 인정.</li>
       <li>히든미션 가호: [점수 조정] → 종류 '히든미션 가호'로 선생님이 바로 넣을 수 있어요(학생별 점수 + 7일 가호 +10%).</li>
       <li>습관: 청소(+1, 게이지 +20%) · 가방 정리(+1, 올클리어 조건 아님)</li>
+      <li>EBS: 공부 지원 체크(히든미션 아래)에 있어요. [학생 계정] EBS 칸에서 아이마다 닫힘·평일만·매일로 켜고 꺼요. 올클리어에는 안 들어가요.</li>
       <li>출석 도장: 메인 과목(수학·영어·국어·EBS) 1개 이상 체크한 날 도장 + 출석 상자(궁극기 게이지 +20%), 한 주 도장 5개면 알 부화 +5점. 앱만 열면 도장 없음.</li>
       <li>스트릭 방패: 5일 연속마다 1개(최대 2개), 빠진 날 자동으로 연속 기록과 보스 반격을 막아요. 힘든 날엔 "문제 1개만" 최소 시동 퀘스트(5 데미지, 출석 인정)</li>
       <li>알 부화: 공부 점수 30점 부화 → 150점 성장 → 300점 각성. 파트너는 1마리 장착, 도감에서 바꿔 끼기. 공격할 때 파트너도 같이 공격(12/1부터 +3/+4/+5 데미지)</li>

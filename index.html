@@ -15,11 +15,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="스터디아 키즈">
-<script src="config.js?v=2026.11.28-1309"></script>
-<script src="game-data.js?v=2026.11.28-1309"></script>
-<script src="sound.js?v=2026.11.28-1309"></script>
+<script src="config.js?v=2026.11.28-1355"></script>
+<script src="game-data.js?v=2026.11.28-1355"></script>
+<script src="sound.js?v=2026.11.28-1355"></script>
 <script>
-window.RR_VERSION='2026.11.28-1309';
+window.RR_VERSION='2026.11.28-1355';
 /* 실시간 오류 기록: 학생 폰에서 난 오류를 구글 시트 [오류] 탭으로 보냄 */
 (function(){var n=0;window.RR_REPORT=function(msg,stack,extra){try{var C=window.RR_CONFIG||{};if(!C.API_URL||n>=8)return;n++;var a=null;try{a=JSON.parse(localStorage.getItem('sk-auth-v1')||'null')}catch(e){}
 fetch(C.API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},keepalive:true,body:JSON.stringify({action:'logError',token:a&&a.token||'',msg:String(msg||'').slice(0,1000),stack:String(stack||'').slice(0,3000),page:location.pathname+(location.hash.indexOf('#parent')===0?' (학부모)':''),tab:(window.RR_TAB||'')+(extra?' '+extra:''),ver:window.RR_VERSION||'',ua:navigator.userAgent.slice(0,300)})}).catch(function(){})}catch(e){}};
@@ -948,7 +948,7 @@ function renderToday(){
   L.q.forEach((q,i)=>{if(SK.STUDY.includes(q.a))h+=questRow(q,i,L,k)});
   h+=`<p class="tiny muted">${sc.ac?'올클리어 달성! +'+SK.ALLCLEAR+'점':'공부 체크를 다 하면 올클리어 +'+SK.ALLCLEAR+'점'}</p></div>`;
   h+=`<div class="card" style="gap:8px"><div class="row between"><h3>공부 지원 체크</h3><span class="tiny muted">올클리어와 상관없어요</span></div>`;
-  L.q.forEach((q,i)=>{if(!SK.STUDY.includes(q.a))h+=questRow(q,i,L,k)});
+  SK.SUPPORT.forEach(a=>{const i=L.q.findIndex(q=>q.a===a);if(i>=0)h+=questRow(L.q[i],i,L,k)});
   h+=`<div class="quest ${L.life.clean?'done':''}"><span class="dot" style="background:var(--gold)"></span><div class="body"><div class="t">${ACT.clean.n}</div><div class="tiny muted">+1점 · 궁극기 게이지 +20%</div></div><button class="check" data-life="clean" ${closed?'disabled':''}>${L.life.clean?'✓':'완료'}</button></div>
   ${SK.newOn()||L.life.bag?'':'<!--'}<div class="quest ${L.life.bag?'done':''}"><span class="dot" style="background:var(--gold)"></span><div class="body"><div class="t">${ACT.bag.n}</div><div class="tiny muted">+1점 · 습관</div></div><button class="check" data-life="bag" ${closed?'disabled':''}>${L.life.bag?'✓':'완료'}</button></div>${SK.newOn()||L.life.bag?'':'-->'}</div>`;
   {const SS=shieldState();const mOn=miniOn(L),mWait=!!L.miniReq&&!mOn;const showMini=SK.MINI&&(!hasStudy(L)||mOn||mWait);
@@ -958,7 +958,7 @@ function renderToday(){
      ${(()=>{const ev=petBuf('leaf')||SK.SHIELD.every;return `<p class="tiny muted">${ev}일 연속 출석마다 방패 1개 (최대 ${SK.SHIELD.max}개)${petBuf('leaf')?' · 비취알 파트너 효과':''}. 못 한 날엔 방패가 자동으로 연속 기록을 지키고 보스 반격도 막아 줘요. 다음 방패까지 ${SS.shields>=SK.SHIELD.max?'가득 찼어요!':(ev-SS.n%ev)+'일'}</p>`})()}
      ${showMini?`<div class="quest ${mOn?'done':mWait?'wait':''}" style="margin-top:6px"><span class="dot" style="background:#7FC8A9"></span><div class="body"><div class="t">오늘 너무 힘들어? 문제 1개만!</div><div class="tiny muted">최소 시동 퀘스트 · 책상에 앉아 딱 1문제 · 선생님이 허가하면 ${SK.MINI.dmg} 데미지 + 출석 인정<br>${mOn?'선생님이 허가했어요!':mWait?'선생님 허가 기다리는 중':'1문제 풀면 [알리기]'}</div></div><button class="check" data-life="mini" ${closed||mOn||mWait?'disabled':''}>${mOn?'✓':mWait?'대기':'알리기'}</button></div>`:''}</div>`}
   h+=`<div class="card" style="gap:4px"><div class="row between"><b>보너스</b><span class="small">${sc.ac?'<span class="pill">올클리어 +2</span>':''} ${sc.sb?'<span class="pill">연속 +'+sc.sb+'</span>':''} ${sc.bonus?'<span class="pill purple">선생님 +'+sc.bonus+'</span>':''} ${sc.pen?'<span class="pill red">감점 -'+sc.pen+'</span>':''}</span></div>
-    <p class="tiny muted">공부 체크(수학·영어·국어${ebsMode()==='off'?'':'·EBS'})를 다 하면 올클리어 +2점, 3일 연속 +2점, 7일 연속 +5점. 보너스는 레이드와 히든보스에 들어가요.</p>
+    <p class="tiny muted">공부 체크(수학·영어·국어)를 다 하면 올클리어 +2점, 3일 연속 +2점, 7일 연속 +5점. 보너스는 레이드와 히든보스에 들어가요.</p>
     ${adjOf(L,'penalty').concat(adjOf(L,'bonus'),adjOf(L,'check')).map(a=>`<p class="tiny">${a.t==='penalty'?'감점':a.t==='bonus'?'선생님 포인트':'선생님이 넣은 체크'} ${a.pts}점${a.why?' · '+esc(a.why):''}</p>`).join('')}</div>`;
   if(sc.min>=SK.LOTS_MIN)h+=`<div class="bubble">"오늘은 정말 많이 했어. 이제 쉬어도 돼!"</div>`;
   const emoDone=S.emo[k]&&!S.emo[k].demo;
