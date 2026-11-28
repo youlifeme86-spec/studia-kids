@@ -341,9 +341,9 @@ SK.COOP={start:'2026-12-01',perKid:800,minKids:3,egg:10,
   /* lobby: from시 정각부터 lobby분 동안 대기실(들어온 친구가 보여요). 그 뒤 다 같이 입장해서 데미지가 한꺼번에 들어가요. 0이면 대기실 없음 */
   /* levels: 앞 단계를 쓰러뜨리면 다음 단계가 나와요. 넘친 데미지는 다음 단계로 이어져요. perKid = 학생 1명당 체력, egg = 그 단계 처치 보상(알 가속 점수) */
   events:[{day:'2026-11-28',since:'2026-11-26',from:22,lobby:5,to:24,showUntil:'2026-11-30',levels:[
-    {n:'그림자 졸개 대장',spr:'autumn',perKid:40,egg:10},
-    {n:'그림자 얼음 기사',spr:'icedragon',perKid:60,egg:15},
-    {n:'개국 전야 그림자 대왕',spr:'hidden',perKid:80,egg:25}]}],
+    {n:'그림자 졸개 대장',spr:'autumn',perKid:150,egg:10},
+    {n:'그림자 얼음 기사',spr:'icedragon',perKid:200,egg:15},
+    {n:'개국 전야 그림자 대왕',spr:'hidden',perKid:260,egg:25}]}],
   bosses:[{n:'숙제 먹는 구름 거인',spr:'sleepy'},{n:'딴짓 유령 군단',spr:'autumn'},{n:'게으름 눈보라 골렘',spr:'winter'},{n:'핑계 대장 꽃마녀',spr:'spring'},{n:'스마트폰 블랙홀 드래곤',spr:'icedragon'},{n:'졸음 아이스크림 왕',spr:'summer'}]};
 /* students: [{id, name, daily:{'YYYY-MM-DD':{dm,r}}}] */
 SK.coop=function(students,today){const C=SK.COOP;if(!C||today<C.start)return null;const ws=SK.weekKey(today),from=ws<C.start?C.start:ws,to=SK.addDays(ws,6);
